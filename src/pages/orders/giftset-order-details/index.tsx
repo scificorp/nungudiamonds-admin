@@ -153,10 +153,11 @@ const OrderDetails = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
     useEffect(() => {
-        let orderNumberValue: string = orderNumber as string
+        const orderNumberValue: string = orderNumber as string
         if (orderNumberValue != undefined) {
             setOrderNumber(orderNumberValue)
             ordersDetailsData(orderNumber)
@@ -182,7 +183,8 @@ const OrderDetails = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
 
     const handleChangeOrderStatus = (e: any) => {
@@ -194,6 +196,7 @@ const OrderDetails = () => {
         deliveryStatusApi(event.target.value)
         setDeliveryStatus(event.target.value)
     }
+
     //////////////////// DELIVERY STATUS API ///////////////////////
 
     const deliveryStatusApi = async (delivery: number) => {
@@ -215,7 +218,8 @@ const OrderDetails = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
 
     const column = [

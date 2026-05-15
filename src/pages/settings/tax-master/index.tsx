@@ -1,6 +1,7 @@
-import { Divider, CardHeader, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { Divider, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -263,7 +264,7 @@ const Taxs = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Tax'></CardHeader>
+                    <AdminPageHeader title='Tax' />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

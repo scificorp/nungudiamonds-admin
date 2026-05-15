@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -342,7 +343,7 @@ const Metalgroupmaster = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Metal Group Master'></CardHeader>
+                    <AdminPageHeader title='Metal Group Master' />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

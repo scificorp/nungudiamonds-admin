@@ -1,5 +1,4 @@
 // ** Type import
-import path from 'path'
 import { VerticalNavItemsType } from 'src/@core/layouts/types'
 
 const navigation = (): VerticalNavItemsType => {
@@ -10,7 +9,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:smart-home'
     },
     {
-      sectionTitle: 'ORDERS MANAGEMENT'
+      sectionTitle: 'OPERATIONS'
     },
     {
       title: 'Orders',
@@ -27,31 +26,76 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      sectionTitle: 'PRODUCT MANAGEMENT'
+      title: 'Customers',
+      path: '/customer/customers-list',
+      icon: 'tabler:users'
     },
     {
-      title: 'Product',
+      title: 'Business Activity',
+      icon: 'tabler:briefcase',
+      children: [
+        {
+          title: 'Customer Reviews',
+          path: '/business-section/customer-review'
+        },
+        {
+          title: 'Order Transactions',
+          path: '/business-section/order-transactions'
+        },
+        {
+          title: 'Wishlist Products',
+          path: '/business-section/wishlist-product'
+        },
+        {
+          title: 'Cart Products',
+          path: '/business-section/cart-product'
+        },
+        {
+          title: 'Payments',
+          path: '/payments/payment'
+        }
+      ]
+    },
+    {
+      title: 'Enquiries',
+      icon: 'material-symbols:record-voice-over-rounded',
+      children: [
+        {
+          title: 'Product Enquiries',
+          path: '/enquiries/product-enquiries'
+        },
+        {
+          title: 'General Enquiries',
+          path: '/enquiries/general-enquiries'
+        }
+      ]
+    },
+    {
+      sectionTitle: 'CATALOG OPERATIONS'
+    },
+    {
+      title: 'Catalog',
       icon: 'fluent-mdl2:product-variant',
       children: [
         {
-          title: 'Add product',
-          path: '/product/add-products'
+          title: 'All Products',
+          path: '/product/all-products'
         },
         {
-          title: 'All products',
-          path: '/product/all-products'
+          title: 'Quick Add Product',
+          path: '/product/simplified-add'
         },
         {
           title: 'Bulk Upload',
           path: '/product/product-bulk-upload/file-import'
         },
         {
-          title: 'Gift Sets',
+          title: 'Legacy Gift Products',
           path: '/product/gift-set/gift-list'
         },
         {
-          title: 'product Stocks',
-          path: '/product/product-stocks'
+          title: 'Legacy Product Workspace',
+          path: '/product/add-products'
         }
       ]
     },
@@ -62,17 +106,8 @@ const navigation = (): VerticalNavItemsType => {
     },
     {
       title: 'Collections',
+      path: '/collections/collections-list',
       icon: 'tabler:collection',
-      children: [
-        {
-          title: 'All Collections',
-          path: '/collections/collections-list'
-        },
-        {
-          title: 'Add Collection',
-          path: '/collections/add-collection'
-        }
-      ]
     },
     {
       title: 'Attribute',
@@ -166,69 +201,32 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      sectionTitle: 'CUSTOMER MANAGEMENT'
-    },
-    {
-      title: 'Customers',
-      path: '/customer/customers-list',
-      icon: 'tabler:users'
-    },
-    {
-      sectionTitle: 'BUSINESS SECTION'
-    },
-    {
-      title: 'Customer Review',
-      path: '/business-section/customer-review',
-      icon: 'material-symbols:reviews-outline-sharp'
-    },
-    {
-      title: 'Order Transactions',
-      path: '/business-section/order-transactions',
-      icon: 'tabler:id'
-    },
-    {
-      title: 'Wishlist Products',
-      path: '/business-section/wishlist-product',
-      icon: 'mdi:cart-heart'
-    },
-    {
-      title: 'Cart Products',
-      path: '/business-section/cart-product',
-      icon: 'mdi:cart-variant'
-    },
-    {
-      sectionTitle: 'PAYMENT MANAGEMENT'
-    },
-    {
-      title: 'Payments',
-      path: '/payments/payment',
-      icon: 'fluent-mdl2:payment-card'
-    },
-    {
-      sectionTitle: 'ENQUIRY MANAGEMENT'
-    },
-    {
-      title: 'Enquiry',
-      icon: 'material-symbols:record-voice-over-rounded',
+      title: 'Rates',
+      icon: 'tabler:currency-exchange',
       children: [
         {
-          title: 'Product Enquiries',
-          path: '/enquiries/product-enquiries'
+          title: 'FX Rate',
+          path: '/rates/fx-rate'
         },
         {
-          title: 'General Enquiries',
-          path: '/enquiries/general-enquiries'
+          title: 'Diamond Rates',
+          path: '/rates/diamond-rates'
         }
       ]
     },
     {
-      sectionTitle: 'FRONTEND MANAGEMENT'
+      sectionTitle: 'MERCHANDISING & CONTENT'
     },
 
     {
       title: 'Hero Content',
       path: '/frontend/hero-content',
       icon: 'tabler:video'
+    },
+    {
+      title: 'Image Upload Utility',
+      path: '/frontend/bulk-image-upload',
+      icon: 'tabler:cloud-upload'
     },
     {
       title: 'Banner',
@@ -284,7 +282,7 @@ const navigation = (): VerticalNavItemsType => {
       icon: 'tabler:file'
     },
     {
-      sectionTitle: 'ROLES & PERMISSION'
+      sectionTitle: 'CONFIGURATION'
     },
     {
       title: 'Roles & Permissions',
@@ -301,20 +299,12 @@ const navigation = (): VerticalNavItemsType => {
       ]
     },
     {
-      sectionTitle: 'WEB CONFIG & API MANAGEMENT'
-    },
-    {
-      title: 'Email Set-UP',
+      title: 'Email Setup',
       icon: 'tabler:mail',
       path: '/web-config-api/email-setup'
     },
     {
-      title: 'Instagram ID',
-      path: '/web-config-api/instagram-ID',
-      icon: 'tabler:brand-instagram'
-    },
-    {
-      title: 'Company Info setup',
+      title: 'Company Info',
       path: '/web-config-api/company-info-setup',
       icon: 'tabler:settings'
     },

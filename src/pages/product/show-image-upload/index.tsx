@@ -31,7 +31,7 @@ const productTypeList = [
     }
 ]
 
-const showProductImageUpload = (data: any) => {
+const ShowProductImageUpload = (data: any) => {
     const [metalToneList, setMetalToneList] = useState<any[]>([])
     const [productImagesList, setProductImagesList] = useState<any[]>([])
     const [displayImagesList, setDisplayImagesList] = useState<any[]>([])
@@ -78,7 +78,8 @@ const showProductImageUpload = (data: any) => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
 
     ////////////////// GETBYID API //////////////////
@@ -115,14 +116,15 @@ const showProductImageUpload = (data: any) => {
     }, [metalTone, productType])
 
     useEffect(() => {
-        let productDetailId: string = id as string
+        const productDetailId: string = id as string
 
         if (productDetailId != undefined) {
             setProductId(parseInt(productDetailId))
             getByIdProductData(parseInt(productDetailId))
         }
     }, [router.isReady])
-    return (
+    
+return (
         <Fragment>
             <Button variant='contained' sx={{ ml: 5, mb: 4, '& svg': { mr: 2 } }} onClick={() => Router.push('/product/all-products')}>
                 Back
@@ -163,11 +165,11 @@ const showProductImageUpload = (data: any) => {
                                 <List component='nav' aria-label='main mailbox'>
                                     {displayImagesList.map((value: any) => {
                                         return (
-                                            <>
+                                            <Fragment key={value.id || value.image_path}>
                                                 <Card sx={{ marginBottom: "10px" }}>
                                                     <ListItem disablePadding sx={{ display: "flex" }}>
                                                         <ListItemButton>
-                                                            {value.image_type !== 4 ? <img src={`${IMG_ENDPOINT}/${value.image_path}`} height={50} width={50} /> : <video src={`${IMG_ENDPOINT}/${value.image_path}`} height={50} width={50} />}
+                                                            {value.image_type !== 4 ? <img src={`${IMG_ENDPOINT}/${value.image_path}`} height={50} width={50} alt={value.image_path || 'Product media'} /> : <video src={`${IMG_ENDPOINT}/${value.image_path}`} height={50} width={50} />}
                                                             <ListItemText sx={{ mt: 2, ml: 5 }} primary={value.image_path} />
                                                         </ListItemButton>
                                                         <IconButton>
@@ -175,7 +177,7 @@ const showProductImageUpload = (data: any) => {
                                                         </IconButton>
                                                     </ListItem>
                                                 </Card>
-                                            </>
+                                            </Fragment>
                                         )
                                     })}
                                 </List>
@@ -196,4 +198,4 @@ const showProductImageUpload = (data: any) => {
     )
 }
 
-export default showProductImageUpload
+export default ShowProductImageUpload

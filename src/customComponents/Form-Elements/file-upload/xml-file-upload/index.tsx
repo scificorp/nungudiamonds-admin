@@ -39,7 +39,9 @@ const TccFileUpload = (props: any) => {
     const { getRootProps, getInputProps } = useDropzone({
         multiple: false,
         accept: {
-            'file/*': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel']
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+            'application/vnd.ms-excel': ['.xls'],
+            'text/csv': ['.csv']
         },
         onDrop: (acceptedFiles: File[]) => {
             setFiles(acceptedFiles.map((file: File) => Object.assign(file)))

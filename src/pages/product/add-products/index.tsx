@@ -1,5 +1,5 @@
 // ** React Imports
-import { ChangeEvent, Fragment, SyntheticEvent, useEffect, useState } from 'react'
+import { ChangeEvent, Fragment, SyntheticEvent, useCallback, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -16,8 +16,10 @@ import Typography from '@mui/material/Typography'
 import InputLabel from '@mui/material/InputLabel'
 import CardContent from '@mui/material/CardContent'
 import MuiStep, { StepProps } from '@mui/material/Step'
+
 // ** Third Party Imports
 import toast from 'react-hot-toast'
+import { useQueryClient } from 'react-query'
 
 // ** Icon Imports
 import { Icon } from '@iconify/react'
@@ -37,8 +39,12 @@ import { Autocomplete, CardHeader, Checkbox, FormControlLabel, FormGroup, MenuIt
 import TccSelect from 'src/customComponents/Form-Elements/select'
 import BulkUploadZip from 'src/components/product/BulkUploadZip'
 import BulkUploadFile from 'src/components/product/BulkUploadFile'
+import ImageManagement from 'src/components/product/ImageManagement'
+import VariantManagement from 'src/components/product/VariantManagement'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import CustomChip from 'src/@core/components/mui/chip'
-import { ADD_PRODUCT_BASIC_DETAILS, ADD_PRODUCT_DETAILS, ADD_PRODUCT_DROPDOWN_LIST, ADD_PRODUCT_METAL_DIAMOND_DETAILS, ADD_PRODUCT_MRTAL_DATA, EDIT_PRODUCT_DETAILS, GET_BY_ID_PRODUCTS, GET_DIAMOND_GROUP_MASTER_WITH_DETAILS } from 'src/services/AdminServices'
+import { ADD_PRODUCT_BASIC_DETAILS, ADD_PRODUCT_DETAILS, ADD_PRODUCT_METAL_DIAMOND_DETAILS, ADD_PRODUCT_MRTAL_DATA, EDIT_PRODUCT_DETAILS, GET_BY_ID_PRODUCTS } from 'src/services/AdminServices'
+import { useProductDetail, useProductDropdowns } from 'src/hooks/useProducts'
 import { appErrors, STONE_TYPE } from 'src/AppConstants'
 import Router, { useRouter } from 'next/router'
 
@@ -53,6 +59,7 @@ const steps = [
     icon: 'ion:diamond-outline',
     title: 'Gold & Diamonds Details',
   }
+
   // {
   //   icon: 'ion:diamond-outline',
   //   title: 'Image Upload',
@@ -60,7 +67,7 @@ const steps = [
 
 ]
 
-let genderData: any = [
+const genderData: any = [
   {
     id: 1,
     name: "Male",
@@ -103,13 +110,12 @@ const Step = styled(MuiStep)<StepProps>(({ theme }) => ({
 
 const ProductAdd = () => {
   // ** States
-  let productSizeLenghtFilter: any;
   const [productId, setProductId] = useState(0)
   const [count, setCount] = useState(1)
   const [radioButtonStripe, setRadioButtonStripe] = useState('')
   const [inputFields, setInputFields] = useState([{ category: null, subCategory: null, subSubCategory: null, categoryList: [], subCategoryList: [], subSubCategoryList: [], id: 0, isDeleted: 0 }])
   const [inputFieldsGold, setInputFieldsGold] = useState([{ rate: '', default: '0', price: '', weight: '', metalGroup: "", id: 0, isDeleted: 0 }])
-  const [inputFieldsDiamond, setInputFieldsDiamond] = useState([{
+  const [inputFieldsDiamond, setInputFieldsDiamond] = useState<any[]>([{
     default: '0', id_diamond_group: null, diamondGroup: null, Stone_type: "", stone_mm_size: null,
     Stone_weight: 0, stone_cut: null, stone_color: null, stone_clarity: null, stone_shape: "",
     stone: "", stone_count: 0, stone_setting: "", rate: 0, price: 0,
@@ -134,7 +140,7 @@ const ProductAdd = () => {
   const [itemLength, setItemLength] = useState<{ id: null, length: "" }[]>([])
   const [metalGroupList, setMetalGroupList] = useState([])
   const [diamondGroupList, setDiamondGroupList] = useState([])
-  const [diamondGroupsWithDetails, setDiamondGroupsWithDetails] = useState([])
+  const [diamondGroupsWithDetails, setDiamondGroupsWithDetails] = useState<any[]>([])
   const [stoneTypeList, setStoneTypeList] = useState([{ id: 1, name: "center" }, { id: 2, name: "side" }])
   const [metalToneList, setMetalToneList] = useState([])
   const [silverToneList, setSilverToneList] = useState([])
@@ -156,13 +162,20 @@ const ProductAdd = () => {
   const [otherCharge, setOtherCharge] = useState<number>(0)
   const [checked, setChecked] = useState({})
   const [category, setCategory] = useState<any>()
+  const productSizeLenghtFilter: any = categorysList.find((t: any) => t.id === inputFields[0].category)
 
   const [isDisabled, setIsDisabled] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
   const router = useRouter();
   const { id, action } = router.query;
   const { viewid } = router.query;
+  const queryClient = useQueryClient()
+
+  const productDetailId = id ? parseInt(id as string) : null
+  const { data: productDetail, isLoading: isProductLoading } = useProductDetail(productDetailId)
+  const { data: dropDownData, isLoading: isDropDownLoading } = useProductDropdowns()
 
   const handleChecked = (id: any) => (e: any) => {
     const { checked } = e.target;
@@ -181,110 +194,131 @@ const ProductAdd = () => {
   }
 
 
-  productSizeLenghtFilter = categorysList.find((t: any) => t.id === inputFields[0].category)
+  
+  useEffect(() => {
+    if (productDetailId != undefined) {
+      setProductId(productDetailId)
+      setActiveTab(0)
+    }
+  }, [productDetailId])
 
   useEffect(() => {
-    let productDetailId: string = id as string
+    if (!productDetailId) return
+    console.log('[ProductEdit] checked state', checked)
+    console.log('[ProductEdit] inputFieldGoldMetal', inputFieldGoldMetal)
+    console.log('[ProductEdit] inputFieldSilverMetal', inputFieldSilverMetal)
+    console.log('[ProductEdit] inputFieldPlatinumMetal', inputFieldPlatinumMetal)
+    console.log('[ProductEdit] metalGroupList', metalGroupList)
+  }, [checked, inputFieldGoldMetal, inputFieldSilverMetal, inputFieldPlatinumMetal, metalGroupList, productDetailId])
 
-    if (productDetailId != undefined) {
-      setProductId(parseInt(productDetailId))
+  const getByIdProductData = useCallback((dropDownData: any, productDetailIdStr: string) => {
+    if (!productDetail?.findProduct) {
+      toast.error('Product data not found')
+      
+return
     }
-    getAllDropDownData(productDetailId)
-  }, [router.isReady])
 
-  const getByIdProductData = async (dropDownData: any, productDetailId: string) => {
+    const product = productDetail.findProduct
+    console.log('[ProductEdit] productDetailId', productDetailIdStr)
+    console.log('[ProductEdit] product PMO', product.PMO)
+    console.log('[ProductEdit] dropdown metal_list', dropDownData.metal_list)
+    console.log('[ProductEdit] dropdown metal_tone', dropDownData.metal_tone)
+    console.log('[ProductEdit] dropdown metal_karat', dropDownData.metal_karat)
 
-    try {
-      const data = await GET_BY_ID_PRODUCTS(parseInt(productDetailId));
-      if (data.code === 200 || data.code === "200") {
-        setProductId(data.data.findProduct.id)
-        setProductName(data.data.findProduct.name)
-        setProductSKU(data.data.findProduct.sku)
-        setProductSortDes(data.data.findProduct.sort_description)
-        setProductLongDes(data.data.findProduct.long_description)
-        setFindingCharge(data.data.findProduct.finding_charge)
-        setMarketingCharge(data.data.findProduct.making_charge)
-        setOtherCharge(data.data.findProduct.other_charge)
+    setProductId(product.id)
+    setProductName(product.name)
+    setProductSKU(product.sku)
+    setProductSortDes(product.sort_description)
+    setProductLongDes(product.long_description)
+    setFindingCharge(product.finding_charge)
+    setMarketingCharge(product.making_charge)
+    setOtherCharge(product.other_charge)
 
         const tags = dropDownData.keyWords?.filter((t: any) => {
-          if (data.data.findProduct.tag.indexOf(parseInt(t.id)) >= 0) return t;
+          if ((product.tag || []).indexOf(parseInt(t.id)) >= 0) return t;
         });
         setKeyword(tags)
 
         const genderDatas: any = genderData?.filter((t: any) => {
-          if (data.data.findProduct.gender.indexOf(parseInt(t.id)) >= 0) return t;
+          if ((product.gender || []).indexOf(parseInt(t.id)) >= 0) return t;
         });
         setGender(genderDatas)
 
         const setting_style_type = dropDownData.setting_type_list?.filter((t: any) => {
-          if (data.data.findProduct.setting_style_type.indexOf(parseInt(t.id)) >= 0) return t;
+          if ((product.setting_style_type || []).indexOf(parseInt(t.id)) >= 0) return t;
         });
 
         setSettingType(setting_style_type)
 
         const item_size = dropDownData.item_size?.filter((t: any) => {
-          if (data.data.findProduct.size.indexOf(parseInt(t.id)) >= 0) return t;
+          if ((product.size || []).indexOf(parseInt(t.id)) >= 0) return t;
         })
 
         setItemSize(item_size)
 
         const item_length = dropDownData.item_length?.filter((t: any) => {
-          if ((data.data.findProduct.length as number[]).indexOf(parseInt(t.id)) >= 0) return t;
+          if ((product.length as number[] || []).indexOf(parseInt(t.id)) >= 0) return t;
         })
         setItemLength(item_length)
 
-        const categoryData = dropDownData.categoryList.find((t: any) => t.id == parseInt(data.data.findProduct.product_categories[0].id_category))
+        // Safely access product categories
+        const productCategories = product.product_categories || []
+        const categoryData = productCategories.length > 0
+          ? dropDownData.categoryList.find((t: any) => t.id == parseInt(productCategories[0].id_category))
+          : null
 
-        setCategory(categoryData)
-        if (categoryData.id_size.length > 0) {
-          const sizeList: any = []
-          for (const list of categoryData.id_size) {
-            const sizeData: any = dropDownData.item_size.find((t: any) => t.id == parseInt(list))
-            if (sizeData) {
-              sizeList.push({ id: sizeData.id, size: sizeData.size })
+        if (categoryData) {
+          setCategory(categoryData)
+          if (categoryData.id_size && categoryData.id_size.length > 0) {
+            const sizeList: any = []
+            for (const list of categoryData.id_size) {
+              const sizeData: any = dropDownData.item_size.find((t: any) => t.id == parseInt(list))
+              if (sizeData) {
+                sizeList.push({ id: sizeData.id, size: sizeData.size })
+              }
             }
-          }
 
-          setItemSizeList(sizeList)
-        }
-        if (categoryData.id_length.length > 0) {
-          const lengthList: any = []
-          for (const list of categoryData.id_length) {
-            const lengthData: any = dropDownData.item_length.find((t: any) => t.id == parseInt(list))
-            if (lengthData) {
-              lengthList.push({ id: lengthData.id, length: lengthData.length })
+            setItemSizeList(sizeList)
+          }
+          if (categoryData.id_length && categoryData.id_length.length > 0) {
+            const lengthList: any = []
+            for (const list of categoryData.id_length) {
+              const lengthData: any = dropDownData.item_length.find((t: any) => t.id == parseInt(list))
+              if (lengthData) {
+                lengthList.push({ id: lengthData.id, length: lengthData.length })
+              }
             }
+            setItemLengthList(lengthList)
           }
-          setItemLengthList(lengthList)
         }
 
-        let arrCategories: any[] = []
-        data.data.findProduct.product_categories.map((value: any) => {
-          let categoryList = dropDownData.categoryList;
-          let subCategoryList = []
-          let subSubCategoryList = []
-          if (value.id_sub_sub_category) {
-            subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category));
-            subSubCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_sub_category));
-          }
-          else {
-            subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category));
-          }
+        if (productCategories.length > 0) {
+          const arrCategories: any[] = []
+          productCategories.map((value: any) => {
+            const categoryList = dropDownData.categoryList
+            let subCategoryList = []
+            let subSubCategoryList = []
+            if (value.id_sub_sub_category) {
+              subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
+              subSubCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_sub_category))
+            } else {
+              subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
+            }
 
-          const data = {
-            category: value.id_category,
-            subCategory: value.id_sub_category,
-            subSubCategory: value.id_sub_sub_category,
-            categoryList: categoryList,
-            subCategoryList: subCategoryList,
-            subSubCategoryList: subSubCategoryList,
-            id: value.id,
-            isDeleted: 0
-          }
-          arrCategories.push(data)
-
-        })
-        setInputFields(arrCategories)
+            const data = {
+              category: value.id_category,
+              subCategory: value.id_sub_category,
+              subSubCategory: value.id_sub_sub_category,
+              categoryList: categoryList,
+              subCategoryList: subCategoryList,
+              subSubCategoryList: subSubCategoryList,
+              id: value.id,
+              isDeleted: 0
+            }
+            arrCategories.push(data)
+          })
+          setInputFields(arrCategories)
+        }
 
         //Gold Calculations
 
@@ -294,16 +328,40 @@ const ProductAdd = () => {
         const metalKarat = dropDownData.metal_karat || []
         const metalTone = dropDownData.metal_tone as number[] || []
         let checkedValues = {}
-        data.data.findProduct.PMO.filter(((t: any) => t.id_karat !== null)).map((value: any) => {
 
-          const id_metal_tone = value.metal_tone ? value.metal_tone as number[] : [];
-          var idMetalTonesNumber = id_metal_tone.map((t: any) => {
+        // Safely access PMO (Product Metal Options)
+        const productMetalOptions = product.PMO || []
+        console.log('[ProductEdit] PMO raw', productMetalOptions)
+        const hasGoldOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 1)
+        const hasSilverOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 2)
+        const hasPlatinumOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 3)
+        console.log('[ProductEdit] PMO flags', { hasGoldOptions, hasSilverOptions, hasPlatinumOptions })
+
+        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 1 && t.id_karat !== null).map((value: any) => {
+
+          // Handle metal_tone data - it can be a string (pipe-separated) or array
+          let id_metal_tone: string[] = [];
+          if (value.metal_tone) {
+            if (typeof value.metal_tone === 'string') {
+              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone];
+            } else if (Array.isArray(value.metal_tone)) {
+              id_metal_tone = value.metal_tone.map(String);
+            }
+          }
+
+          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
             return parseInt(t)
-          });
+          }).filter(num => !isNaN(num)); // Filter out invalid numbers
+
           const selectedMetalTones = metalTone?.filter((r: any) => {
             if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r;
           });
-          const karatValue = metalKarat.filter((x: any) => parseInt(x.id) === parseInt(value.id_karat))[0].name;
+
+          const karatData = metalKarat.filter((x: any) => parseInt(x.id) === parseInt(value.id_karat));
+          if (karatData.length === 0) {
+            return; 
+          }
+          const karatValue = karatData[0].name;
 
           const rate = ((parseFloat(goldMetalRate) / 31.104) * ((parseInt(karatValue) / 24))).toFixed(2)
           const data = {
@@ -338,11 +396,13 @@ const ProductAdd = () => {
         });
 
 
+        console.log('[ProductEdit] gold options', arrMetalKarat)
         if (arrMetalKarat.length > 0) {
           setInputFieldGoldMetal(arrMetalKarat)
         }
-        if (arrMetalKarat.length > 0) {
+        if (hasGoldOptions) {
           checkedValues = {
+            ...checkedValues,
             [1]: true
           }
         }
@@ -352,15 +412,23 @@ const ProductAdd = () => {
 
         arrMetalKarat = []
         const silverRate = metalList.filter((m: any) => parseInt(m.id) === 2)[0].metal_rate;
-        data.data.findProduct.PMO.filter(((t: any) => (parseInt(t.id_metal) === 2))).map((value: any) => {
+        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 2).map((value: any) => {
+          // Handle metal_tone data - it can be a string (pipe-separated) or array
+          let id_metal_tone: string[] = []
+          if (value.metal_tone) {
+            if (typeof value.metal_tone === 'string') {
+              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone]
+            } else if (Array.isArray(value.metal_tone)) {
+              id_metal_tone = value.metal_tone.map(String)
+            }
+          }
 
-          const id_metal_tone = value.id_metal_tone ? value.id_metal_tone.split("|") as number[] : [];
-          var idMetalTonesNumber = id_metal_tone.map((t: any) => {
+          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
             return parseInt(t)
-          });
+          }).filter(num => !isNaN(num))
           const selectedMetalTones = metalTone?.filter((r: any) => {
-            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r;
-          });
+            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r
+          })
 
           const data = {
             karat: '',
@@ -374,10 +442,11 @@ const ProductAdd = () => {
           }
           arrMetalKarat.push(data)
         })
+        console.log('[ProductEdit] silver options', arrMetalKarat)
         if (arrMetalKarat.length > 0) {
           setInputFieldSilverMetal(arrMetalKarat)
         }
-        if (arrMetalKarat.length > 0) {
+        if (hasSilverOptions) {
           checkedValues = {
             ...checkedValues,
             [2]: true
@@ -387,12 +456,22 @@ const ProductAdd = () => {
         //Platinum
         arrMetalKarat = []
         const platinumRate = metalList.filter((m: any) => parseInt(m.id) === 3)[0].metal_rate;
-        data.data.findProduct.PMO.filter(((t: any) => (parseInt(t.id_metal) === 3))).map((value: any) => {
+        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 3).map((value: any) => {
 
-          const id_metal_tone = value.metal_tone ? value.metal_tone as number[] : [];
-          var idMetalTonesNumber = id_metal_tone.map((t: any) => {
+          // Handle metal_tone data - it can be a string (pipe-separated) or array
+          let id_metal_tone: string[] = [];
+          if (value.metal_tone) {
+            if (typeof value.metal_tone === 'string') {
+              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone];
+            } else if (Array.isArray(value.metal_tone)) {
+              id_metal_tone = value.metal_tone.map(String);
+            }
+          }
+
+          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
             return parseInt(t)
-          });
+          }).filter(num => !isNaN(num)); // Filter out invalid numbers
+
           const selectedMetalTones = metalTone?.filter((r: any) => {
             if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r;
           });
@@ -409,24 +488,30 @@ const ProductAdd = () => {
           }
           arrMetalKarat.push(data)
         })
+        console.log('[ProductEdit] platinum options', arrMetalKarat)
         if (arrMetalKarat.length > 0) {
           setInputFieldPlatinumMetal(arrMetalKarat)
         }
-        if (arrMetalKarat.length > 0) {
+        if (hasPlatinumOptions) {
           checkedValues = {
             ...checkedValues,
             [3]: true
           }
         }
         setChecked(checkedValues)
-        const product_diamond = data.data.findProduct.PDO.map((value: any) => {
+
+        // Safely access PDO (Product Diamond Options)
+        const productDiamondOptions = product.PDO || []
+        const product_diamond = productDiamondOptions.map((value: any) => {
+          // Safely access diamond rate data
+          const rate = value.rate || {}
           const diamondRate = dropDownData.diamond_master.filter((t: any) =>
-            t.id_cuts == value.rate.id_cuts &&
-            t.id_clarity == value.rate.id_clarity &&
-            t.id_stone == value.rate.id_stone &&
-            t.id_shape == value.rate.id_shape &&
-            t.id_mm_size == value.rate.id_mm_size &&
-            t.id_color == value.rate.id_color
+            t.id_cuts == rate.id_cuts &&
+            t.id_clarity == rate.id_clarity &&
+            t.id_stone == rate.id_stone &&
+            t.id_shape == rate.id_shape &&
+            t.id_mm_size == rate.id_mm_size &&
+            t.id_color == rate.id_color
 
           )
 
@@ -436,14 +521,14 @@ const ProductAdd = () => {
             // default: value.is_default,
             id_diamond_group: value.id_diamond_group,
             diamondGroup: value.id_diamond_group,
-            stone: value.rate.id_stone,
+            stone: rate.id_stone,
             Stone_type: value.id_type,
             Stone_weight: value.weight,
-            stone_cut: value.rate.id_cuts,
-            stone_color: value.rate.id_color,
-            stone_mm_size: value.rate.id_mm_size,
-            stone_clarity: value.rate.id_clarity,
-            stone_shape: value.rate.id_shape,
+            stone_cut: rate.id_cuts,
+            stone_color: rate.id_color,
+            stone_mm_size: rate.id_mm_size,
+            stone_clarity: rate.id_clarity,
+            stone_shape: rate.id_shape,
             stone_count: value.count,
             stone_setting: value.id_setting,
             rate: selectedRate,
@@ -456,106 +541,84 @@ const ProductAdd = () => {
           return data
         })
         setInputFieldsDiamond(product_diamond)
-      } else {
+  }, [productDetail?.findProduct])
 
-        return toast.error(data.message);
-      }
-    } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+  useEffect(() => {
+    if (dropDownData && productDetailId) {
+      getByIdProductData(dropDownData, productDetailId.toString())
     }
-  }
+  }, [dropDownData, productDetailId, getByIdProductData])
 
-  const fetchDiamondGroupsWithDetails = async () => {
-    try {
-      const response = await GET_DIAMOND_GROUP_MASTER_WITH_DETAILS();
-      if (response.code === 200 || response.code === "200") {
-        setDiamondGroupsWithDetails(response.data);
-      } else {
-        toast.error(response.message || "Failed to fetch diamond groups");
-      }
-    } catch (error: any) {
-      toast.error(error?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
-    }
-  };
+  useEffect(() => {
+    if (dropDownData) {
+      const categoryData = dropDownData.categoryList?.filter((t: any) => t.parent_id === null)
+      setKeywordsList(dropDownData.keyWords || [])
+      setInputFields(prev => prev.map(value => ({ ...value, categoryList: categoryData || [] })))
+      setCategorysList(dropDownData.categoryList || [])
+      setSettingTypeList(dropDownData.setting_type_list || [])
+      setItemLengthList(dropDownData.item_length || [])
+      setItemSizeList(dropDownData.item_size || [])
+      setMetalGroupList(dropDownData.metal_list || [])
+      setDiamondGroupList(dropDownData.diamond_master || [])
+      setStoneSettingList(dropDownData.stone_setting || [])
+      setMetalToneList((dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_GOLD_ID))
+      const silverTones = (dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_SILVER_ID)
+      const platinumTones = (dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_PLATINUM_ID)
+      setSilverToneList(silverTones)
+      setPaltinumToneList(platinumTones)
+      setStoneShapeList(dropDownData.stone_shape || [])
+      setStoneList(dropDownData.stone || [])
+      setStoneMMSize(dropDownData.MM_Size || [])
+      setStoneColor(dropDownData.stone_color || [])
+      setStoneClarity(dropDownData.stone_clarity || [])
+      setStoneCuts(dropDownData.stone_cut || [])
+      setMetalKaratList(dropDownData.metal_karat || [])
+      setDiamondGroupsWithDetails(dropDownData.diamond_groups_with_details || [])
 
-  const getAllDropDownData = async (productDetailId: string) => {
-
-    try {
-      const data = await ADD_PRODUCT_DROPDOWN_LIST();
-      if (data.code === 200 || data.code === "200") {
-        const categoryData = data.data.categoryList.filter((t: any) => t.parent_id === null)
-        setKeywordsList(data.data.keyWords)
-        inputFields.map((value) => value.categoryList = categoryData)
-        setCategorysList(data.data.categoryList)
-        setSettingTypeList(data.data.setting_type_list)
-        setItemLengthList(data.data.item_length)
-        setItemSizeList(data.data.item_size)
-        setMetalGroupList(data.data.metal_list)
-        setDiamondGroupList(data.data.diamond_master)
-        setStoneSettingList(data.data.stone_setting)
-        setMetalToneList(data.data.metal_tone.filter((m: any) => parseInt(m.id_metal) === MEATL_GOLD_ID))
-        setSilverToneList(data.data.metal_tone.filter((m: any) => parseInt(m.id_metal) === MEATL_SILVER_ID))
-        setPaltinumToneList(data.data.metal_tone.filter((m: any) => parseInt(m.id_metal) === MEATL_PLATINUM_ID))
-        setStoneShapeList(data.data.stone_shape)
-        setStoneList(data.data.stone)
-        setStoneMMSize(data.data.MM_Size)
-        setStoneColor(data.data.stone_color)
-        setStoneClarity(data.data.stone_clarity)
-        setStoneCuts(data.data.stone_cut)
-        setMetalKaratList(data.data.metal_karat)
-
-        // Fetch diamond groups with details
-        fetchDiamondGroupsWithDetails();
-
-        const product_metal_gold = data.data.metal_karat.map((value: any) => {
+      const isEditingProduct = !!productDetailId && !!productDetail?.findProduct
+      if (!isEditingProduct) {
+        const product_metal_gold = (dropDownData.metal_karat || []).map((value: any) => {
           const gold = {
             karat: value.name,
             id_karat: value.id,
             tone: [{ id: null, name: "" }],
             price: '',
-            rate: ((data.data.metal_list[0].metal_rate / 31.104) * (value.name / 24)).toFixed(2), id: 0, metal_tone: data.data.metal_tone
+            rate: (((dropDownData.metal_list?.[0]?.metal_rate || 0) / 31.104) * (Number(value.name) / 24)).toFixed(2), id: 0, metal_tone: dropDownData.metal_tone || []
           }
 
           return gold
         })
         setInputFieldGoldMetal(product_metal_gold)
 
-        const silverRate = data.data.metal_list[1].metal_rate
-        const platinumRate = data.data.metal_list[2].metal_rate
+        const silverRate = dropDownData.metal_list?.[1]?.metal_rate || 0
+        const platinumRate = dropDownData.metal_list?.[2]?.metal_rate || 0
 
-        const dataDisplay = [...inputFieldSilverMetal]
+        setInputFieldSilverMetal([
+          {
+            tone: [{ id: null, name: "" }],
+            price: '',
+            rate: silverRate,
+            id: 0,
+            metal_tone: silverTones,
+            metal_weight: null
+          }
+        ])
 
-        inputFieldSilverMetal.map((value: any, index) => {
-
-          dataDisplay[index].rate = silverRate
-          dataDisplay[index].metal_tone = silverToneList
-
-        })
-        setInputFieldSilverMetal(dataDisplay)
-
-        const dataPlatinum = [...inputFieldPlatinumMetal]
-        inputFieldPlatinumMetal.map((value: any, index) => {
-
-          dataPlatinum[index].rate = platinumRate
-          dataPlatinum[index].metal_tone = paltinumToneList
-
-        })
-        setInputFieldPlatinumMetal(dataPlatinum)
-
-        if (productDetailId && productDetailId != undefined) {
-          getByIdProductData(data.data, productDetailId)
-        }
-
-      } else {
-
-        return toast.error(data.message);
+        setInputFieldPlatinumMetal([
+          {
+            tone: [{ id: null, name: "" }],
+            price: '',
+            rate: platinumRate,
+            id: 0,
+            metal_tone: platinumTones,
+            metal_weight: null
+          }
+        ])
       }
-    } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
     }
-  }
+  }, [dropDownData, productDetailId, productDetail?.findProduct])
 
-  // const addProductDetails = async () => {
+   // const addProductDetails
   //   const payload = {
   //     "id_product": 0,
   //     "name": productName,
@@ -664,7 +727,8 @@ const ProductAdd = () => {
             "id_karat": value.id_karat,
             "id_metal": checked['1' as keyof typeof checked] === true && 1
           }
-          return data
+          
+return data
         }),
         "product_silver_options": inputFieldSilverMetal.map((value) => {
           const data = {
@@ -673,7 +737,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['2' as keyof typeof checked] === true && 2
           }
-          return data
+          
+return data
         }),
 
         "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -683,7 +748,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['3' as keyof typeof checked] === true && 3
           }
-          return data
+          
+return data
         }),
         "product_diamond_options": inputFieldsDiamond.map((value: any) => {
           const data = {
@@ -694,7 +760,6 @@ const ProductAdd = () => {
             "count": value.stone_count,
             "is_default": value.default,
             "id_diamond_group": value.id_diamond_group,
-            "id_diamond_group": value.id_diamond_group,
             "id_stone": value.stone,
             "id_shape": value.stone_shape,
             "id_mm_size": value.stone_mm_size,
@@ -702,7 +767,8 @@ const ProductAdd = () => {
             "id_clarity": value.stone_clarity,
             "id_cuts": value.stone_cut
           }
-          return data
+          
+return data
         })
 
       }
@@ -721,7 +787,8 @@ const ProductAdd = () => {
             "id_karat": value.id_karat,
             "id_metal": checked['1' as keyof typeof checked] === true && 1
           }
-          return data
+          
+return data
         }),
         "product_silver_options": inputFieldSilverMetal.map((value) => {
           const data = {
@@ -730,7 +797,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['2' as keyof typeof checked] === true && 2
           }
-          return data
+          
+return data
         }),
         "product_diamond_options": inputFieldsDiamond.map((value: any) => {
           const data = {
@@ -741,7 +809,6 @@ const ProductAdd = () => {
             "count": value.stone_count,
             "is_default": value.default,
             "id_diamond_group": value.id_diamond_group,
-            "id_diamond_group": value.id_diamond_group,
             "id_stone": value.stone,
             "id_shape": value.stone_shape,
             "id_mm_size": value.stone_mm_size,
@@ -749,7 +816,8 @@ const ProductAdd = () => {
             "id_clarity": value.stone_clarity,
             "id_cuts": value.stone_cut
           }
-          return data
+          
+return data
         })
       }
     } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -767,7 +835,8 @@ const ProductAdd = () => {
             "id_karat": value.id_karat,
             "id_metal": checked['1' as keyof typeof checked] === true && 1
           }
-          return data
+          
+return data
         }),
 
         "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -777,7 +846,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['3' as keyof typeof checked] === true && 3
           }
-          return data
+          
+return data
         }),
         "product_diamond_options": inputFieldsDiamond.map((value: any) => {
           const data = {
@@ -795,7 +865,8 @@ const ProductAdd = () => {
             "id_clarity": value.stone_clarity,
             "id_cuts": value.stone_cut
           }
-          return data
+          
+return data
         })
       }
     } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -813,7 +884,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['2' as keyof typeof checked] === true && 2
           }
-          return data
+          
+return data
         }),
 
         "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -823,7 +895,8 @@ const ProductAdd = () => {
             "id_metal_tone": value.tone.map((t: any) => t.id),
             "id_metal": checked['3' as keyof typeof checked] === true && 3
           }
-          return data
+          
+return data
         }),
         "product_diamond_options": inputFieldsDiamond.map((value: any) => {
           const data = {
@@ -841,7 +914,8 @@ const ProductAdd = () => {
             "id_clarity": value.stone_clarity,
             "id_cuts": value.stone_cut
           }
-          return data
+          
+return data
         })
       }
     } else {
@@ -860,7 +934,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -878,7 +953,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
 
         }
@@ -898,7 +974,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -916,7 +993,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       }
@@ -954,7 +1032,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       }
@@ -1061,7 +1140,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
           "product_silver_options": inputFieldSilverMetal.map((value) => {
             const data = {
@@ -1070,7 +1150,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1080,7 +1161,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
 
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
@@ -1099,7 +1181,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
 
         }
@@ -1117,7 +1200,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
           "product_silver_options": inputFieldSilverMetal.map((value) => {
             const data = {
@@ -1126,7 +1210,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1144,7 +1229,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -1161,7 +1247,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1171,7 +1258,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1189,7 +1277,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -1206,7 +1295,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1216,7 +1306,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1234,7 +1325,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else {
@@ -1252,7 +1344,8 @@ const ProductAdd = () => {
                 "id_karat": value.id_karat,
                 "id_metal": checked['1' as keyof typeof checked] === true && 1
               }
-              return data
+              
+return data
             }),
             "product_diamond_options": inputFieldsDiamond.map((value: any) => {
               const data = {
@@ -1270,7 +1363,8 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
 
           }
@@ -1289,7 +1383,8 @@ const ProductAdd = () => {
                 "id_metal_tone": value.tone.map((t: any) => t.id),
                 "id_metal": checked['2' as keyof typeof checked] === true && 2
               }
-              return data
+              
+return data
             }),
             "product_diamond_options": inputFieldsDiamond.map((value: any) => {
               const data = {
@@ -1307,7 +1402,8 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
           }
         }
@@ -1344,20 +1440,23 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
           }
         }
 
       }
 
-      let finalPayload = {
+      const finalPayload = {
         ...payload1, ...payload
       }
 
-
+      setIsSaving(true)
       const data = await ADD_PRODUCT_DETAILS(finalPayload);
+      setIsSaving(false)
       if (data.code === 200 || data.code === "200") {
+        queryClient.invalidateQueries(['productList'])
         toast.success(data.message)
         Router.push({ pathname: "/product/all-products" })
       } else {
@@ -1367,6 +1466,7 @@ const ProductAdd = () => {
 
     }
     catch (e: any) {
+      setIsSaving(false)
       toast.error(e.data.message);
     }
   }
@@ -1455,7 +1555,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
           "product_silver_options": inputFieldSilverMetal.map((value) => {
             const data = {
@@ -1464,7 +1565,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1474,7 +1576,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1492,7 +1595,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
 
         }
@@ -1510,7 +1614,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
           "product_silver_options": inputFieldSilverMetal.map((value) => {
             const data = {
@@ -1519,7 +1624,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1537,7 +1643,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -1554,7 +1661,8 @@ const ProductAdd = () => {
               "id_karat": value.id_karat,
               "id_metal": checked['1' as keyof typeof checked] === true && 1
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1564,7 +1672,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1582,7 +1691,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
@@ -1599,7 +1709,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['2' as keyof typeof checked] === true && 2
             }
-            return data
+            
+return data
           }),
 
           "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
@@ -1609,7 +1720,8 @@ const ProductAdd = () => {
               "id_metal_tone": value.tone.map((t: any) => t.id),
               "id_metal": checked['3' as keyof typeof checked] === true && 3
             }
-            return data
+            
+return data
           }),
           "product_diamond_options": inputFieldsDiamond.map((value: any) => {
             const data = {
@@ -1627,7 +1739,8 @@ const ProductAdd = () => {
               "id_clarity": value.stone_clarity,
               "id_cuts": value.stone_cut
             }
-            return data
+            
+return data
           })
         }
       } else {
@@ -1645,7 +1758,8 @@ const ProductAdd = () => {
                 "id_karat": value.id_karat,
                 "id_metal": checked['1' as keyof typeof checked] === true && 1
               }
-              return data
+              
+return data
             }),
             "product_diamond_options": inputFieldsDiamond.map((value: any) => {
               const data = {
@@ -1663,7 +1777,8 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
 
           }
@@ -1682,7 +1797,8 @@ const ProductAdd = () => {
                 "id_metal_tone": value.tone.map((t: any) => t.id),
                 "id_metal": checked['2' as keyof typeof checked] === true && 2
               }
-              return data
+              
+return data
             }),
             "product_diamond_options": inputFieldsDiamond.map((value: any) => {
               const data = {
@@ -1700,7 +1816,8 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
           }
         }
@@ -1737,20 +1854,24 @@ const ProductAdd = () => {
                 "id_clarity": value.stone_clarity,
                 "id_cuts": value.stone_cut
               }
-              return data
+              
+return data
             })
           }
         }
 
       }
 
-      let finalPayload = {
+      const finalPayload = {
         ...payload1, ...payload
       }
 
-
+      setIsSaving(true)
       const data = await EDIT_PRODUCT_DETAILS(finalPayload);
+      setIsSaving(false)
       if (data.code === 200 || data.code === "200") {
+        queryClient.invalidateQueries(['productDetail', productId])
+        queryClient.invalidateQueries(['productList'])
         toast.success(data.message)
         Router.push({ pathname: "/product/all-products" })
       } else {
@@ -1760,11 +1881,11 @@ const ProductAdd = () => {
 
     }
     catch (e: any) {
+      setIsSaving(false)
       toast.error(e.data.message);
     }
   }
 
-  // Handle Stepper
   const handleBack = () => {
     setActiveStep(prevActiveStep => prevActiveStep - 1)
   }
@@ -2012,7 +2133,7 @@ const ProductAdd = () => {
 
             {inputFields.map((input, index) => {
               return (
-                <>
+                <Fragment key={`category-group-${index}`}>
                   <Grid item xs={12} sm={4} key={"CAT_" + index}>
                     <TccSelect
                       InputProps={isDisabled}
@@ -2116,7 +2237,7 @@ const ProductAdd = () => {
                     </Button>
                   </Grid>
 
-                </>
+                </Fragment>
               )
             })
             }
@@ -2766,9 +2887,20 @@ const ProductAdd = () => {
               >
                 Back
               </Button>
-              {activeStep === steps.length - 1 && action == "view" ? <></> : <Button size='large' variant='contained' onClick={activeStep === 0 ?
-                handleNext : activeStep === 1 ? id == undefined && productId == 0 ? addProductDetails : editProductDetails : handleNext}>
-                {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
+              {activeStep === steps.length - 1 && action == "view" ? <></> : <Button 
+                size='large' 
+                variant='contained' 
+                disabled={isSaving}
+                onClick={activeStep === 0 ?
+                  handleNext : activeStep === 1 ? id == undefined && productId == 0 ? addProductDetails : editProductDetails : handleNext}>
+                {isSaving ? (
+                  <>
+                    <Icon icon="eos-icons:loading" className="spin" style={{ animation: 'spin 1s linear infinite', marginRight: 8 }} />
+                    Saving...
+                  </>
+                ) : (
+                  activeStep === steps.length - 1 ? 'Submit' : 'Next'
+                )}
               </Button>}
             </Grid>
           </Grid>
@@ -2778,79 +2910,207 @@ const ProductAdd = () => {
   }
 
   const renderTabContent = () => {
-    switch (activeTab) {
-      case 0:
-        return (
-          <>
-            <StepperWrapper>
-              <Stepper activeStep={activeStep} sx={{ display: 'flex', justifyContent: "start" }} connector={<Icon icon='tabler:chevron-right' />}>
-                {steps.map((step, index) => {
-                  const RenderAvatar = activeStep >= index ? CustomAvatar : Avatar
+    // When editing existing product (id exists), tab indices are different
+    // because bulk upload tabs are hidden
+    if (id) {
+      // Editing existing product: Tab 0 = Single Product, Tab 1 = Image Management, Tab 2 = Variant Management
+      switch (activeTab) {
+        case 0:
+          return (
+            <>
+              <StepperWrapper>
+                <Stepper activeStep={activeStep} sx={{ display: 'flex', justifyContent: "start" }} connector={<Icon icon='tabler:chevron-right' />}>
+                  {steps.map((step, index) => {
+                    const RenderAvatar = activeStep >= index ? CustomAvatar : Avatar
 
-                  return (
-                    <Step key={"THE_" + index}>
-                      <StepLabel StepIconComponent={StepperCustomDot}>
-                        <div className='step-label'>
-                          <RenderAvatar
-                            variant='rounded'
-                            {...(activeStep >= index && { skin: 'light' })}
-                            {...(activeStep === index && { skin: 'filled' })}
-                            {...(activeStep >= index && { color: 'primary' })}
-                            sx={{
-                              ...(activeStep === index && { boxShadow: theme => theme.shadows[3] }),
-                              ...(activeStep > index && { color: theme => hexToRGBA(theme.palette.primary.main, 0.4) })
-                            }}
-                          >
-                            <Icon icon={step.icon} />
-                          </RenderAvatar>
-                          <div>
-                            <Typography className='step-title'>{step.title}</Typography>
+                    return (
+                      <Step key={"THE_" + index}>
+                        <StepLabel StepIconComponent={StepperCustomDot}>
+                          <div className='step-label'>
+                            <RenderAvatar
+                              variant='rounded'
+                              {...(activeStep >= index && { skin: 'light' })}
+                              {...(activeStep === index && { skin: 'filled' })}
+                              {...(activeStep >= index && { color: 'primary' })}
+                              sx={{
+                                ...(activeStep === index && { boxShadow: theme => theme.shadows[3] }),
+                                ...(activeStep > index && { color: theme => hexToRGBA(theme.palette.primary.main, 0.4) })
+                              }}
+                            >
+                              <Icon icon={step.icon} />
+                            </RenderAvatar>
+                            <div>
+                              <Typography className='step-title'>{step.title}</Typography>
+                            </div>
                           </div>
-                        </div>
-                      </StepLabel>
-                    </Step>
-                  )
-                })}
-              </Stepper>
-            </StepperWrapper>
-            <Divider sx={{ m: '0 !important' }} />
-            <CardContent>{renderContent()}</CardContent>
-          </>
-        )
-      case 1:
-        return <BulkUploadZip onSuccess={handleBulkUploadSuccess} />
-      case 2:
-        return <BulkUploadFile onSuccess={handleBulkUploadSuccess} />
-      default:
-        return null
+                        </StepLabel>
+                      </Step>
+                    )
+                  })}
+                </Stepper>
+              </StepperWrapper>
+              <Divider sx={{ m: '0 !important' }} />
+              <CardContent>{renderContent()}</CardContent>
+            </>
+          )
+        case 1:
+          // Image Management tab
+          return (
+            <ImageManagement
+              productId={parseInt(id as string)}
+              onImagesChange={() => undefined}
+            />
+          )
+        case 2:
+          return (
+            <VariantManagement
+              productId={parseInt(id as string)}
+              onVariantsChange={() => undefined}
+            />
+          )
+        default:
+          return null
+      }
+    } else {
+      // Adding new product: Tab 0 = Single Product, Tab 1 = Bulk ZIP, Tab 2 = Bulk File
+      switch (activeTab) {
+        case 0:
+          return (
+            <>
+              <StepperWrapper>
+                <Stepper activeStep={activeStep} sx={{ display: 'flex', justifyContent: "start" }} connector={<Icon icon='tabler:chevron-right' />}>
+                  {steps.map((step, index) => {
+                    const RenderAvatar = activeStep >= index ? CustomAvatar : Avatar
+
+                    return (
+                      <Step key={"THE_" + index}>
+                        <StepLabel StepIconComponent={StepperCustomDot}>
+                          <div className='step-label'>
+                            <RenderAvatar
+                              variant='rounded'
+                              {...(activeStep >= index && { skin: 'light' })}
+                              {...(activeStep === index && { skin: 'filled' })}
+                              {...(activeStep >= index && { color: 'primary' })}
+                              sx={{
+                                ...(activeStep === index && { boxShadow: theme => theme.shadows[3] }),
+                                ...(activeStep > index && { color: theme => hexToRGBA(theme.palette.primary.main, 0.4) })
+                              }}
+                            >
+                              <Icon icon={step.icon} />
+                            </RenderAvatar>
+                            <div>
+                              <Typography className='step-title'>{step.title}</Typography>
+                            </div>
+                          </div>
+                        </StepLabel>
+                      </Step>
+                    )
+                  })}
+                </Stepper>
+              </StepperWrapper>
+              <Divider sx={{ m: '0 !important' }} />
+              <CardContent>{renderContent()}</CardContent>
+            </>
+          )
+        case 1:
+          return <BulkUploadZip onSuccess={handleBulkUploadSuccess} />
+        case 2:
+          return <BulkUploadFile onSuccess={handleBulkUploadSuccess} />
+        default:
+          return null
+      }
     }
   }
 
   return (
     <>
-      <Button variant='contained' sx={{ mr: 3, mb: 4, '& svg': { mr: 2 } }} onClick={() => Router.back()}>
-        <Icon icon='material-symbols:arrow-back-rounded' />
-        Back
-      </Button>
+      <Box sx={{ mb: 4 }}>
+        <AdminPageHeader
+          title='Legacy Product Workspace'
+          subtitle='Use this editor for existing products and advanced edge cases while simplified add stays the primary create flow.'
+          actions={
+            <>
+              <Button
+                variant='outlined'
+                onClick={() => Router.push('/product/simplified-add')}
+                startIcon={<Icon icon='tabler:plus' />}
+              >
+                Quick Add Product
+              </Button>
+              <Button
+                variant='outlined'
+                onClick={() => Router.push('/product/product-bulk-upload/file-import/')}
+                startIcon={<Icon icon='tabler:file-import' />}
+              >
+                Bulk Import
+              </Button>
+            </>
+          }
+        />
+      </Box>
+
+      {/* Display product name when editing existing product */}
+      {id && productName && (
+        <Box sx={{ mb: 4 }}>
+          <Typography
+            variant="h4"
+            component="h1"
+            sx={{
+              fontWeight: 600,
+              color: '#c6a55a', // Gold color from design system
+              fontFamily: 'Canela Text Trial, serif' // Canela font for titles
+            }}
+          >
+            Editing: {productName}
+          </Typography>
+        </Box>
+      )}
+
       <Card>
         <CardContent>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
             <Tabs value={activeTab} onChange={handleTabChange} aria-label="product addition tabs">
-              <Tab
-                label="Single Product"
-                icon={<Icon icon='fluent-mdl2:product-release' />}
-                iconPosition="start"
-              />
-              <Tab
-                label="Bulk Upload - ZIP Files"
-                icon={<Icon icon='tabler:upload' />}
-                iconPosition="start"
-              />
-              <Tab
-                label="Bulk Upload - File Import"
-                icon={<Icon icon='tabler:file-import' />}
-                iconPosition="start"
-              />
+              {[
+                // Single Product tab - always shown
+                <Tab
+                  key="single-product"
+                  label="Single Product"
+                  icon={<Icon icon='fluent-mdl2:product-release' />}
+                  iconPosition="start"
+                />,
+
+                // Bulk upload tabs - only when adding new products
+                ...(!id ? [
+                  <Tab
+                    key="bulk-zip"
+                    label="Bulk Upload - ZIP Files"
+                    icon={<Icon icon='tabler:upload' />}
+                    iconPosition="start"
+                  />,
+                  <Tab
+                    key="bulk-file"
+                    label="Bulk Upload - File Import"
+                    icon={<Icon icon='tabler:file-import' />}
+                    iconPosition="start"
+                  />
+                ] : []),
+
+                // Management tabs - only when editing existing product
+                ...(id ? [
+                  <Tab
+                    key="image-management"
+                    label="Image Management"
+                    icon={<Icon icon='tabler:photo' />}
+                    iconPosition="start"
+                  />,
+                  <Tab
+                    key="variant-management"
+                    label="Variant Management"
+                    icon={<Icon icon='tabler:versions' />}
+                    iconPosition="start"
+                  />
+                ] : [])
+              ]}
             </Tabs>
           </Box>
           {renderTabContent()}

@@ -1,5 +1,5 @@
 // ** React Imports
-import { forwardRef, Fragment, useEffect, useImperativeHandle, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -37,32 +37,80 @@ const Img = styled('img')(({ theme }) => ({
 const TccSingleFileUpload = (props: any) => {
     // ** State
     const [files, setFiles] = useState<File[]>([])
+    const [hasExistingImage, setHasExistingImage] = useState<boolean>(false)
+    const [existingImageUrl, setExistingImageUrl] = useState<string>('')
     let imagePath = `${IMG_ENDPOINT}${props.imageShow}`
 
-    async function createFile(fileUrl: string) {
-        const response = await fetch(IMG_ENDPOINT + "/" + fileUrl);
-        const extension = fileUrl.split(".").pop();
-        const data = await response.blob();
-        const metadata = {
-            type: (extension == "jpeg" ? "image/jpeg" : (extension == "svg" ? "image/svg+xml" : (extension == "jpg" ? "image/jpg" : "image/png")))
-        };
-        const segments = fileUrl.split('/');
-        const imageName = segments.pop() || segments.pop(); // Handle potential trailing slash
+    const createFile = useCallback(async (fileUrl: string) => {
+        const fullUrl = fileUrl.startsWith('http') ? fileUrl : `${IMG_ENDPOINT}${fileUrl}`
+        let response: Response | null = null
 
-        const file = new File([data], imageName || "", metadata);
-        const filesArray = [file];
-        setFiles(filesArray);
+        try {
+            // First attempt: Standard CORS request
+            response = await fetch(fullUrl, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'image/*',
+                },
+            })
 
-        // ... do something with the file or return it
-    }
+            if (!response.ok && response.status !== 0) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+
+            const extension = fileUrl.split('.').pop()?.toLowerCase()
+            const data = await response.blob()
+
+            // More comprehensive MIME type mapping
+            const getMimeType = (ext: string) => {
+                switch (ext) {
+                    case 'jpeg':
+                    case 'jpg':
+                        return 'image/jpeg'
+                    case 'png':
+                        return 'image/png'
+                    case 'gif':
+                        return 'image/gif'
+                    case 'svg':
+                        return 'image/svg+xml'
+                    case 'webp':
+                        return 'image/webp'
+                    default:
+                        return 'image/jpeg'
+                }
+            }
+
+            const metadata = {
+                type: getMimeType(extension || 'jpg')
+            }
+
+            const segments = fileUrl.split('/')
+            const imageName = segments.pop() || segments.pop() || 'image'
+
+            const file = new File([data], imageName, metadata)
+            const filesArray = [file]
+            setFiles(filesArray)
+            setHasExistingImage(false)
+        } catch (error) {
+            console.error('Error loading image file:', error)
+
+            // Set fallback state to show existing image URL
+            setHasExistingImage(true)
+            setExistingImageUrl(fullUrl)
+        }
+    }, [])
 
     useEffect(() => {
-        if (props.imageFile && props.imageFile != null) {
-
-            //File Exists
+        if (props.imageFile && props.imageFile != null && typeof props.imageFile === 'string' && props.imageFile.trim() !== '') {
+            // File Exists and is a valid string
             createFile(props.imageFile as string)
+        } else {
+            // Reset states when no image file
+            setHasExistingImage(false)
+            setExistingImageUrl('')
         }
-    }, [props.imageFile])
+    }, [createFile, props.imageFile])
 
     // ** Hooks
     const theme = useTheme()
@@ -73,21 +121,19 @@ const TccSingleFileUpload = (props: any) => {
         },
         multiple: false,
         onDrop: (acceptedFiles: File[]) => {
+            // Add safety check for acceptedFiles
+            if (!acceptedFiles || acceptedFiles.length === 0) {
+                return
+            }
 
             setFiles(acceptedFiles.map((file: File) => Object.assign(file, {
                 preview: URL.createObjectURL(file)
             })))
-            if (props.onDrop) { props.onDrop(acceptedFiles[0]); }
 
-            // const newFiles = acceptedFiles.map(file => {
-            //     return Object.assign(file, {
-            //         preview: URL.createObjectURL(file)
-            //     })
-            // })
-            // setFiles(newFiles)
-            // console.log(newFiles);
-
-
+            // Pass the full array to parent component for consistency
+            if (props.onDrop) {
+                props.onDrop(acceptedFiles)
+            }
         },
         onDropRejected: () => {
             toast.error('You can only upload maximum size of 5 MB.', {
@@ -99,9 +145,8 @@ const TccSingleFileUpload = (props: any) => {
 
 
     const renderFilePreview = (file: FileProp) => {
-        imagePath = "";
+        imagePath = ''
         if (file.type.startsWith('image')) {
-
             return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
         } else {
             return <Icon icon='tabler:file-description' />
@@ -110,11 +155,11 @@ const TccSingleFileUpload = (props: any) => {
 
 
     const handleRemoveFile = (file: FileProp) => {
-        imagePath = ""
+        imagePath = ''
         const uploadedFiles = files
         const filtered = uploadedFiles.filter((i: FileProp) => i.name !== file.name)
         setFiles([...filtered])
-        if (props.onDrop) { props.onDrop([...filtered]); }
+        if (props.onDrop) { props.onDrop([...filtered]) }
     }
 
     const img = files.map((file: FileProp) => (
@@ -136,16 +181,18 @@ const TccSingleFileUpload = (props: any) => {
         </ListItem>
     ))
 
-    const handleRemoveAllFiles = () => {
+    const handleRemoveAllFiles = useCallback(() => {
         setFiles([])
-        if (props.onDrop) { props.onDrop(); }
-    }
+        setHasExistingImage(false)
+        setExistingImageUrl('')
+        if (props.onDrop) { props.onDrop([]) }
+    }, [props])
 
     useEffect(() => {
         if (props.onClick == '0') {
             handleRemoveAllFiles()
         }
-    }, [props.onClick])
+    }, [handleRemoveAllFiles, props.onClick])
 
     return (
         <FileUploadWapper>
@@ -158,9 +205,6 @@ const TccSingleFileUpload = (props: any) => {
                         <Typography sx={{ mb: 2.5 }}>
                             Drop files here or click to upload.
                         </Typography>
-                        {/* <Typography sx={{ color: 'text.secondary' }}>
-                            (This is just a demo drop zone. Selected files are not actually uploaded.)
-                        </Typography> */}
                     </Box>
                 </div>
                 {files.length ? (
@@ -171,6 +215,46 @@ const TccSingleFileUpload = (props: any) => {
                                 Remove
                             </Button>
                         </div>
+                    </Fragment>
+                ) : null}
+
+                {/* Display existing image when fetch fails but image exists */}
+                {hasExistingImage && existingImageUrl && !files.length ? (
+                    <Fragment>
+                        <Box sx={{ mt: 2, p: 2, border: '1px dashed #ccc', borderRadius: 1 }}>
+                            <Typography variant='body2' sx={{ mb: 1, color: 'text.secondary' }}>
+                                Existing Image:
+                            </Typography>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                <img
+                                    src={existingImageUrl}
+                                    alt='Existing image'
+                                    style={{
+                                        width: 60,
+                                        height: 60,
+                                        objectFit: 'cover',
+                                        borderRadius: 4,
+                                        border: '1px solid #ddd'
+                                    }}
+                                    onError={(e) => {
+                                        // Hide image if it fails to load
+                                        (e.target as HTMLImageElement).style.display = 'none'
+                                    }}
+                                />
+                                <Box>
+                                    <Typography variant='body2'>
+                                        Current image will be kept unless you upload a new one
+                                    </Typography>
+                                    <Chip
+                                        label='Existing'
+                                        size='small'
+                                        color='primary'
+                                        variant='outlined'
+                                        sx={{ mt: 0.5 }}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
                     </Fragment>
                 ) : null}
 

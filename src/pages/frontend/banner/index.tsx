@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -120,7 +121,8 @@ const Banner = () => {
                 toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
             }
         }
-        return false
+        
+return false
     }
 
     const editBannerDataApi = async (data: any) => {
@@ -195,6 +197,9 @@ const Banner = () => {
 
     useEffect(() => {
         getAllBannerDataApi(pagination);
+
+        // Legacy table fetch intentionally runs once on mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChangePerPageRows = (perPageRows: number) => {
@@ -221,6 +226,9 @@ const Banner = () => {
 
     useEffect(() => {
         searchBusinessUser();
+
+        // Debounced search is driven only by the input value.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchFilter]);
 
     const column = [
@@ -279,11 +287,15 @@ const Banner = () => {
             editBannerDataApi(data)
         }
     }
-    return (
+    
+return (
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Banner'></CardHeader>
+                    <AdminPageHeader
+                        title='Banner'
+                        subtitle='Secondary promotional banner records. These are separate from the homepage hero and can be used by storefront banner sections.'
+                    />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

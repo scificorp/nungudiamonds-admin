@@ -9,6 +9,7 @@ import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
+import { PUBLIC_AUTHORIZATION_TOKEN } from 'src/AppConfig'
 
 // ** Types
 import { AuthValuesType, RegisterParams, LoginParams, ErrCallbackType, UserDataType } from './types'
@@ -31,6 +32,27 @@ type Props = {
   children: ReactNode
 }
 
+const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
+
+const guestStorageUser = {
+  id: 0,
+  role: 'admin',
+  password: 'guest',
+  fullName: 'Guest Admin',
+  username: 'guest',
+  email: 'guest@nungu.app',
+  user_type: 'guest'
+}
+
+const guestAuthUser: UserDataType = {
+  id: guestStorageUser.id,
+  role: guestStorageUser.role,
+  password: guestStorageUser.password,
+  fullName: guestStorageUser.fullName,
+  username: guestStorageUser.username,
+  email: guestStorageUser.email
+}
+
 const AuthProvider = ({ children }: Props) => {
   // ** States
   const [user, setUser] = useState<UserDataType | null>(defaultProvider.user)
@@ -39,24 +61,44 @@ const AuthProvider = ({ children }: Props) => {
   // ** Hooks
   const router = useRouter()
 
+  const applyGuestUser = () => {
+    window.localStorage.setItem('userData', JSON.stringify(guestStorageUser))
+    localStorageUtils.setAccessToken(PUBLIC_AUTHORIZATION_TOKEN, PUBLIC_AUTHORIZATION_TOKEN)
+    localStorageUtils.setUserInfo(guestStorageUser)
+    setUser(guestAuthUser)
+  }
+
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
-      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
-      if (storedToken) {
-        setLoading(true)
+      setLoading(true)
+      if (loginDisabled) {
+        applyGuestUser()
         setLoading(false)
-        const userInfo = localStorageUtils.getUserInfo()
-        setUser({
-          id: userInfo.id,
-          role: 'admin',
-          password: userInfo.pass_hash,
-          fullName: userInfo.username,
-          username: userInfo.username,
-          email: userInfo.username
-        })
-      } else {
-        setLoading(false)
+        
+return
       }
+
+      const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)
+      if (storedToken) {
+        const userInfo = localStorageUtils.getUserInfo()
+        if (userInfo) {
+          window.localStorage.setItem('userData', JSON.stringify(userInfo))
+          setUser({
+            id: userInfo.id,
+            role: 'admin',
+            password: userInfo.pass_hash,
+            fullName: userInfo.username,
+            username: userInfo.username,
+            email: userInfo.username
+          })
+        } else {
+          setUser(null)
+        }
+      } else {
+        localStorageUtils.removeUserInfo()
+        setUser(null)
+      }
+      setLoading(false)
     }
 
     initAuth()
@@ -64,15 +106,25 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
+    if (loginDisabled) {
+      applyGuestUser()
+      router.replace('/')
+      
+return
+    }
+
     const userInfo = localStorageUtils.getUserInfo()
-    setUser({
-      id: userInfo.id,
-      role: 'admin',
-      password: userInfo.pass_hash,
-      fullName: userInfo.username,
-      username: userInfo.username,
-      email: userInfo.username
-    })
+    if (userInfo) {
+      window.localStorage.setItem('userData', JSON.stringify(userInfo))
+      setUser({
+        id: userInfo.id,
+        role: 'admin',
+        password: userInfo.pass_hash,
+        fullName: userInfo.username,
+        username: userInfo.username,
+        email: userInfo.username
+      })
+    }
     const returnUrl = router.query.returnUrl;
     if (returnUrl && returnUrl != null) {
       router.replace(returnUrl as string)
@@ -85,6 +137,13 @@ const AuthProvider = ({ children }: Props) => {
   }
 
   const handleLogout = () => {
+    if (loginDisabled) {
+      applyGuestUser()
+      router.replace('/')
+      
+return
+    }
+
     setUser(null)
 
     localStorageUtils.removeAcessToken()

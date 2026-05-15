@@ -11,6 +11,7 @@ export const getQueryUrlFormPagiantion = (payload: ICommonPagination) => {
   query += payload.per_page_rows ? `per_page_rows=${payload.per_page_rows}&` : ''
   query += payload.order_by ? `order_by=${payload.order_by}&` : ''
   query += payload.sort_by ? `sort_by=${payload.sort_by}&` : ''
+  query += payload.no_pagination ? 'no_pagination=1&' : ''
   query += payload.search_text ? `search_text=${payload.search_text}&` : '&'
 
   return query.length > 0 ? query.slice(0, -1) : query

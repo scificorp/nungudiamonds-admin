@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -35,7 +36,7 @@ const SettingCaratWeight = () => {
   const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
   const [showModel, setShowModel] = useState(false);
   const [editerData, setEditerData] = useState("")
-  const [edit, setEdit] = useState<String>('<p></p>')
+  const [edit, setEdit] = useState<string>('<p></p>')
   const [called, setCalled] = useState(true)
   const toggleAddsettingCaratWeightDrawer = () => setDrawerAction(!drawerAction)
 
@@ -285,7 +286,7 @@ const SettingCaratWeight = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='setting Carat Weight'></CardHeader>
+          <AdminPageHeader title='setting Carat Weight' />
           <Divider />
           <Box>
             <TCCTableHeader isButton value={searchFilter}

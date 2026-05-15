@@ -1,7 +1,6 @@
 // ** MUI Imports
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText, SelectChangeEvent } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText, SelectChangeEvent } from '@mui/material'
 import { useEffect, useState } from 'react'
-import TCCTableHeader from 'src/customComponents/data-table/header'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box from '@mui/material/Box'
@@ -18,11 +17,13 @@ import { ICommonPagination } from 'src/data/interface'
 import { createPagination } from 'src/utils/sharedFunction'
 import TccSelect from 'src/customComponents/Form-Elements/select'
 import DeleteDataModel from 'src/customComponents/delete-model'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
+import { Icon } from '@iconify/react'
 
 const Customers = () => {
 
   let timer: any;
-  const [searchFilter, setSearchFilter] = useState()
+  const [searchFilter, setSearchFilter] = useState('')
   const [pageSize, setPageSize] = useState(10)
   const [drawerAction, setDrawerAction] = useState(false)
   const [customersName, setCustomersName] = useState('')
@@ -32,6 +33,7 @@ const Customers = () => {
   const [customersPassword, setCustomersPassword] = useState('')
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
   const [result, setResult] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
   const [imageFile, setImageFile] = useState<string>()
   const [countryValue, setCountryValue] = useState<string>('')
   const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
@@ -118,6 +120,7 @@ const Customers = () => {
   }
   useEffect(() => {
     countryGetAllApi();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /////////////////// ADD API //////////////////////
@@ -143,12 +146,14 @@ const Customers = () => {
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
     }
-    return false;
+    
+return false;
   }
 
   //////////////////////// GET API ////////////////////////
 
   const getAllApi = async (mbPagination: ICommonPagination) => {
+    setIsLoading(true)
     try {
       const data = await CUSTOMER_GET_ALL(mbPagination);
       if (data.code === 200 || data.code === "200") {
@@ -159,12 +164,15 @@ const Customers = () => {
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+    } finally {
+      setIsLoading(false)
     }
 
     return false;
   }
   useEffect(() => {
     getAllApi(pagination);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleChangePerPageRows = (perPageRows: number) => {
@@ -191,6 +199,7 @@ const Customers = () => {
 
   useEffect(() => {
     searchBusinessUser();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFilter]);
 
   ////////////////////////// EDIT API ////////////////////////////
@@ -338,21 +347,34 @@ const Customers = () => {
       editApi(data)
     }
   }
+  
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Customers List '></CardHeader>
           <Divider />
-          <TCCTableHeader isButton value={searchFilter}
-            onChange={(e: any) => setSearchFilter(e.target.value)}
-            toggle={() => {
-              toggleAddCustomersDrawer()
-              setDialogTitle('Add')
-              clearFormDataHandler()
-            }}
-            ButtonName='Add New Customers'
-          />
+          <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+            <AdminPageHeader
+              title='Customers List'
+              subtitle='Browse customer records, open profiles, and manage status.'
+              searchValue={searchFilter}
+              onSearchChange={setSearchFilter}
+              actions={
+                <Button
+                  variant='contained'
+                  onClick={() => {
+                    toggleAddCustomersDrawer()
+                    setDialogTitle('Add')
+                    clearFormDataHandler()
+                  }}
+                  startIcon={<Icon icon='tabler:plus' />}
+                >
+                  Add New Customer
+                </Button>
+              }
+            />
+          </Box>
+          <Divider />
           <TccDataTable
             column={column}
             rows={result}
@@ -363,6 +385,7 @@ const Customers = () => {
             page={pagination.current_page - 1}
             onPageChange={handleOnPageChange}
             iconTitle={'Customers'}
+            loading={isLoading}
 
           />
         </Card>

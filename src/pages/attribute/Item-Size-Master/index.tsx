@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -280,7 +281,7 @@ const Item_Size_Master = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Item Size'></CardHeader>
+                    <AdminPageHeader title='Item Size' />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

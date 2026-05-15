@@ -234,23 +234,47 @@ const AddCollection = () => {
                   />
                 </Grid>
 
-                {/* Collection Image */}
+                {/* Collection Menu/Thumbnail Image */}
                 <Grid item xs={12} md={6}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 1, fontWeight: 600, fontSize: '0.875rem', color: 'text.primary' }}>
+                      Menu Image (Thumbnail)
+                    </Box>
+                    <Box sx={{ mb: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                      Square image used in collection grids, menus, and card displays. Recommended: 500x500px
+                    </Box>
+                  </Box>
                   <TccSingleFileUpload
-                    onDrop={(files: File[]) => setImageFile(files[0])}
+                    onDrop={(files: File[]) => {
+                      if (files && files.length > 0) {
+                        setImageFile(files[0]);
+                      }
+                    }}
                     onClick={(file: File) => setImageFile(file)}
                     clearFile={() => setImageFile(null)}
-                    title="Collection Image"
+                    title="Upload Menu Image"
                   />
                 </Grid>
 
-                {/* Banner Image */}
+                {/* Collection Banner Image */}
                 <Grid item xs={12} md={6}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 1, fontWeight: 600, fontSize: '0.875rem', color: 'text.primary' }}>
+                      Banner Image (Hero)
+                    </Box>
+                    <Box sx={{ mb: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                      Wide banner image used on collection detail pages and hero sections. Recommended: 1920x800px
+                    </Box>
+                  </Box>
                   <TccSingleFileUpload
-                    onDrop={(files: File[]) => setBannerImageFile(files[0])}
+                    onDrop={(files: File[]) => {
+                      if (files && files.length > 0) {
+                        setBannerImageFile(files[0]);
+                      }
+                    }}
                     onClick={(file: File) => setBannerImageFile(file)}
                     clearFile={() => setBannerImageFile(null)}
-                    title="Banner Image"
+                    title="Upload Banner Image"
                   />
                 </Grid>
 

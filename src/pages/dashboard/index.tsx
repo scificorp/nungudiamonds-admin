@@ -1,14 +1,15 @@
 import { Icon } from "@iconify/react"
-import { Box, Card, CardContent, CardHeader, Grid, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
+import { Box, Button, Card, CardContent, Chip, Grid, Stack, Typography } from "@mui/material"
 import Router from "next/router"
-import { MouseEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import CustomAvatar from 'src/@core/components/mui/avatar'
 import { appErrors } from "src/AppConstants"
-import TCCTableHeader from "src/customComponents/data-table/header"
 import TccDataTable from "src/customComponents/data-table/table"
-import { GET_ALL_DASHBOARD } from "src/services/AdminServices"
+import { GET_ALL_DASHBOARD, GET_ALL_GENERAL_ENQUIRIES } from "src/services/AdminServices"
 import { getPriceFormat } from "src/utils/sharedFunction"
+import ErrorBoundary from "src/components/ErrorBoundary"
+import AdminPageHeader from "src/components/common/AdminPageHeader"
 
 
 type OrderStatisticsData = {
@@ -31,28 +32,70 @@ type TotalRevenue = {
 type TotalItem = {
   item: any
 }
+
+type LeadPreview = {
+  id?: number | string
+  first_name?: string
+  last_name?: string
+  email?: string
+  message?: string
+  lead_status?: number
+  lead_status_label?: string
+}
+
+const toSafeNumber = (value: unknown) => {
+  const numberValue = Number(value)
+
+  return Number.isFinite(numberValue) ? numberValue : 0
+}
+
 const Home = () => {
   const [pageSize, setPageSize] = useState(10)
-  const [active, setActive] = useState<string | null>('daily')
   const [result, setResult] = useState<Partial<OrderStatisticsData>>({})
   const [totalRevenue, setTotalRevenue] = useState<Partial<TotalRevenue>>({})
   const [totalItem, setTotalItem] = useState<Partial<TotalItem>>({})
   const [topSellingProduct, setTopSellingProduct] = useState<{ id: number, name: any, sku: any, slug: any, order_count: number, image_path: any }[]>([])
-
-  const handleActive = (event: MouseEvent<HTMLElement>, newActive: string | null) => {
-    setActive(newActive)
-  }
+  const [leadPreview, setLeadPreview] = useState<LeadPreview[]>([])
+  const [leadQueueError, setLeadQueueError] = useState('')
 
   const viewOnClickHandler = (data: any) => {
-    Router.push({ pathname: `https://nungudiamonds.vercel.app/products/${data.id}` })
+    Router.push({ pathname: '/product/add-products/', query: { id: data.id, action: 'view' } })
   }
+
+  const quickActions = [
+    {
+      label: 'Quick Add Product',
+      icon: 'tabler:plus',
+      color: 'primary',
+      href: '/product/simplified-add'
+    },
+    {
+      label: 'All Products',
+      icon: 'fluent-mdl2:product-variant',
+      color: 'secondary',
+      href: '/product/all-products'
+    },
+    {
+      label: 'Manage Collections',
+      icon: 'tabler:link',
+      color: 'warning',
+      href: '/collections/assign-products'
+    },
+    {
+      label: 'Legacy Product Workspace',
+      icon: 'tabler:layout-dashboard',
+      color: 'info',
+      href: '/product/add-products'
+    }
+  ] as const
+
   /////////////////////// GET API ///////////////////////
 
   const getAllApi = async () => {
     try {
       const data = await GET_ALL_DASHBOARD();
 
-      if (data.code === 200 || data.code === "200") {
+      if (String(data.code) === '200') {
         setResult(data.data)
         setTotalRevenue(data.data.total_revenue)
         setTotalItem(data.data.total_items)
@@ -71,8 +114,34 @@ const Home = () => {
 
     return false;
   }
+
+  const getLeadQueueApi = async () => {
+    setLeadQueueError('')
+    try {
+      const data = await GET_ALL_GENERAL_ENQUIRIES({
+        current_page: 1,
+        per_page_rows: 8,
+        sort_by: 'id',
+        order_by: 'DESC',
+        search_text: ''
+      })
+
+      if (String(data.code) === '200') {
+        const rows = Array.isArray(data.data?.result) ? data.data.result : []
+        setLeadPreview(rows.filter((row: LeadPreview) => Number(row.lead_status ?? 0) !== 3).slice(0, 5))
+
+        return
+      }
+
+      setLeadQueueError(data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+    } catch (e: any) {
+      setLeadQueueError(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+    }
+  }
+
   useEffect(() => {
     getAllApi();
+    getLeadQueueApi();
   }, []);
 
 
@@ -123,35 +192,33 @@ const Home = () => {
   ]
 
   return (
-    <>
-      <h2 style={{ margin: 0, marginBottom: 8 }}>Dashboard</h2>
+    <ErrorBoundary>
+      <>
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Card>
-            <CardHeader
-              title={<Box sx={{ display: 'flex' }}><Icon icon='material-symbols:bar-chart' fontSize='23px' /><Typography><b>Order Statistics</b></Typography></Box>}
-              sx={{
-                flexDirection: ['column', 'row'],
-                alignItems: ['flex-start', 'center'],
-                '& .MuiCardHeader-action': { mb: 0 },
-                '& .MuiCardHeader-content': { mb: [2, 0] }
-              }}
-            // action={
-            //   <ToggleButtonGroup exclusive value={active} onChange={handleActive}>
-            //     <ToggleButton value='all'>All</ToggleButton>
-            //     <ToggleButton value='daily'>Daily</ToggleButton>
-            //     <ToggleButton value='Weekly'>Weekly</ToggleButton>
-            //     <ToggleButton value='monthly'>Monthly</ToggleButton>
-            //     <ToggleButton value='yearly'>Yearly</ToggleButton>
-            //   </ToggleButtonGroup>
-            // }
-            />
-            {/* <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-              <Icon icon='material-symbols:bar-chart' fontSize='23px' />
-              <Typography><b>Order statistics</b></Typography>
-            </CardContent> */}
+            <Box sx={{ px: 6, pt: 6, pb: 2 }}>
+              <AdminPageHeader
+                title='Operations Dashboard'
+                subtitle='Review live order status, revenue totals, and jump into the catalog workspaces used most often.'
+                actions={
+                  <>
+                    <Button variant='outlined' onClick={() => Router.push('/orders/orders-list')}>
+                      Product Orders
+                    </Button>
+                    <Button variant='contained' onClick={() => Router.push('/product/simplified-add')}>
+                      Quick Add Product
+                    </Button>
+                  </>
+                }
+              />
+            </Box>
 
             <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                <Icon icon='material-symbols:bar-chart' fontSize='23px' />
+                <Typography variant='h6'>Order Statistics</Typography>
+              </Box>
               <Grid container spacing={6}>
                 <Grid item xs={12} md={3} lg={3}>
                   <Card>
@@ -270,32 +337,117 @@ const Home = () => {
       <Grid container spacing={6}>
         <Grid item xs={12}>
           <Card sx={{ mt: 6 }}>
-            <CardHeader
-              title={<Box sx={{ display: 'flex' }}><Icon icon='gg:dollar' fontSize='23px' /><Typography><b>Revenue Statistics</b></Typography></Box>}
-              sx={{
-                flexDirection: ['column', 'row'],
-                alignItems: ['flex-start', 'center'],
-                '& .MuiCardHeader-action': { mb: 0 },
-                '& .MuiCardHeader-content': { mb: [2, 0] }
-              }}
-            // action={
-            //   <ToggleButtonGroup exclusive value={active} onChange={handleActive}>
-            //     <ToggleButton value='all'>All</ToggleButton>
-            //     <ToggleButton value='daily'>Daily</ToggleButton>
-            //     <ToggleButton value='Weekly'>Weekly</ToggleButton>
-            //     <ToggleButton value='monthly'>Monthly</ToggleButton>
-            //     <ToggleButton value='yearly'>Yearly</ToggleButton>
-            //   </ToggleButtonGroup>
-            // }
-            />
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Icon icon='tabler:bolt' fontSize='23px' />
+                <Typography variant='h6'>Catalog Shortcuts</Typography>
+              </Box>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
+                Jewelry inventory is mostly made-to-order, so the dashboard should push operators straight into product creation, catalog cleanup, and collection editing.
+              </Typography>
 
-            {/* <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-              <Icon icon='gg:dollar' fontSize='23px' />
-              <Typography><b>Revenue Statistics</b></Typography>
-            </CardContent> */}
+              <Grid container spacing={3}>
+                {quickActions.map(action => (
+                  <Grid item xs={12} sm={6} md={3} key={action.href}>
+                    <Button
+                      fullWidth
+                      variant={action.color === 'primary' ? 'contained' : 'outlined'}
+                      color={action.color}
+                      onClick={() => Router.push(action.href)}
+                      startIcon={<Icon icon={action.icon} fontSize='18px' />}
+                      sx={{ py: 1.5 }}
+                    >
+                      {action.label}
+                    </Button>
+                  </Grid>
+                ))}
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Card sx={{ mt: 6 }}>
+            <CardContent>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  justifyContent: 'space-between',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  gap: 3,
+                  mb: 4
+                }}
+              >
+                <Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
+                    <Icon icon='tabler:message-circle-2' fontSize='23px' />
+                    <Typography variant='h6'>Lead Follow-Up Queue</Typography>
+                  </Box>
+                  <Typography variant='body2' color='text.secondary'>
+                    Recent open general enquiries that need sales follow-up.
+                  </Typography>
+                </Box>
+                <Button variant='outlined' onClick={() => Router.push('/enquiries/general-enquiries')}>
+                  Open General Enquiries
+                </Button>
+              </Box>
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <CardContent sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
+              {leadQueueError ? (
+                <Typography color='error.main'>Could not load recent enquiries: {leadQueueError}</Typography>
+              ) : leadPreview.length === 0 ? (
+                <Typography color='text.secondary'>No recent open general enquiries found.</Typography>
+              ) : (
+                <Stack spacing={2}>
+                  {leadPreview.map(lead => {
+                    const name = [lead.first_name, lead.last_name].filter(Boolean).join(' ') || lead.email || 'Unknown lead'
+
+                    return (
+                      <Box
+                        key={lead.id || `${name}-${lead.message}`}
+                        sx={{
+                          display: 'flex',
+                          alignItems: { xs: 'flex-start', sm: 'center' },
+                          justifyContent: 'space-between',
+                          flexDirection: { xs: 'column', sm: 'row' },
+                          gap: 2,
+                          p: 3,
+                          border: theme => `1px solid ${theme.palette.divider}`,
+                          borderRadius: 1
+                        }}
+                      >
+                        <Box sx={{ minWidth: 0 }}>
+                          <Typography fontWeight={600}>{name}</Typography>
+                          <Typography variant='body2' color='text.secondary' noWrap>
+                            {lead.message || 'No message provided'}
+                          </Typography>
+                        </Box>
+                        <Chip
+                          size='small'
+                          color={Number(lead.lead_status ?? 0) === 0 ? 'warning' : 'info'}
+                          label={lead.lead_status_label || 'Needs follow-up'}
+                        />
+                      </Box>
+                    )
+                  })}
+                </Stack>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+      <Grid container spacing={6}>
+        <Grid item xs={12}>
+          <Card sx={{ mt: 6 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
+                <Icon icon='gg:dollar' fontSize='23px' />
+                <Typography variant='h6'>Revenue Statistics</Typography>
+              </Box>
+
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 4 }}>
+              <Box sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
                 <Grid container spacing={6}>
                   <Grid item xs={6} md={4}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -303,7 +455,7 @@ const Home = () => {
                         <Icon icon='fluent-mdl2:product-variant' />
                       </CustomAvatar>
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant='h6'>{result.total_order}</Typography>
+                        <Typography variant='h6'>{toSafeNumber(result.total_order)}</Typography>
                         <Typography variant='body2' sx={{ whiteSpace: 'nowrap' }}>Total Orders</Typography>
 
                       </Box>
@@ -312,8 +464,8 @@ const Home = () => {
 
                   </Grid>
                 </Grid>
-              </CardContent>
-              <CardContent sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
+              </Box>
+              <Box sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
                 <Grid container spacing={6}>
                   <Grid item xs={6} md={4}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -321,14 +473,14 @@ const Home = () => {
                         <Icon icon='ph:currency-circle-dollar-fill' />
                       </CustomAvatar>
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant='h6'>{`${getPriceFormat(totalRevenue.total?.toFixed(2))}`}</Typography>
+                        <Typography variant='h6'>{getPriceFormat(toSafeNumber(totalRevenue.total))}</Typography>
                         <Typography variant='body2' sx={{ whiteSpace: 'nowrap' }}>Total Revenue</Typography>
                       </Box>
                     </Box>
                   </Grid>
                 </Grid>
-              </CardContent>
-              <CardContent sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
+              </Box>
+              <Box sx={{ pt: theme => `${theme.spacing(0.5)} !important` }}>
                 <Grid container spacing={6}>
                   <Grid item xs={6} md={4}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -336,14 +488,15 @@ const Home = () => {
                         <Icon icon='mdi:assignment-return' />
                       </CustomAvatar>
                       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                        <Typography variant='h6'>{totalItem.item}</Typography>
-                        <Typography variant='body2' sx={{ whiteSpace: 'nowrap' }}>Total Item </Typography>
+                        <Typography variant='h6'>{toSafeNumber(totalItem.item)}</Typography>
+                        <Typography variant='body2' sx={{ whiteSpace: 'nowrap' }}>Total Items</Typography>
                       </Box>
                     </Box>
                   </Grid>
                 </Grid>
-              </CardContent>
+              </Box>
             </Box>
+            </CardContent>
 
           </Card>
         </Grid>
@@ -368,9 +521,9 @@ const Home = () => {
         </Grid>
       </Grid>
     </>
+    </ErrorBoundary>
 
   )
 }
 
 export default Home
-

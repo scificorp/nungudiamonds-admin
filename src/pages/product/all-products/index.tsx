@@ -1,30 +1,26 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { ChangeEvent, useEffect, useState } from 'react'
-import { Box, Button, Divider, TextField } from '@mui/material'
-import TCCTableHeader from 'src/customComponents/data-table/header'
-import TccDataTable from 'src/customComponents/data-table/table'
-import { ICommonPagination } from 'src/data/interface'
-import { DELETE_PRODUCT_API, FEATURE_STATUS_UPDATE_PRODUCT, GET_ALL_PRODUCT_LIST, STATUS_UPDATE_PRODUCT, TRENDING_STATUS_UPDATE_PRODUCT } from 'src/services/AdminServices'
-import { toast } from 'react-hot-toast'
-import { appErrors, SEARCH_DELAY_TIME } from 'src/AppConstants'
+import { useEffect, useRef, useState } from 'react'
+import { Box, Button, Divider, TablePagination } from '@mui/material'
+import { DataGrid } from '@mui/x-data-grid'
+import EnhancedProductTable from 'src/components/product/EnhancedProductTable'
+import { SEARCH_DELAY_TIME } from 'src/AppConstants'
 import { createPagination } from 'src/utils/sharedFunction'
 import DeleteDataModel from 'src/customComponents/delete-model'
-import Router, { useRouter } from 'next/router'
-import ProductAdd from '../add-products'
+import Router from 'next/router'
 import { Icon } from '@iconify/react'
+import { useProducts, useUpdateProductStatus, useUpdateProductFeature, useUpdateProductTrending, useDeleteProduct } from 'src/hooks/useProducts'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 const ProductList = () => {
-
-  let timer: any;
   const [searchFilter, setSearchFilter] = useState('')
-  const [checked, setChecked] = useState<boolean>(true)
-  const [productList, setProductList] = useState([])
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
   const [showModel, setShowModel] = useState(false)
-  const [productId, setProductId] = useState()
+  const [productId, setProductId] = useState<number>()
+  const [useEnhancedView, setUseEnhancedView] = useState(true)
+  const [localProducts, setLocalProducts] = useState<any[]>([])
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const editOnClickHandler = (data: any) => {
     Router.push({ pathname: "/product/add-products/", query: { id: data.id } })
@@ -33,122 +29,79 @@ const ProductList = () => {
   const viewOnClickHandler = (data: any) => {
     Router.push({ pathname: "/product/add-products/", query: { id: data.id, action: "view" } })
   }
-  /////////////////// List API ///////////////////
 
-  const getAllProductList = async (mbPagination: ICommonPagination) => {
-    try {
-      const data = await GET_ALL_PRODUCT_LIST(mbPagination);
-      if (data.code === 200 || data.code === "200") {
-
-        setProductList(data.data.result);
-        setPagination(data.data.pagination)
-
-      } else {
-        return toast.error(data.message);
-      }
-    } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
-    }
-  }
+  const { data: productsData, isLoading, isFetching, refetch } = useProducts(pagination, useEnhancedView)
+  const updateStatusMutation = useUpdateProductStatus()
+  const updateFeatureMutation = useUpdateProductFeature()
+  const updateTrendingMutation = useUpdateProductTrending()
+  const deleteMutation = useDeleteProduct()
 
   useEffect(() => {
-    getAllProductList(pagination);
-  }, []);
+    if (productsData?.result) {
+      setLocalProducts(productsData.result)
+    }
+    if (productsData?.pagination) {
+      setPagination(prev => ({
+        ...prev,
+        total_items: productsData.pagination.total_items,
+        total_pages: productsData.pagination.total_pages
+      }))
+    }
+  }, [productsData])
+
+  useEffect(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
+    timerRef.current = setTimeout(() => {
+      setPagination(prev => ({ ...prev, current_page: 1, search_text: searchFilter }))
+    }, SEARCH_DELAY_TIME)
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [searchFilter])
+
+  useEffect(() => {
+    refetch()
+  }, [pagination, useEnhancedView, refetch])
 
   const handleChangePerPageRows = (perPageRows: number) => {
-    getAllProductList({ ...pagination, per_page_rows: perPageRows, current_page: 1 })
+    setPagination(prev => ({ ...prev, per_page_rows: perPageRows, current_page: 1 }))
   }
 
   const handleOnPageChange = (page: number) => {
-    getAllProductList({ ...pagination, current_page: page + 1 })
+    setPagination(prev => ({ ...prev, current_page: page + 1 }))
   }
 
   const handleChangeSortBy = (orderSort: any) => {
-    getAllProductList({ ...pagination, sort_by: orderSort == undefined ? "id" : orderSort.map((t: any) => t.field), order_by: orderSort == undefined ? "DESC" : orderSort.map((t: any) => t.sort) })
-  }
-  const searchBusinessUser = async () => {
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    timer = setTimeout(() => {
-      getAllProductList({ ...pagination, current_page: 1, search_text: searchFilter });
-    }, SEARCH_DELAY_TIME);
+    setPagination(prev => ({
+      ...prev,
+      sort_by: orderSort == undefined ? "id" : orderSort.map((t: any) => t.field),
+      order_by: orderSort == undefined ? "DESC" : orderSort.map((t: any) => t.sort)
+    }))
   }
 
-  useEffect(() => {
-    searchBusinessUser();
-  }, [searchFilter]);
-
-  /////////////////// STATUS API ///////////////////
-
-  const activeStatusDataApi = async (checked: boolean, row: any) => {
-    const payload = {
-      "id_product": row.id,
-      "is_active": checked ? '1' : '0',
-    }
-    try {
-      const datas = await STATUS_UPDATE_PRODUCT(payload)
-
-      if (datas.code === 200 || datas.code === "200") {
-        toast.success("Successfully updated")
-        getAllProductList(pagination)
-
-        return true
-      } else {
-
-      }
-    } catch (error) {
-
-      return toast.error(appErrors.UNKNOWN_ERROR_TRY_AGAIN)
-    }
+  const activeStatusDataApi = async (isChecked: boolean, row: any) => {
+    updateStatusMutation.mutate({
+      id_product: row.id,
+      is_active: isChecked ? '1' : '0'
+    })
   }
 
-  const featureproductStatusDataApi = async (checked: boolean, row: any) => {
-    const payload = {
-      "id_product": row.id,
-      "is_featured": checked ? '1' : '0',
-    }
-    try {
-      const datas = await FEATURE_STATUS_UPDATE_PRODUCT(payload)
-
-      if (datas.code === 200 || datas.code === "200") {
-        toast.success("Successfully updated")
-        getAllProductList(pagination)
-
-        return true
-      } else {
-
-      }
-    } catch (error) {
-
-      return toast.error(appErrors.UNKNOWN_ERROR_TRY_AGAIN)
-    }
+  const featureproductStatusDataApi = async (isChecked: boolean, row: any) => {
+    updateFeatureMutation.mutate({
+      id_product: row.id,
+      is_featured: isChecked ? '1' : '0'
+    })
   }
 
-  const trendingproductStatusDataApi = async (checked: boolean, row: any) => {
-    const payload = {
-      "id_product": row.id,
-      "is_trending": checked ? '1' : '0',
-    }
-    try {
-      const datas = await TRENDING_STATUS_UPDATE_PRODUCT(payload)
-
-      if (datas.code === 200 || datas.code === "200") {
-        toast.success("Successfully updated")
-        getAllProductList(pagination)
-
-        return true
-      } else {
-
-      }
-    } catch (error) {
-
-      return toast.error(appErrors.UNKNOWN_ERROR_TRY_AGAIN)
-    }
+  const trendingproductStatusDataApi = async (isChecked: boolean, row: any) => {
+    updateTrendingMutation.mutate({
+      id_product: row.id,
+      is_trending: isChecked ? '1' : '0'
+    })
   }
-
-  /////////////////// DELETE API ///////////////////
 
   const deleteOnclickHandler = (data: any) => {
     setProductId(data.id)
@@ -156,27 +109,30 @@ const ProductList = () => {
   }
 
   const deleteProductApi = async () => {
-
-    const payload = {
-      "id": productId
-    }
-    // console.log(payload)
-    try {
-      const data = await DELETE_PRODUCT_API(payload);
-      if (data.code === 200 || data.code === "200") {
-        toast.success(data.message);
-        setShowModel(!showModel)
-        getAllProductList(pagination)
-      } else {
-        toast.error(data.message)
-      }
-    } catch (error) {
-
+    if (productId) {
+      deleteMutation.mutate({ id: productId })
+      setShowModel(!showModel)
     }
   }
 
   const imagesUploadOnClick = (data: any) => {
     Router.push({ pathname: "/product/image-upload", query: { id: data.id } })
+  }
+
+  const handleEditProduct = (productId: number) => {
+    editOnClickHandler({ id: productId })
+  }
+
+  const handleViewProduct = (productId: number) => {
+    viewOnClickHandler({ id: productId })
+  }
+
+  const handleDeleteProduct = (productId: number) => {
+    deleteOnclickHandler({ id: productId })
+  }
+
+  const handleImageUpload = (productId: number) => {
+    imagesUploadOnClick({ id: productId })
   }
 
   const column = [
@@ -200,7 +156,13 @@ const ProductList = () => {
       field: 'category',
       text: 'text'
     },
-
+    {
+      flex: 1,
+      value: 'collections',
+      headerName: 'Collections',
+      field: 'collections',
+      text: 'collections'
+    },
     {
       flex: 1,
       headerName: 'Status',
@@ -248,58 +210,119 @@ const ProductList = () => {
     },
   ]
 
+  const isLoadingOrFetching = isLoading || isFetching
+
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Product List'></CardHeader>
-          <Divider />
-
-          <Box
-            sx={{
-              py: 4,
-              px: 6,
-              rowGap: 2,
-              columnGap: 4,
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}
-          >
-            <TextField
-              size='small'
-              value={searchFilter}
-              placeholder='Search'
-              onChange={(e: any) => setSearchFilter(e.target.value)}
+          <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+            <AdminPageHeader
+            title='All Products'
+            subtitle='Browse and update products, variants, and publish status.'
+            searchValue={searchFilter}
+            onSearchChange={setSearchFilter}
+            actions={
+              <>
+                <Button
+                  variant='outlined'
+                  onClick={() => {
+                    setUseEnhancedView(!useEnhancedView)
+                  }}
+                  startIcon={<Icon fontSize='1.125rem' icon={useEnhancedView ? 'tabler:list' : 'tabler:hierarchy'} />}
+                  sx={{
+                    borderColor: '#666',
+                    color: '#666',
+                    '&:hover': {
+                      borderColor: '#333',
+                      backgroundColor: '#f5f5f5'
+                    }
+                  }}
+                >
+                  {useEnhancedView ? 'List View' : 'Grouped View'}
+                </Button>
+                <Button
+                  variant='outlined'
+                  onClick={() => Router.push('/collections/assign-products')}
+                  startIcon={<Icon fontSize='1.125rem' icon='tabler:link' />}
+                  sx={{
+                    borderColor: '#c6a55a',
+                    color: '#c6a55a',
+                    '&:hover': {
+                      borderColor: '#b8944d',
+                      backgroundColor: '#c6a55a',
+                      color: 'white'
+                    }
+                  }}
+                >
+                  Manage Collections
+                </Button>
+                <Button
+                  variant='contained'
+                  color='primary'
+                  onClick={() => Router.push('/product/simplified-add')}
+                  startIcon={<Icon fontSize='1.125rem' icon='tabler:plus' />}
+                >
+                  Quick Add Product
+                </Button>
+              </>
+            }
             />
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <Button
-                variant='contained'
-                color='primary'
-                onClick={() => Router.push('/product/add-products')}
-                startIcon={<Icon fontSize='1.125rem' icon='tabler:plus' />}
-              >
-                Add Product
-              </Button>
-            </Box>
           </Box>
-          <TccDataTable
-            column={column}
-            rows={productList}
-            handleSortChanges={handleChangeSortBy}
-            pageSize={parseInt(pagination.per_page_rows.toString())}
-            onChangepage={handleChangePerPageRows}
-            rowCount={pagination.total_items}
-            page={pagination.current_page - 1}
-            onPageChange={handleOnPageChange}
-            iconTitle='Product'
-          />
+          <Divider />
+          {useEnhancedView ? (
+            <>
+              <EnhancedProductTable
+                products={localProducts}
+                onEdit={handleEditProduct}
+                onView={handleViewProduct}
+                onDelete={handleDeleteProduct}
+                onImageUpload={handleImageUpload}
+                onStatusChange={activeStatusDataApi}
+                onFeaturedChange={featureproductStatusDataApi}
+                onTrendingChange={trendingproductStatusDataApi}
+                isLoading={isLoadingOrFetching}
+              />
+              <TablePagination
+                component="div"
+                count={pagination.total_items}
+                page={pagination.current_page - 1}
+                onPageChange={(event, newPage) => handleOnPageChange(newPage)}
+                rowsPerPage={pagination.per_page_rows}
+                onRowsPerPageChange={(event) => handleChangePerPageRows(parseInt(event.target.value, 10))}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+              />
+            </>
+          ) : (
+            <DataGrid
+              autoHeight
+              disableColumnFilter
+              rows={localProducts}
+              columns={column}
+              pageSize={parseInt(pagination.per_page_rows.toString())}
+              onPageSizeChange={handleChangePerPageRows}
+              rowsPerPageOptions={[5, 10, 25, 50]}
+              rowCount={pagination.total_items}
+              onSortModelChange={handleChangeSortBy}
+              page={pagination.current_page - 1}
+              onPageChange={handleOnPageChange}
+              paginationMode="server"
+              disableSelectionOnClick
+              loading={isLoadingOrFetching}
+              sx={{
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#f5f5f5',
+                  borderBottom: '2px solid #c6a55a'
+                },
+                '& .MuiDataGrid-row:hover': {
+                  backgroundColor: '#faf9f7'
+                }
+              }}
+            />
+          )}
         </Card>
       </Grid>
       <DeleteDataModel showModel={showModel} toggle={(show: any) => setShowModel(show)} onClick={deleteProductApi} />
-
     </Grid>
   )
 }

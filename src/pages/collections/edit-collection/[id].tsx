@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useState, useEffect } from 'react'
 import { Grid, Card, CardHeader, CardContent, Divider, Button, TextField, FormControlLabel, Switch, Box } from '@mui/material'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
@@ -86,13 +86,7 @@ const EditCollection = () => {
   }
 
   // ** Fetch collection data
-  useEffect(() => {
-    if (id) {
-      fetchCollectionData()
-    }
-  }, [id])
-
-  const fetchCollectionData = async () => {
+  const fetchCollectionData = useCallback(async () => {
     try {
       setIsLoading(true)
       const response = await GET_BY_ID_COLLECTION(Number(id))
@@ -126,7 +120,13 @@ const EditCollection = () => {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [id, reset, router])
+
+  useEffect(() => {
+    if (id) {
+      fetchCollectionData()
+    }
+  }, [fetchCollectionData, id])
 
   // ** Submit Handler
   const onSubmit = async (data: FormData) => {
@@ -316,24 +316,48 @@ const EditCollection = () => {
                   />
                 </Grid>
 
-                {/* Collection Image */}
+                {/* Collection Menu/Thumbnail Image */}
                 <Grid item xs={12} md={6}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 1, fontWeight: 600, fontSize: '0.875rem', color: 'text.primary' }}>
+                      Menu Image (Thumbnail)
+                    </Box>
+                    <Box sx={{ mb: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                      Square image used in collection grids, menus, and card displays. Recommended: 500x500px
+                    </Box>
+                  </Box>
                   <TccSingleFileUpload
-                    onDrop={(files: File[]) => setImageFile(files[0])}
+                    onDrop={(files: File[]) => {
+                      if (files && files.length > 0) {
+                        setImageFile(files[0]);
+                      }
+                    }}
                     onClick={(file: File) => setImageFile(file)}
                     clearFile={() => setImageFile(null)}
-                    title="Collection Image"
+                    title="Upload Menu Image"
                     currentImage={currentImage}
                   />
                 </Grid>
 
-                {/* Banner Image */}
+                {/* Collection Banner Image */}
                 <Grid item xs={12} md={6}>
+                  <Box sx={{ mb: 2 }}>
+                    <Box sx={{ mb: 1, fontWeight: 600, fontSize: '0.875rem', color: 'text.primary' }}>
+                      Banner Image (Hero)
+                    </Box>
+                    <Box sx={{ mb: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                      Wide banner image used on collection detail pages and hero sections. Recommended: 1920x800px
+                    </Box>
+                  </Box>
                   <TccSingleFileUpload
-                    onDrop={(files: File[]) => setBannerImageFile(files[0])}
+                    onDrop={(files: File[]) => {
+                      if (files && files.length > 0) {
+                        setBannerImageFile(files[0]);
+                      }
+                    }}
                     onClick={(file: File) => setBannerImageFile(file)}
                     clearFile={() => setBannerImageFile(null)}
-                    title="Banner Image"
+                    title="Upload Banner Image"
                     currentImage={currentBannerImage}
                   />
                 </Grid>

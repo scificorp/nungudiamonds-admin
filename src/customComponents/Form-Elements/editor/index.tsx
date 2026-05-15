@@ -1,9 +1,9 @@
 import { EditorWrapper } from "../styles/editor"
 import { useEffect, useState } from "react";
-import { ContentBlock, ContentState, convertFromHTML, convertFromRaw, convertToRaw, EditorState } from "draft-js";
+import { ContentState, convertFromHTML, convertToRaw, EditorState } from "draft-js";
 import draftToHtml from "draftjs-to-html";
-import TCCReactEditor from "src/@core/components/react-draft-wysiwyg";
 import dynamic from 'next/dynamic';
+
 // import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 const Editor = dynamic(
@@ -11,9 +11,9 @@ const Editor = dynamic(
   { ssr: false }
 )
 
-const TccEditor = (props: { getHtmlData?: any, data?: any, called?: boolean }) => {
-  let state: any
+const TccEditor = ({ getHtmlData, data }: { getHtmlData?: any, data?: any, called?: boolean }) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
   // useEffect(() => {
   //   if (props.getHtmlData && props.data) {
   //     props.getHtmlData(draftToHtml(convertToRaw(editorState.getCurrentContent())))
@@ -21,22 +21,27 @@ const TccEditor = (props: { getHtmlData?: any, data?: any, called?: boolean }) =
   // }, [editorState]);
 
   useEffect(() => {
-    // if (props.getHtmlData && props.data) {
-    props.getHtmlData(draftToHtml(convertToRaw(editorState.getCurrentContent())))
-    // }
-  }, [editorState]);
+    // Only call getHtmlData if it's a function
+    if (typeof getHtmlData === 'function') {
+      getHtmlData(draftToHtml(convertToRaw(editorState.getCurrentContent())))
+    }
+  }, [editorState, getHtmlData]);
 
   useEffect(() => {
-    if (props.data !== <p></p>) {
-      const blocksFromHTML = convertFromHTML(props.data);
-      const content = ContentState.createFromBlockArray(
-        blocksFromHTML.contentBlocks,
-        blocksFromHTML.entityMap
-      );
-      state = EditorState.createWithContent(content)
-      setEditorState(state)
+    if (data && typeof data === 'string' && data !== '<p></p>') {
+      try {
+        const blocksFromHTML = convertFromHTML(data);
+        const content = ContentState.createFromBlockArray(
+          blocksFromHTML.contentBlocks,
+          blocksFromHTML.entityMap
+        );
+        setEditorState(EditorState.createWithContent(content))
+      } catch (error) {
+        // Silently handle conversion errors
+        console.warn('Error loading editor content:', error)
+      }
     }
-  }, [props.data]);
+  }, [data]);
 
   return (
     <div>

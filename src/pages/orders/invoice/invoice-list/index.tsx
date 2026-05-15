@@ -96,7 +96,7 @@ const InvoiceDetails = () => {
                 setBillingAdressData(data.data.billing_address)
                 setOrderTaxData(JSON.parse(data.data.order_invoice.order_taxs));
                 const invoiceOrderProductList: any = []
-                for (let orderProduct of data.data.order_invoice.order) {
+                for (const orderProduct of data.data.order_invoice.order) {
                     invoiceOrderProductList.push({ id: orderProduct.product_id, product_name: orderProduct.product_name, product_price: orderProduct.product_price?.toFixed(2), quantity: orderProduct.quantity == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.quantity}</Typography>, product_tax: orderProduct.product_tax == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.product_tax}</Typography>, sub_total: orderProduct.sub_total?.toFixed(2), product_image: orderProduct.product_image, discount: orderProduct.discount == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.discount}</Typography> })
                 }
                 setOrderInvoiceData(invoiceOrderProductList);
@@ -106,10 +106,11 @@ const InvoiceDetails = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
     useEffect(() => {
-        let orderId: string = id as string
+        const orderId: string = id as string
         if (orderId != undefined) {
             setOrderDetailId(parseInt(orderId))
             invoiceDetailsData(parseInt(orderId));
@@ -184,7 +185,7 @@ const InvoiceDetails = () => {
                                 <Grid item sm={6} xs={12} sx={{ mb: { sm: 0, xs: 4 } }}>
                                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                         <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
-                                            <img width={110} height={50} src={`${IMG_ENDPOINT}${SYSTEM_LOGO_MAIN}`} />
+                                            <img width={110} height={50} src={``} alt="Nungu Diamonds logo" />
 
                                             {/* <Typography
                                                 variant='h6'
@@ -297,7 +298,7 @@ const InvoiceDetails = () => {
                                         <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{`${CURRENCY_VALUE}`}00.00</Typography>
                                     </CalcWrapper>
                                     {orederTaxData && orederTaxData.map((t: any) => (
-                                        <CalcWrapper>
+                                        <CalcWrapper key={`${t.name}-${t.rate}`}>
                                             <Typography sx={{ color: 'text.secondary' }}>{t.name}({t.rate})%</Typography>
                                             <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{`${CURRENCY_VALUE}`}{t.tax_amount}</Typography>
                                         </CalcWrapper>

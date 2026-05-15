@@ -43,6 +43,7 @@ import Spinner from 'src/@core/components/spinner'
 // ** Contexts
 import { AuthProvider } from 'src/context/AuthContext'
 import { SettingsConsumer, SettingsProvider } from 'src/@core/context/settingsContext'
+import ReactQueryProvider from 'src/components/ReactQueryProvider'
 
 // ** Styled Components
 import ReactHotToast from 'src/@core/styles/libs/react-hot-toast'
@@ -138,11 +139,13 @@ const App = (props: ExtendedAppProps) => {
               return (
                 <ThemeComponent settings={settings}>
                   <WindowWrapper>
-                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                      <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard}>
-                        {getLayout(<Component {...pageProps} />)}
-                      </AclGuard>
-                    </Guard>
+                    <ReactQueryProvider>
+                      <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                        <AclGuard aclAbilities={aclAbilities} guestGuard={guestGuard}>
+                          {getLayout(<Component {...pageProps} />)}
+                        </AclGuard>
+                      </Guard>
+                    </ReactQueryProvider>
                   </WindowWrapper>
                   <ReactHotToast>
                     <Toaster position={settings.toastPosition} toastOptions={{ className: 'react-hot-toast' }} />

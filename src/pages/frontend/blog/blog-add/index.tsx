@@ -46,7 +46,7 @@ const AddBlog = () => {
     const [bannerimageshow, setBannerImageShow] = useState<string>()
     const [removeimage, setRemoveImage] = useState("0")
     const [editerData, setEditerData] = useState("")
-    const [edit, setEdit] = useState<String>('<p></p>')
+    const [edit, setEdit] = useState<string>('<p></p>')
     const [called, setCalled] = useState(true)
     const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
     const [statusTypeData, setStatusTypeData] = useState('')
@@ -96,6 +96,7 @@ const AddBlog = () => {
         reset()
         setEditerData('<p><p>')
     }
+
     /////////////////////// GETBYID API ///////////////////////
     const getByIdData = async (data: any) => {
         const payload = {
@@ -131,7 +132,7 @@ const AddBlog = () => {
 
     useEffect(() => {
 
-        let blogId: string = id as string
+        const blogId: string = id as string
         if (blogId != undefined) {
             setDialogTitle('Edit')
             setCalled(true)

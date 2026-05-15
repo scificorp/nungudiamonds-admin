@@ -1,9 +1,9 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
 import { Button, CardContent, Divider, Drawer, Rating, Typography } from '@mui/material'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import { useEffect, useState } from 'react'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccSelect from 'src/customComponents/Form-Elements/select'
@@ -187,7 +187,7 @@ const CustomerReview = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Customer Review' />
+          <AdminPageHeader title='Customer Review' />
           <Divider />
 
           <TCCTableHeader

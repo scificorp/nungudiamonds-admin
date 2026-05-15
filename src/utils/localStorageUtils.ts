@@ -5,19 +5,23 @@ import authConfig from 'src/configs/auth'
 export const localStorageUtils = {
   setUserInfo: (userInfo: any) => {
     localStorage.setItem(authConfig.userDetails, JSON.stringify(userInfo))
+    localStorage.setItem('userData', JSON.stringify(userInfo))
   },
   getUserInfo: () => {
     const userInfoStr = localStorage.getItem(authConfig.userDetails)
+    const legacyUserInfoStr = localStorage.getItem('userData')
+    const source = userInfoStr || legacyUserInfoStr
     let userInfo
-    if (userInfoStr) {
-      userInfo = JSON.parse(userInfoStr)
+    if (source) {
+      userInfo = JSON.parse(source)
     } else {
       userInfo = undefined
     }
 
     return userInfo
   },
-  removeUserInfo :() => {
+  removeUserInfo: () => {
+    window.localStorage.removeItem(authConfig.userDetails)
     window.localStorage.removeItem('userData')
   },
   setAccessToken: (token: string, refreshToken: string) => {

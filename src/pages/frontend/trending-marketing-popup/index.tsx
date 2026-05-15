@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, TextField, } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, TextField } from '@mui/material'
 import { forwardRef, useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -167,6 +168,7 @@ const TrendingAndMarketingPopup = () => {
 
         getAllApi(pagination);
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChangePerPageRows = (perPageRows: number) => {
@@ -193,6 +195,9 @@ const TrendingAndMarketingPopup = () => {
 
     useEffect(() => {
         searchBusinessUser();
+
+        // Debounced search is driven only by the input value.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [SearchFilter]);
 
     /////////////////////// EDIT API ///////////////////////
@@ -328,7 +333,10 @@ const TrendingAndMarketingPopup = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Trending/marketing Popup'></CardHeader>
+                    <AdminPageHeader
+                        title='Marketing Popup'
+                        subtitle='Timed promotional popup shown on the storefront through the marketing popup API.'
+                    />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={SearchFilter}
@@ -340,7 +348,7 @@ const TrendingAndMarketingPopup = () => {
                                 clearFormData()
                                 deafultDateData()
                             }}
-                            ButtonName='Add Trending/marketing Popup'
+                            ButtonName='Add Marketing Popup'
                         />
 
                     </Box>
@@ -366,7 +374,7 @@ const TrendingAndMarketingPopup = () => {
                 sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
             >
                 <DrawerHeader
-                    title={`${dialogTitle} Trending/marketing Popup`}
+                    title={`${dialogTitle} Marketing Popup`}
                     onClick={toggleAddTrandingMarketingDrawer}
                 />
 

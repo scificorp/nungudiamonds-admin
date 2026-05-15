@@ -1,10 +1,8 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { Button, CardContent, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
+import { Alert, Box, Button, CardContent, CardHeader, Chip, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import { ChangeEvent, useState } from 'react'
-import TccRadioButton from 'src/customComponents/Form-Elements/radio'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 
 const PaymentManagement = () => {
@@ -31,13 +29,42 @@ const PaymentManagement = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Payment Management'></CardHeader>
+          <CardHeader
+            title='Payment Management'
+            subheader='Checkout currently records Yoco transactions through the API. The PayPal and Stripe forms below are legacy placeholders and are not wired as active checkout configuration.'
+          />
+          <CardContent sx={{ pt: 0 }}>
+            <Alert severity='info'>
+              Yoco is implemented in the backend payment flow using the server-side payment secret. Manage live Yoco keys in the API environment until a secure admin settings endpoint is added.
+            </Alert>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12}>
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+              <Box>
+                <Typography variant='h6'>Yoco</Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  Active checkout integration. Payments post to Yoco from the API and save order transaction records.
+                </Typography>
+              </Box>
+              <Chip color='success' label='Backend configured' />
+            </Box>
+            <Alert severity='warning'>
+              Do not collect or store Yoco secret keys in this browser-only form. Add a secured API settings endpoint before making Yoco editable from the admin portal.
+            </Alert>
+          </CardContent>
         </Card>
       </Grid>
       <Grid item xs={12} md={6} lg={6}>
         <Grid item xs={12}>
           <Card>
             <CardContent>
+              <Alert severity='warning' sx={{ mb: 4 }}>
+                Legacy placeholder only. This form does not currently persist PayPal settings or change checkout behavior.
+              </Alert>
               <Typography variant='h6' color='black' sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>Paypal</Typography>
               <form>
                 <Typography sx={{ mb: 4 }}>Paypal Payment</Typography>
@@ -72,6 +99,9 @@ const PaymentManagement = () => {
         <Grid item xs={12}>
           <Card>
             <CardContent>
+              <Alert severity='warning' sx={{ mb: 4 }}>
+                Legacy placeholder only. This form does not currently persist Stripe settings or change checkout behavior.
+              </Alert>
               <Typography variant='h6' color='black' sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>Stripe</Typography>
               <form>
                 <Typography sx={{ mb: 4 }}>Stripe </Typography>

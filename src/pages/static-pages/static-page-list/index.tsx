@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, Box, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, Box, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import TccEditor from 'src/customComponents/Form-Elements/editor'
@@ -25,7 +26,7 @@ const StaticPageList = () => {
   const [slug, setSlug] = useState("")
   const [staticPageId, setStaticPageId] = useState("")
   const [editerData, setEditerData] = useState("")
-  const [edit, setEdit] = useState<String>('<p></p>')
+  const [edit, setEdit] = useState<string>('<p></p>')
   const [staticPageData, setStaticPageData] = useState([])
   const [called, setCalled] = useState(true)
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" });
@@ -275,7 +276,7 @@ const StaticPageList = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Static Page'></CardHeader>
+          <AdminPageHeader title='Static Page' />
           <Divider />
           <Box>
             <TCCTableHeader isButton value={searchFilter}

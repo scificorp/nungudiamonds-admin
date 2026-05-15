@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button } from '@mui/material'
 import { useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -88,7 +89,7 @@ const GenderForFilter = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Gender for filter'></CardHeader>
+          <AdminPageHeader title='Gender for filter' />
           <Divider />
           <Box>
             <TCCTableHeader isButton value={SearchFilter}

@@ -1,48 +1,18 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { Avatar, AvatarGroup, Box, Button, CardContent, Drawer, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
+import { Box, Button, CardContent, Drawer, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip, Typography } from '@mui/material'
 import Link from 'next/link'
 import { Icon } from '@iconify/react'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import TccCheckBox from 'src/customComponents/Form-Elements/check-box'
 import { GET_ALL_ROLES, GET_ALL_MENU_ITEMS, GET_ALL_ACTIONS, ADD_ROLE_CONFIGURATION, GET_ROLE_CONFIGURATION, UPDATE_ROLE_CONFIGRATION } from 'src/services/AppServices'
 import { DEFAULT_STATUS_CODE_SUCCESS } from 'src/AppConstants'
 import { toast } from 'react-hot-toast'
-import { access } from 'fs'
 import { IAction, IMenuItem, IRole, IRoleConfiguration, IRolePermissionAccess } from 'src/data/interface'
-import { DateSchema } from 'yup'
-
-interface CardDataType {
-  title: string
-  avatars: string[]
-  totalUsers: number
-}
-
-const cardData: CardDataType[] = [
-  { totalUsers: 4, title: 'Administrator', avatars: ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds', 'https://bit.ly/ryan-florence', 'https://bit.ly/prosper-baba'] },
-  { totalUsers: 7, title: 'Manager', avatars: ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds', 'https://bit.ly/ryan-florence', 'https://bit.ly/prosper-baba', 'https://bit.ly/code-beast', '2.png', '3.png'] },
-  { totalUsers: 5, title: 'Users', avatars: ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds', 'https://bit.ly/ryan-florence', 'https://bit.ly/prosper-baba', 'https://bit.ly/code-beast'] },
-  { totalUsers: 3, title: 'Support', avatars: ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds', 'https://bit.ly/ryan-florence'] },
-  { totalUsers: 2, title: 'Restricted User', avatars: ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds'] }
-]
-
-const rolesArr: string[] = [
-  'User Management',
-  'Content Management',
-  'Disputes Management',
-  'Database Management',
-  'Financial Management',
-  'Reporting',
-  'API Control',
-  'Repository Management',
-  'Payroll'
-]
-
-const avatars = ['https://bit.ly/dan-abramov', 'https://bit.ly/kent-c-dodds', 'https://bit.ly/ryan-florence', 'https://bit.ly/prosper-baba', 'https://bit.ly/code-beast']
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 const Roles = () => {
 
@@ -57,11 +27,7 @@ const Roles = () => {
   const [isRNTouched, setIsRNTouched] = useState<boolean>(false);
   const [editRoleId, setEditRoleId] = useState<number>();
 
-  useEffect(() => {
-    fetchData()
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const allPromise = Promise.all([GET_ALL_ROLES(), GET_ALL_MENU_ITEMS(), GET_ALL_ACTIONS()])
       const values = await allPromise;
@@ -80,7 +46,11 @@ const Roles = () => {
     } catch (e: any) {
       toast.error(e?.data?.message)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData]);
 
   const getAllRoles = async () => {
     try {
@@ -149,13 +119,7 @@ const Roles = () => {
 
   }
 
-  useEffect(() => {
-    if (editRoleId) {
-      fethRoleConfiguration(editRoleId);
-    }
-  }, [editRoleId]);
-
-  const fethRoleConfiguration = async (id: number) => {
+  const fetchRoleConfiguration = useCallback(async (id: number) => {
     try {
       const data = await GET_ROLE_CONFIGURATION(id);
       if (data.code === DEFAULT_STATUS_CODE_SUCCESS) {
@@ -170,10 +134,16 @@ const Roles = () => {
         }
         setSelectedCheckbox(tempSelectedCheckBox);
       } else {
-        toast.error(data?.message)
-      }
+      toast.error(data?.message)
+    }
     } catch (e) { }
-  }
+  }, [menuItemList])
+
+  useEffect(() => {
+    if (editRoleId) {
+      fetchRoleConfiguration(editRoleId);
+    }
+  }, [editRoleId, fetchRoleConfiguration]);
 
   const handleClickOpen = () => {
     setSelectedCheckbox([])
@@ -271,7 +241,12 @@ const Roles = () => {
   return (
     <>
       <Card sx={{ mb: 4 }}>
-        <CardHeader title='Rols' />
+        <CardContent>
+          <AdminPageHeader
+            title='Roles'
+            subtitle='Control admin roles and menu permissions. Changes here affect what staff can access.'
+          />
+        </CardContent>
       </Card>
       <Grid container spacing={6} className='match-height'>
         <Grid item xs={12} sm={6} lg={4}>
@@ -313,7 +288,7 @@ const Roles = () => {
                     >
                       Add New Role
                     </Button>
-                    <Typography sx={{ color: 'text.secondary' }}>Add role, if it doesn't exist.</Typography>
+                    <Typography sx={{ color: 'text.secondary' }}>Create a role when a staff group needs a distinct permission set.</Typography>
                   </Box>
                 </CardContent>
               </Grid>

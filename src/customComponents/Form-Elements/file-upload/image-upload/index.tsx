@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useCallback, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -38,11 +38,12 @@ const TccMultipleImageUpload = (props: any) => {
     const [files, setFiles] = useState<File[]>([])
     const [imageId, setImageId] = useState<{ id: any, files: any }[]>([])
 
-    let imagePath = `${IMG_ENDPOINT}${props.imageShow}`
-    let newImageArray: any[] = []
+    const imagePath = `${IMG_ENDPOINT}${props.imageShow}`
+    const createFile = useCallback(async (fileUrl: any) => {
+        const newImageArray: File[] = []
+        const nextImageIds: { id: any, files: File }[] = []
 
-    async function createFile(fileUrl: any) {
-        for (let row of fileUrl) {
+        for (const row of fileUrl) {
             const response = await fetch(IMG_ENDPOINT + "/" + row.image_path);
             const extension = row.image_path;
             const data = await response.blob();
@@ -53,36 +54,37 @@ const TccMultipleImageUpload = (props: any) => {
             const imageName = segments || segments // Handle potential trailing slash
             const file = new File([data], imageName || "", metadata);
             newImageArray.push(file)
-            const findData = imageId.find((i: any) => i.files.name == file.name)
+            const findData = nextImageIds.find((i: any) => i.files.name == file.name)
             if (!findData) {
-                imageId.push({ id: row.id, files: file });
+                nextImageIds.push({ id: row.id, files: file });
             }
 
         }
         setFiles(newImageArray);
+        setImageId(nextImageIds);
 
 
         // ... do something with the file or return it
-    }
+    }, [])
 
     useEffect(() => {
         if (props.imageFile && props.imageFile != null) {
             //File Exists
             createFile(props.imageFile)
         }
-    }, [props.imageFile])
+    }, [createFile, props.imageFile])
 
 
-    const handleRemoveAllFiles = () => {
+    const handleRemoveAllFiles = useCallback(() => {
         setFiles([])
         if (props.onDrop) { props.onDrop(); }
-    }
+    }, [props])
 
     useEffect(() => {
         if (props.onClick == '0') {
             handleRemoveAllFiles()
         }
-    }, [props.onClick])
+    }, [handleRemoveAllFiles, props.onClick])
 
     // ** Hooks
     const theme = useTheme()
@@ -97,9 +99,6 @@ const TccMultipleImageUpload = (props: any) => {
             })))
             const exitingImages = [...files, ...acceptedFiles]
             setFiles(exitingImages)
-            console.log("newaddImagearray", ...files, ...acceptedFiles)
-            console.log("acceptedFiles", acceptedFiles);
-
             if (props.onDrop) { props.onDrop(acceptedFiles) }
         },
         onDropRejected: () => {

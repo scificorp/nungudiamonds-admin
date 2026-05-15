@@ -9,21 +9,22 @@ import { useAuth } from 'src/hooks/useAuth'
 
 interface AuthGuardProps {
   children: ReactNode
-  fallback: ReactElement | null
+  fallback?: ReactElement | null
 }
 
 const AuthGuard = (props: AuthGuardProps) => {
-  const { children, fallback } = props
+  const { children, fallback = null } = props
   const auth = useAuth()
   const router = useRouter()
+  const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
   useEffect(
     () => {
-      if (!router.isReady) {
+      if (!router.isReady || loginDisabled || auth.loading) {
         return
       }
 
-      if (auth.user === null && !window.localStorage.getItem('userData')) {
+      if (auth.user === null) {
         if (router.asPath !== '/') {
           router.replace({
             pathname: '/login',
@@ -35,8 +36,12 @@ const AuthGuard = (props: AuthGuardProps) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router.route]
+    [router.route, loginDisabled, auth.loading, auth.user]
   )
+
+  if (loginDisabled) {
+    return <>{children}</>
+  }
 
   if (auth.loading || auth.user === null) {
     return fallback

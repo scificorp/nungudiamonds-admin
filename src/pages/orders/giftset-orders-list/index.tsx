@@ -1,23 +1,23 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { Badge, Button, Divider, TextField } from '@mui/material'
-import { forwardRef, useEffect, useState } from 'react'
+import { Badge, Divider, TextField, Typography } from '@mui/material'
+import { forwardRef, useCallback, useEffect, useState } from 'react'
 import TccDataTable from 'src/customComponents/data-table/table'
 import { Box } from '@mui/system'
 import Router from 'next/router'
 import CustomChip from 'src/@core/components/mui/chip'
-import { ICommonOrderPagination, ICommonPagination } from 'src/data/interface'
+import { ICommonOrderPagination } from 'src/data/interface'
 import { GET_ALL_GIFTSET } from 'src/services/AdminServices'
 import { toast } from 'react-hot-toast'
 import { SEARCH_DELAY_TIME, appErrors } from 'src/AppConstants'
-import { createOrderPagination, createPagination } from 'src/utils/sharedFunction'
+import { createOrderPagination } from 'src/utils/sharedFunction'
 import { OrderStatus } from 'src/data/type'
 import format from 'date-fns/format'
-import DatePicker, { ReactDatePickerProps } from 'react-datepicker'
+import DatePicker from 'react-datepicker'
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import { subMonths } from 'date-fns'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 interface PickerProps {
     label?: string
@@ -38,16 +38,23 @@ type statusCount = {
     total_cancel_order: number
     total_fail_order: number
 }
-const giftSetProductOrdersList = () => {
 
-    let timer: any;
-    const [searchFilter, setSearchFilter] = useState()
+const orderStatusFilters = [
+    { label: 'All', value: OrderStatus.All, countKey: 'all_order' },
+    { label: 'Pending', value: OrderStatus.Pending, countKey: 'total_pendding_order' },
+    { label: 'Confirmed', value: OrderStatus.Confirmed, countKey: 'total_confirm_order' },
+    { label: 'Processing', value: OrderStatus.Processing, countKey: 'total_in_process_order' },
+    { label: 'Out for Delivery', value: OrderStatus.OutOfDelivery, countKey: 'total_out_of_delivery_order' },
+    { label: 'Delivered', value: OrderStatus.Delivered, countKey: 'total_delivery_order' },
+    { label: 'Returned', value: OrderStatus.Returned, countKey: 'total_returned_order' },
+    { label: 'Failed', value: OrderStatus.Failed, countKey: 'total_fail_order' },
+    { label: 'Canceled', value: OrderStatus.Canceled, countKey: 'total_cancel_order' }
+] as const
+
+const GiftSetProductOrdersList = () => {
     const [pagination, setPagination] = useState({ ...createOrderPagination(), order_status: 0, start_date: null, end_date: null })
     const [result, setResult] = useState([])
     const [count, setCount] = useState<Partial<statusCount>>({})
-    const [orderDate, setOrderDate] = useState({})
-    const [pageSize, setPageSize] = useState(10)
-    const [orderNumber, setOrderNumber] = useState('')
     const [orderStatus, setOrderStatus] = useState<number>()
     const [startDate, setStartDate] = useState<DateType>(subMonths(new Date(), 1))
     const [endDate, setEndDate] = useState<DateType>(new Date())
@@ -59,18 +66,14 @@ const giftSetProductOrdersList = () => {
 
     /////////////////////// GET API ///////////////////////
 
-    const getAllApi = async (mbPagination: ICommonOrderPagination) => {
+    const getAllApi = useCallback(async (mbPagination: ICommonOrderPagination) => {
         try {
             const data = await GET_ALL_GIFTSET(mbPagination);
 
             if (data.code === 200 || data.code === "200") {
                 setPagination(data.data.pagination)
-                setResult(data.data.result || {})
-                // console.log(data.data.result);
-
+                setResult(data.data.result || [])
                 setCount(data.data.count || {})
-                // console.log(data.data.count);
-
             } else {
                 return toast.error(data.message);
             }
@@ -79,10 +82,7 @@ const giftSetProductOrdersList = () => {
         }
 
         return false;
-    }
-    // useEffect(() => {
-    //     getAllApi(pagination);
-    // }, [pagination]);
+    }, [])
 
     const handleChangePerPageRows = (perPageRows: number) => {
         getAllApi({ ...pagination, per_page_rows: perPageRows, current_page: 1, order_status: orderStatus, start_date: startDate, end_date: endDate })
@@ -96,19 +96,22 @@ const giftSetProductOrdersList = () => {
         getAllApi({ ...pagination, sort_by: orderSort == undefined ? "id" : orderSort.map((t: any) => t.field), order_by: orderSort == undefined ? "DESC" : orderSort.map((t: any) => t.sort) })
     }
 
-    const searchBusinessUser = async () => {
-        if (timer) {
-            clearTimeout(timer);
-        }
-
-        timer = setTimeout(() => {
-            getAllApi({ ...pagination, current_page: 1, order_status: orderStatus, start_date: startDate, end_date: endDate });
-        }, SEARCH_DELAY_TIME);
-    }
-
     useEffect(() => {
-        searchBusinessUser();
-    }, [orderStatus, startDate, endDate]);
+        if (startDate && endDate) {
+            const timer = setTimeout(() => {
+                getAllApi({
+                    ...createOrderPagination(),
+                    per_page_rows: pagination.per_page_rows,
+                    current_page: 1,
+                    order_status: orderStatus,
+                    start_date: startDate,
+                    end_date: endDate
+                });
+            }, SEARCH_DELAY_TIME);
+
+            return () => clearTimeout(timer)
+        }
+    }, [endDate, getAllApi, orderStatus, pagination.per_page_rows, startDate]);
 
     const column = [
         {
@@ -181,87 +184,52 @@ const giftSetProductOrdersList = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Giftset Order Transactions' />
-                    <Divider />
-                    <Box sx={{ display: 'flex', justifyContent: 'space-around', mb: 4, ml: 5, mr: 5, fontSize: 'medium' }}>
-                        <Badge badgeContent={count.all_order == 0 ? "0" : count.all_order}
-                            max={count.all_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='All' skin='light' sx={{ fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.All)}
-                            />
-                        </Badge>
-
-                        <Badge badgeContent={count.total_pendding_order == 0 ? "0" : count.total_pendding_order} max={count.total_pendding_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Pending' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Pending)}
-                            />
-                        </Badge>
-
-                        <Badge badgeContent={count.total_confirm_order == 0 ? "0" : count.total_confirm_order} max={count.total_confirm_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Confirmed' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Confirmed)}
-                            />
-                        </Badge>
-
-                        <Badge badgeContent={count.total_in_process_order == 0 ? "0" : count.total_in_process_order} max={count.total_in_process_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Processing' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Processing)}
-                            />
-
-                        </Badge>
-
-                        <Badge badgeContent={count.total_out_of_delivery_order == 0 ? "0" : count.total_out_of_delivery_order} max={count.total_out_of_delivery_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Out for Delivery' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.OutOfDelivery)}
-                            />
-                        </Badge>
-
-                        <Badge badgeContent={count.total_delivery_order == 0 ? "0" : count.total_delivery_order} max={count.total_delivery_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Delivered' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Delivered)}
-                            />
-
-                        </Badge>
-
-                        <Badge badgeContent={count.total_returned_order == 0 ? "0" : count.total_returned_order} max={count.total_returned_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Returned' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Returned)}
-                            />
-
-                        </Badge>
-
-                        <Badge badgeContent={count.total_fail_order == 0 ? "0" : count.total_fail_order} max={count.total_fail_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Failed' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Failed)}
-                            />
-                        </Badge>
-
-                        <Badge badgeContent={count.total_cancel_order == 0 ? "0" : count.total_cancel_order} max={count.total_cancel_order} color='primary' sx={{ mt: 5 }}>
-                            <CustomChip rounded label='Canceled' skin='light' sx={{ ml: 5, fontSize: 'medium' }}
-                                onClick={() => setOrderStatus(OrderStatus.Canceled)}
-                            />
-
-                        </Badge>
+                    <Box sx={{ p: 6, pb: 4 }}>
+                        <AdminPageHeader
+                            title='Giftset Orders'
+                            subtitle='Track curated giftset purchases and fulfilment status.'
+                            actions={
+                                <Typography variant='body2' color='text.secondary'>
+                                    Showing giftset orders from the last month by default.
+                                </Typography>
+                            }
+                        />
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Divider />
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4, mb: 4, px: 6, pt: 6, fontSize: 'medium' }}>
+                        {orderStatusFilters.map(filter => {
+                            const badgeCount = count[filter.countKey] ?? 0
 
-                        <Box sx={{ mb: 4, ml: 240, mt: 2 }}>
-                            <DatePickerWrapper>
-                                <DatePicker
-                                    selectsRange
-                                    endDate={endDate}
-                                    selected={startDate}
-                                    startDate={startDate}
-                                    id='date-range-picker'
-                                    onChange={handleOnChange}
-                                    shouldCloseOnSelect={true}
-                                    customInput={
-                                        <CustomInput label='Search Dates' start={startDate as Date | number} end={endDate as Date | number} />
-                                    }
-                                />
-                            </DatePickerWrapper>
+                            return (
+                                <Badge key={filter.value} badgeContent={badgeCount === 0 ? '0' : badgeCount} max={badgeCount} color='primary'>
+                                    <CustomChip
+                                        rounded
+                                        label={filter.label}
+                                        skin='light'
+                                        color={orderStatus === filter.value ? 'primary' : 'default'}
+                                        sx={{ fontSize: 'medium' }}
+                                        onClick={() => setOrderStatus(filter.value)}
+                                    />
+                                </Badge>
+                            )
+                        })}
+                    </Box>
 
-                        </Box>
+                    <Box sx={{ display: 'flex', justifyContent: { xs: 'stretch', sm: 'flex-end' }, px: 6, mt: 5, mb: 2 }}>
+                        <DatePickerWrapper>
+                            <DatePicker
+                                selectsRange
+                                endDate={endDate}
+                                selected={startDate}
+                                startDate={startDate}
+                                id='date-range-picker'
+                                onChange={handleOnChange}
+                                shouldCloseOnSelect={true}
+                                customInput={
+                                    <CustomInput label='Search Dates' start={startDate as Date | number} end={endDate as Date | number} />
+                                }
+                            />
+                        </DatePickerWrapper>
                     </Box>
 
                     <TccDataTable
@@ -280,4 +248,4 @@ const giftSetProductOrdersList = () => {
     )
 }
 
-export default giftSetProductOrdersList;
+export default GiftSetProductOrdersList;

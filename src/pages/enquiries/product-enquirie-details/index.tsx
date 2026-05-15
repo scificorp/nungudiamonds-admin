@@ -81,7 +81,7 @@ const ProductEnquirieDetails = () => {
 
     useEffect(() => {
 
-        let productInquirieId: string = id as string
+        const productInquirieId: string = id as string
         if (productInquirieId != undefined) {
             setProductInquirieId(parseInt(productInquirieId))
             productInquiriesData(parseInt(productInquirieId));

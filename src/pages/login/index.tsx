@@ -47,7 +47,7 @@ import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
 import AuthIllustrationV1Wrapper from 'src/views/pages/auth/AuthIllustrationV1Wrapper'
 import { Card, CardContent } from '@mui/material'
 import { toast } from 'react-hot-toast'
-import { DEFAULT_STATUS_CODE_SUCCESS, UNAUTHORIZED_ACCESS_CODE_SUCCESS } from 'src/AppConstants'
+import { DEFAULT_STATUS_CODE_SUCCESS } from 'src/AppConstants'
 import { LOGIN } from 'src/services/AppServices'
 import { localStorageUtils } from 'src/utils/localStorageUtils'
 
@@ -134,7 +134,7 @@ const LoginPage = () => {
   const onSubmit = async (data: FormData) => {
     const { email, password } = data
     try {
-      const data = await LOGIN({ username: email, password });
+      const data = await LOGIN({ username: email, password })
       if (data.code === DEFAULT_STATUS_CODE_SUCCESS) {
 
         localStorageUtils.setAccessToken(data.data.tokens.token, data.data.tokens.refreshToken);
@@ -150,10 +150,9 @@ const LoginPage = () => {
 
       }
     } catch (e: any) {
-      if (e?.data?.code === UNAUTHORIZED_ACCESS_CODE_SUCCESS) {
-        localStorageUtils.removeAcessToken();
-      }
-      toast.error(e?.data?.message);
+      localStorageUtils.removeAcessToken();
+      localStorageUtils.removeUserInfo();
+      toast.error(e?.data?.message || 'Login failed. Please try again.');
     }
 
     // auth.login({ email, password, rememberMe }, () => {

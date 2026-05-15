@@ -1,83 +1,238 @@
-// ** MUI Imports
-import Card from '@mui/material/Card'
-import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { Button, CardContent, Typography } from '@mui/material'
-import TccInput from 'src/customComponents/Form-Elements/inputField'
-import { useState } from 'react'
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Checkbox,
+  CircularProgress,
+  FormControlLabel,
+  Grid,
+  Stack,
+  TextField,
+  Typography
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import { toast } from 'react-hot-toast'
+import { appErrors } from 'src/AppConstants'
+import { GET_EMAIL_CONFIG, UPDATE_EMAIL_CONFIG } from 'src/services/AdminServices'
+
+type EmailConfigForm = {
+  subscription_email: string
+  mail_server: string
+  mail_port: string
+  mail_secure: boolean
+  username: string
+  password: string
+  from_email: string
+  has_password: boolean
+}
+
+const initialForm: EmailConfigForm = {
+  subscription_email: '',
+  mail_server: '',
+  mail_port: '465',
+  mail_secure: true,
+  username: '',
+  password: '',
+  from_email: '',
+  has_password: false
+}
 
 const MailConfig = () => {
+  const [form, setForm] = useState<EmailConfigForm>(initialForm)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
 
-  const [subscription, setSubScription] = useState()
-  const [mailServer, setMailServer] = useState()
-  const [userName, setUserName] = useState()
-  const [password, setPassword] = useState()
+  const updateField = (field: keyof EmailConfigForm, value: string | boolean) => {
+    setForm(current => ({ ...current, [field]: value }))
+  }
+
+  const loadConfig = async () => {
+    setIsLoading(true)
+    try {
+      const response = await GET_EMAIL_CONFIG()
+
+      if (response.code === 200 || response.code === '200') {
+        setForm({
+          subscription_email: response.data?.subscription_email || '',
+          mail_server: response.data?.mail_server || '',
+          mail_port: String(response.data?.mail_port || '465'),
+          mail_secure: Boolean(response.data?.mail_secure),
+          username: response.data?.username || '',
+          password: '',
+          from_email: response.data?.from_email || '',
+          has_password: Boolean(response.data?.has_password)
+        })
+      } else {
+        toast.error(response.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadConfig()
+  }, [])
+
+  const saveConfig = async () => {
+    setIsSaving(true)
+    try {
+      const response = await UPDATE_EMAIL_CONFIG({
+        subscription_email: form.subscription_email,
+        mail_server: form.mail_server,
+        mail_port: form.mail_port,
+        mail_secure: form.mail_secure,
+        username: form.username,
+        password: form.password,
+        from_email: form.from_email
+      })
+
+      if (response.code === 200 || response.code === '200') {
+        setForm({
+          subscription_email: response.data?.subscription_email || '',
+          mail_server: response.data?.mail_server || '',
+          mail_port: String(response.data?.mail_port || form.mail_port),
+          mail_secure: Boolean(response.data?.mail_secure),
+          username: response.data?.username || '',
+          password: '',
+          from_email: response.data?.from_email || '',
+          has_password: Boolean(response.data?.has_password)
+        })
+        toast.success('Email configuration saved')
+      } else {
+        toast.error(response.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent sx={{ minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <CircularProgress />
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Email Setup'></CardHeader>
+          <CardHeader
+            title='Email Setup'
+            subheader='Configure the transactional email account used by the API for enquiry replies, subscriptions, and order messages.'
+          />
+          <CardContent sx={{ pt: 0 }}>
+            <Alert severity='info'>
+              SMTP values are stored in API configuration with environment fallback. Passwords are write-only: leave the password field blank to keep the current value.
+            </Alert>
+          </CardContent>
         </Card>
       </Grid>
-      <Grid item xs={12} md={6} lg={6}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant='h6' color='black' sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>Subscription Email</Typography>
-              <form>
-                <Typography>Subscription Email</Typography>
-                <TccInput
-                  sx={{ mt: 10, mb: 6 }}
-                  label='Subscription Email'
-                  fullWidth
-                  value={subscription}
-                  onChange={(e: any) => setSubScription(e.target.value)}
-                />
 
-                <Button variant='contained' sx={{ mr: 3, mt: 5 }}>
-                  Submit
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </Grid>
+      <Grid item xs={12} md={5}>
+        <Card>
+          <CardContent>
+            <Typography variant='h6' sx={{ mb: 4 }}>
+              Subscription Recipient
+            </Typography>
+            <Stack spacing={4}>
+              <TextField
+                label='Subscription Email'
+                fullWidth
+                value={form.subscription_email}
+                onChange={event => updateField('subscription_email', event.target.value)}
+              />
+              <Typography variant='body2' color='text.secondary'>
+                This address receives subscription-related notifications generated by the API.
+              </Typography>
+            </Stack>
+          </CardContent>
+        </Card>
       </Grid>
-      <Grid item xs={12} md={6} lg={6}>
-        <Grid item xs={12}>
-          <Card>
-            <CardContent>
-              <Typography variant='h6' color='black' sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>Mail Config</Typography>
-              <form>
-                <Typography>Mail Config</Typography>
 
-                <TccInput
-                  sx={{ mt: 10, mb: 2 }}
+      <Grid item xs={12} md={7}>
+        <Card>
+          <CardContent>
+            <Typography variant='h6' sx={{ mb: 4 }}>
+              SMTP Mail Config
+            </Typography>
+            <Grid container spacing={4}>
+              <Grid item xs={12} sm={8}>
+                <TextField
                   label='Mail Server'
                   fullWidth
-                  value={mailServer}
-                  onChange={(e: any) => setMailServer(e.target.value)}
+                  value={form.mail_server}
+                  onChange={event => updateField('mail_server', event.target.value)}
                 />
-                <TccInput
-                  sx={{ mt: 4, mb: 2 }}
-                  label='UserName'
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <TextField
+                  label='Port'
+                  type='number'
                   fullWidth
-                  value={userName}
-                  onChange={(e: any) => setUserName(e.target.value)}
+                  value={form.mail_port}
+                  onChange={event => updateField('mail_port', event.target.value)}
                 />
-                <TccInput
-                  sx={{ mt: 4, mb: 2 }}
-                  label='Password'
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label='Username'
                   fullWidth
-                  value={password}
-                  onChange={(e: any) => setPassword(e.target.value)}
+                  value={form.username}
+                  onChange={event => updateField('username', event.target.value)}
                 />
-                <Button variant='contained' sx={{ mr: 3, mt: 5 }}>
-                  Submit
-                </Button></form>
-            </CardContent>
-          </Card>
-        </Grid>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  label={form.has_password ? 'Password (saved)' : 'Password'}
+                  type='password'
+                  fullWidth
+                  value={form.password}
+                  helperText={form.has_password ? 'Leave blank to keep the saved password.' : 'Required before SMTP can send mail.'}
+                  onChange={event => updateField('password', event.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  label='From Email'
+                  fullWidth
+                  value={form.from_email}
+                  onChange={event => updateField('from_email', event.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={form.mail_secure}
+                      onChange={event => updateField('mail_secure', event.target.checked)}
+                    />
+                  }
+                  label='Use secure SMTP connection'
+                />
+              </Grid>
+            </Grid>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <Button variant='contained' disabled={isSaving} onClick={saveConfig}>
+            {isSaving ? 'Saving...' : 'Save Email Configuration'}
+          </Button>
+        </Box>
       </Grid>
     </Grid>
   )

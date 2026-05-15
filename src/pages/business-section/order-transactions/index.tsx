@@ -1,59 +1,56 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
-import { Divider } from '@mui/material'
-import TCCTableHeader from 'src/customComponents/data-table/header'
-import { useEffect, useState } from 'react'
+import { Alert, Divider } from '@mui/material'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import TccDataTable from 'src/customComponents/data-table/table'
-import TccSelect from 'src/customComponents/Form-Elements/select'
 import { Box } from '@mui/system'
-import { ICommonOrderPagination, ICommonPagination } from 'src/data/interface'
+import { ICommonPagination } from 'src/data/interface'
 import { GET_ORDER_TRANSACTION } from 'src/services/AdminServices'
 import { toast } from 'react-hot-toast'
 import { SEARCH_DELAY_TIME, appErrors } from 'src/AppConstants'
 import { createPagination } from 'src/utils/sharedFunction'
-
-const initialOptions = [
-
-  { title: 'All', id: 1 },
-  { title: 'Pending', id: 2 },
-  { title: "Success", id: 3 },
-  { title: "Failed", id: 4 },
-
-
-]
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 const TransactionOrder = () => {
 
-  let timer: any
-  const [searchFilter, setSearchFilter] = useState()
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hasMountedSearch = useRef(false)
+  const [searchFilter, setSearchFilter] = useState('')
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
   const [result, setResult] = useState([])
-
-  console.log("searchFilter", searchFilter);
+  const [hasLoaded, setHasLoaded] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
   /////////////////////// GET API ////////////////////////////
 
-  const getAllApi = async (mbPagination: ICommonPagination) => {
+  const getAllApi = useCallback(async (mbPagination: ICommonPagination) => {
+    setLoadError('')
     try {
       const data = await GET_ORDER_TRANSACTION(mbPagination);
       if (data.code === 200 || data.code === "200") {
-        setPagination(data.data.pagination)
-        setResult(data.data.result)
+        setPagination(data.data.pagination || mbPagination)
+        setResult(Array.isArray(data.data.result) ? data.data.result : [])
+        setHasLoaded(true)
       } else {
+        setLoadError(data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+        setHasLoaded(true)
+
         return toast.error(data.message);
       }
     } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+      const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+      setLoadError(message)
+      setHasLoaded(true)
+      toast.error(message);
     }
 
     return false;
-  }
+  }, [])
 
   useEffect(() => {
-    getAllApi(pagination);
-  }, []);
+    getAllApi({ ...createPagination(), search_text: '' });
+  }, [getAllApi]);
 
   const handleChangePerPageRows = (perPageRows: number) => {
     getAllApi({ ...pagination, per_page_rows: perPageRows, current_page: 1 })
@@ -66,19 +63,34 @@ const TransactionOrder = () => {
   const handleOnPageChange = (page: number) => {
     getAllApi({ ...pagination, current_page: page + 1 })
   }
-  const searchBusinessUser = async () => {
-    if (timer) {
-      clearTimeout(timer);
+  const handleSortChanges = () => null
+  useEffect(() => {
+    if (!hasMountedSearch.current) {
+      hasMountedSearch.current = true
+
+      return
     }
 
-    timer = setTimeout(() => {
-      getAllApi({ ...pagination, current_page: 1, search_text: searchFilter });
-    }, SEARCH_DELAY_TIME);
-  }
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
 
-  useEffect(() => {
-    searchBusinessUser();
-  }, [searchFilter]);
+    timer.current = setTimeout(() => {
+      getAllApi({
+        current_page: 1,
+        per_page_rows: pagination.per_page_rows,
+        sort_by: pagination.sort_by,
+        order_by: pagination.order_by,
+        search_text: searchFilter
+      });
+    }, SEARCH_DELAY_TIME);
+
+    return () => {
+      if (timer.current) {
+        clearTimeout(timer.current)
+      }
+    }
+  }, [getAllApi, pagination.order_by, pagination.per_page_rows, pagination.sort_by, searchFilter]);
 
   const column = [
 
@@ -134,32 +146,41 @@ const TransactionOrder = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Order Transactions' />
           <Divider />
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-
-            <TCCTableHeader
-              value={searchFilter}
-              onChange={(e: any) => setSearchFilter(e.target.value)}
+          <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+            <AdminPageHeader
+              title='Order Transactions'
+              subtitle='Search and review payment outcomes across customer orders.'
+              searchValue={searchFilter}
+              onSearchChange={setSearchFilter}
             />
-            {/* <TccSelect
-              sx={{ mr: 4 }}
-              inputLabel="Select"
-              defaultValue=""
-              label='Select'
-              Options={initialOptions}
-            /> */}
           </Box>
+          <Divider />
+          {loadError && (
+            <Box sx={{ px: 6, pt: 4 }}>
+              <Alert severity='error'>
+                Order transactions could not be loaded: {loadError}
+              </Alert>
+            </Box>
+          )}
+          {hasLoaded && !loadError && result.length === 0 && (
+            <Box sx={{ px: 6, pt: 4 }}>
+              <Alert severity='info'>
+                No payment transactions were returned by the API for the current filters. This is a true empty state, not a hidden loading state.
+              </Alert>
+            </Box>
+          )}
 
           <TccDataTable
             column={column}
             rows={result}
-            ppageSize={parseInt(pagination.per_page_rows.toString())}
+            pageSize={parseInt(pagination.per_page_rows.toString())}
             onChangepage={handleChangePerPageRows}
             rowCount={pagination.total_items}
-            handleSortChanges={handleChangeSortBy}
+            handleSortChanges={handleSortChanges}
             page={pagination.current_page - 1}
             onPageChange={handleOnPageChange}
+            emptyMessage='No payment transactions match the current filters'
           />
 
         </Card>

@@ -1,8 +1,7 @@
 
 // ** MUI Imports
-import { Divider, CardHeader, Grid, Card } from '@mui/material'
+import { Divider, Grid, Card } from '@mui/material'
 import { useEffect, useState } from 'react'
-import TCCTableHeader from 'src/customComponents/data-table/header'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import { toast } from 'react-hot-toast'
@@ -10,12 +9,13 @@ import { USER_SUBSCRIPTION_LIST, USER_SUBSCRIPTION_STATUS } from 'src/services/A
 import { createPagination } from 'src/utils/sharedFunction'
 import { ICommonPagination } from 'src/data/interface'
 import { SEARCH_DELAY_TIME, appErrors } from 'src/AppConstants'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 
 const SideSettingStyle = () => {
 
     let timer: any;
-    const [searchFilter, setSearchFilter] = useState()
+    const [searchFilter, setSearchFilter] = useState('')
     const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
     const [result, setResult] = useState([])
 
@@ -37,6 +37,7 @@ const SideSettingStyle = () => {
 
         return false;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         userSubscriberList(pagination);
     }, []);
@@ -62,6 +63,7 @@ const SideSettingStyle = () => {
         }, SEARCH_DELAY_TIME);
     }
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         searchBusinessUser();
     }, [searchFilter])
@@ -130,15 +132,16 @@ const SideSettingStyle = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='User Subscriber'></CardHeader>
                     <Divider />
-                    <Box>
-                        <TCCTableHeader value={searchFilter}
-                            onChange={(e: any) => setSearchFilter(e.target.value)}
-                            ButtonName='Add User Subscriber'
+                    <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+                        <AdminPageHeader
+                            title='User Subscriber'
+                            subtitle='Review newsletter subscribers and manage subscription status.'
+                            searchValue={searchFilter}
+                            onSearchChange={setSearchFilter}
                         />
-
                     </Box>
+                    <Divider />
                     <TccDataTable
                         column={column}
                         rows={result}

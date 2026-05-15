@@ -27,6 +27,7 @@ const Chip = (props: CustomChipProps) => {
   }
 
   const propsToPass = { ...props }
+  const lightSkinColor = color ? colors[color as keyof UseBgColorType] : undefined
 
   propsToPass.rounded = undefined
 
@@ -38,7 +39,7 @@ const Chip = (props: CustomChipProps) => {
         'MuiChip-rounded': rounded,
         'MuiChip-light': skin === 'light'
       })}
-      sx={skin === 'light' && color ? Object.assign(colors[color], sx) : sx}
+      sx={skin === 'light' && lightSkinColor ? Object.assign(lightSkinColor, sx) : sx}
     />
   )
 }

@@ -1,9 +1,9 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
 import { Box, Button, Divider, Drawer, FormControl, FormHelperText, TextField } from '@mui/material'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import { useEffect, useState } from 'react'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -118,7 +118,8 @@ const MarketingBanner = () => {
                 toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
             }
         }
-        return false
+        
+return false
     }
 
     const editBannerDataApi = async (data: any) => {
@@ -197,6 +198,7 @@ const MarketingBanner = () => {
 
         getAllBannerDataApi(pagination);
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChangePerPageRows = (perPageRows: number) => {
@@ -224,6 +226,7 @@ const MarketingBanner = () => {
 
         searchBusinessUser();
 
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchFilter]);
 
     const onSubmit = (data: any) => {
@@ -287,7 +290,10 @@ const MarketingBanner = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Marketing Banner'></CardHeader>
+                    <AdminPageHeader
+                        title='Marketing Banner'
+                        subtitle='Homepage/category marketing tiles that link customers into curated product paths. This is not the hero image manager.'
+                    />
                     <Divider />
                     <TCCTableHeader
                         isButton

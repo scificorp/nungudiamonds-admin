@@ -70,7 +70,8 @@ const ForgotPassword = () => {
 
     return false;
   }
-  return (
+  
+return (
     <Box className='content-center'>
       <AuthIllustrationV1Wrapper>
         <Card>

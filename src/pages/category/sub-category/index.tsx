@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button } from '@mui/material'
 import { useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -112,7 +113,7 @@ const SubCategory = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Sub Category '></CardHeader>
+          <AdminPageHeader title='Sub Category ' />
           <Divider />
           <TCCTableHeader isButton value={SearchFilter}
             onChange={(e: any) => setSearchFilter(e.target.value)}

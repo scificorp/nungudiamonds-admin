@@ -1,8 +1,9 @@
 
 // ** MUI Imports
-import { Divider, CardHeader, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText, SelectChangeEvent, Autocomplete } from '@mui/material'
+import { Divider, Grid, Card, Drawer, Button, FormControl, TextField, FormHelperText, SelectChangeEvent, Autocomplete } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -48,7 +49,7 @@ const CaratSize = () => {
   const [showModel, setShowModel] = useState(false);
   const [sortCode, setSortCode] = useState('')
   const [editerData, setEditerData] = useState("")
-  const [edit, setEdit] = useState<String>('<p></p>')
+  const [edit, setEdit] = useState<string>('<p></p>')
   const [called, setCalled] = useState(true)
   const [queryOptions, setQueryOptions] = React.useState({});
   const [stoneTypeValue, setStoneTypeValue] = useState<string>('')
@@ -98,7 +99,7 @@ const CaratSize = () => {
     setCaratid(data.id);
     setStoneTypeValue(data.is_diamond)
 
-    let diamondShapeData: any = []
+    const diamondShapeData: any = []
     let list: any
     for (list of dropDownList.diamondShapeList) {
       const data = { id: list.id, name: list.name }
@@ -351,7 +352,7 @@ const CaratSize = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Carat Size'></CardHeader>
+          <AdminPageHeader title='Carat Size' />
           <Divider />
           <Box>
             <TCCTableHeader isButton value={searchFilter}

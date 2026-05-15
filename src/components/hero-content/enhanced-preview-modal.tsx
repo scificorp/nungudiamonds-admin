@@ -36,6 +36,12 @@ interface EnhancedPreviewModalProps {
   uploadStatus?: string;
 }
 
+const debugLog = (..._args: unknown[]) => {
+  if (process.env.NEXT_PUBLIC_DEBUG_HERO_CONTENT === 'true') {
+    console.info(..._args)
+  }
+}
+
 const EnhancedPreviewModal: React.FC<EnhancedPreviewModalProps> = ({
   open,
   onClose,
@@ -52,15 +58,16 @@ const EnhancedPreviewModal: React.FC<EnhancedPreviewModalProps> = ({
   const [activeView, setActiveView] = useState<'desktop' | 'mobile'>('desktop');
 
   useEffect(() => {
-    console.log('👀 Preview modal received data:', previewData)
+    debugLog('👀 Preview modal received data:', previewData)
     if (previewData?.content_type === 'video' && videoRef.current) {
       videoRef.current.load();
     }
   }, [previewData]);
 
   if (!previewData) {
-    console.log('👀 Preview modal: no preview data, returning null')
-    return null;
+    debugLog('👀 Preview modal: no preview data, returning null')
+    
+return null;
   }
 
   const MockNavbar = ({ isMobileView }: { isMobileView: boolean }) => (

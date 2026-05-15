@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from "@iconify/react";
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -76,7 +77,8 @@ const CurrencyMaster = () => {
         toggleAddUserDrawer()
         clearFormDataHandler()
         getAllApi(pagination)
-        return toast.success(data.message)
+        
+return toast.success(data.message)
 
       } else {
         return toast.error(data.message);
@@ -148,7 +150,8 @@ const CurrencyMaster = () => {
         toggleAddUserDrawer();
         clearFormDataHandler()
         getAllApi(pagination);
-        return toast.success(data.message);
+        
+return toast.success(data.message);
       } else {
         return toast.error(data.message);
       }
@@ -197,7 +200,8 @@ const CurrencyMaster = () => {
       const data = await CURRENCY_STATUS(payload);
       if (data.code === 200 || data.code === "200") {
         getAllApi(pagination);
-        return toast.success(data.message);
+        
+return toast.success(data.message);
       } else {
         return toast.error(data.message);
       }
@@ -207,6 +211,7 @@ const CurrencyMaster = () => {
 
     return false;
   }
+
   //////////////////// DEFAULT STATUS API ///////////////////////
 
   const defaultCurrencyApi = async (checked: boolean, row: any) => {
@@ -219,14 +224,16 @@ const CurrencyMaster = () => {
       const data = await DEFAULT_CURRENCY_STATUS(payload);
       if (data.code === 200 || data.code === "200") {
         getAllApi(pagination)
-        return toast.success(data.message);
+        
+return toast.success(data.message);
       } else {
         return toast.error(data.message);
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
     }
-    return false;
+    
+return false;
   }
 
   const column = [
@@ -292,7 +299,7 @@ const CurrencyMaster = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Currency Master'></CardHeader>
+          <AdminPageHeader title='Currency Master' />
           <Divider />
           <TCCTableHeader isButton value={searchFilter}
             onChange={(e: any) => setSearchFilter(e.target.value)}

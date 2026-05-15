@@ -13,12 +13,13 @@ import Router, { useRouter } from 'next/router'
 const OurStoriesComponent = () => {
 
     const [title, setTitle] = useState('')
+    const [subtitle, setSubtitle] = useState('')
     const [testid, setTestId] = useState(0);
     const [imageFile, setImageFile] = useState<any>()
     const [imageShow, setImageShow] = useState("")
     const [removeimage, setRemoveImage] = useState("0")
     const [editerData, setEditerData] = useState("")
-    const [edit, setEdit] = useState<String>('<p></p>')
+    const [edit, setEdit] = useState<string>('<p></p>')
     const [called, setCalled] = useState(true)
     const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
 
@@ -27,6 +28,7 @@ const OurStoriesComponent = () => {
 
     const defaultValues = {
         title: title,
+        subtitle: subtitle,
     }
 
     const {
@@ -41,6 +43,8 @@ const OurStoriesComponent = () => {
 
     const clearFormDataHandler = () => {
         reset()
+        setTitle('')
+        setSubtitle('')
         setEditerData('<p><p>')
     }
 
@@ -53,6 +57,8 @@ const OurStoriesComponent = () => {
             if (data.code === 200 || data.code === "200") {
                 setTestId(data.data.id);
                 setValue('title', data.data.title)
+                setValue('subtitle', data.data.subtitle || '')
+                setSubtitle(data.data.subtitle || '')
                 setEdit(data.data.content)
                 setImageShow(data.data.image_path);
             } else {
@@ -61,12 +67,13 @@ const OurStoriesComponent = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
 
     useEffect(() => {
 
-        let detailId: string = id as string
+        const detailId: string = id as string
         if (detailId != undefined) {
             setDialogTitle('Edit')
             setCalled(true)
@@ -86,6 +93,7 @@ const OurStoriesComponent = () => {
         const formData = new FormData()
         formData.append("image", imageFile || "")
         formData.append("title", data.title)
+        formData.append("subtitle", data.subtitle || "")
         formData.append("content", editerData)
 
         try {
@@ -113,6 +121,7 @@ const OurStoriesComponent = () => {
         formData.append("image", imageFile || "")
         formData.append("id", testid)
         formData.append("title", data.title)
+        formData.append("subtitle", data.subtitle || "")
         formData.append("content", editerData)
 
         try {
@@ -169,6 +178,28 @@ const OurStoriesComponent = () => {
                                         )}
                                     />
                                     {errors.title && <FormHelperText sx={{ color: 'error.main' }}>{FIELD_REQUIRED}</FormHelperText>}
+                                </FormControl>
+                            </Grid>
+
+                            <Grid item xs={12}>
+                                <FormControl fullWidth sx={{ mb: 4 }}>
+                                    <Controller
+                                        name='subtitle'
+                                        control={control}
+                                        rules={{ required: false }}
+                                        render={({ field }: any) => (
+                                            <TextField
+                                                size='small'
+                                                value={subtitle}
+                                                label='Subtitle (Optional)'
+                                                placeholder='Enter a subtitle or subheading for this story'
+                                                onChange={(e) => setSubtitle(e.target.value)}
+                                                error={Boolean(errors.subtitle)}
+                                                {...field}
+                                            />
+                                        )}
+                                    />
+                                    {errors.subtitle && <FormHelperText sx={{ color: 'error.main' }}>{FIELD_REQUIRED}</FormHelperText>}
                                 </FormControl>
                             </Grid>
 

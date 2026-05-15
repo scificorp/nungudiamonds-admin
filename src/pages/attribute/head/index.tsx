@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import TccSingleFileUpload from 'src/customComponents/Form-Elements/file-upload/singleFile-upload'
@@ -32,7 +33,7 @@ const Head = () => {
   const [result, setResult] = useState([])
   const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
   const [editerData, setEditerData] = useState("")
-  const [edit, setEdit] = useState<String>('<p></p>')
+  const [edit, setEdit] = useState<string>('<p></p>')
   const [called, setCalled] = useState(true)
   const [showModel, setShowModel] = useState(false);
 
@@ -114,7 +115,8 @@ const Head = () => {
         });
       }
     }
-    return false;
+    
+return false;
   }
 
   //////////////////////// GET API ////////////////////////
@@ -312,7 +314,7 @@ const Head = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Head'></CardHeader>
+          <AdminPageHeader title='Head' />
           <Divider />
           <Box>
             <TCCTableHeader isButton value={searchFilter}

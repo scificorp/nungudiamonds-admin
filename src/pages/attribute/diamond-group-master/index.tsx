@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText, ListItem, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, FormHelperText, ListItem, TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box, { BoxProps } from '@mui/material/Box'
@@ -294,7 +295,8 @@ const DiamondgroupMaster = () => {
                 toast.success(data.message);
             } else {
                 toast.error(data.message);
-                return toast.error(data.data.map((t: any) => t.error_message));
+                
+return toast.error(data.data.map((t: any) => t.error_message));
             }
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
@@ -398,7 +400,7 @@ const DiamondgroupMaster = () => {
         fetch(URL).then(response => {
             response.blob().then(blob => {
                 const fileURL = window.URL.createObjectURL(blob);
-                let alink = document.createElement('a');
+                const alink = document.createElement('a');
                 alink.href = fileURL;
                 alink.download = 'Sample_DiamondGroup.xlsx';
                 alink.click();
@@ -437,7 +439,7 @@ const DiamondgroupMaster = () => {
                 : <></>}
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Diamond Group Master'></CardHeader>
+                    <AdminPageHeader title='Diamond Group Master' />
                     <Divider />
                     <Box sx={{ display: 'flex', justifyContent: "end", mt: 3 }}>
                         <Button variant='contained' sx={{ '& svg': { mr: 2 }, mr: 4 }} onClick={onButtonClick} >

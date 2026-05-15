@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, SelectChangeEvent, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, SelectChangeEvent, FormControl, TextField, FormHelperText } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -308,7 +309,7 @@ const State = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='State'></CardHeader>
+                    <AdminPageHeader title='State' />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

@@ -1,8 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { Alert, CardContent, Divider, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
 import { ChangeEvent, useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box, { BoxProps } from '@mui/material/Box'
 import TccSingleFileUpload from 'src/customComponents/Form-Elements/file-upload/singleFile-upload'
@@ -106,7 +107,8 @@ const Testimonials = () => {
                 toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
             }
         }
-        return false;
+        
+return false;
     }
 
     //////////////////////// GET API ////////////////////////
@@ -128,6 +130,9 @@ const Testimonials = () => {
     }
     useEffect(() => {
         getAllApi(testimonialpagination);
+
+        // Legacy table fetch intentionally runs once on mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChangePerPageRows = (perPageRows: number) => {
@@ -153,6 +158,9 @@ const Testimonials = () => {
 
     useEffect(() => {
         searchBusinessUser();
+
+        // Debounced search is driven only by the input value.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchFilter]);
 
     ////////////////////////// EDIT API ////////////////////////////
@@ -295,8 +303,14 @@ const Testimonials = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Testimonials 🚀'></CardHeader>
+                    <AdminPageHeader
+                        title='Testimonials'
+                        subtitle='Manage customer quotes used across public-facing brand content.'
+                    />
                     <Divider />
+                    <Alert severity='success' sx={{ m: 4, mb: 0 }}>
+                        Active testimonials are now exposed through the public storefront testimonial endpoint. Keep entries concise and image-backed so the carousel remains polished.
+                    </Alert>
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}
                             onChange={(e: any) => setSearchFilter(e.target.value)}
@@ -385,6 +399,7 @@ const Testimonials = () => {
                             autoFocus
                             value={textareavalue}
                             onChange={testimonialhandleChange}
+
                             // size='small'
                             rows={4}
                             multiline label='Text'

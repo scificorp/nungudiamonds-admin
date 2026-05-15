@@ -89,7 +89,7 @@ const GiftsetInvoicePrint = ({ orderId }: any) => {
             const data = await GIFTSET_INVOICE_DETAIL(payload);
             if (data.code === 200 || data.code === "200") {
                 const invoiceOrderProductList: any = []
-                for (let orderProduct of data.data.gift_set_order_invoice.gift_order) {
+                for (const orderProduct of data.data.gift_set_order_invoice.gift_order) {
                     invoiceOrderProductList.push({ id: orderProduct.product_id, product_name: orderProduct.product_name, product_price: orderProduct.product_price?.toFixed(2), quantity: orderProduct.quantity == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.quantity}</Typography>, product_tax: orderProduct.product_tax == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.product_tax}</Typography>, sub_total: orderProduct.sub_total?.toFixed(2), product_image: orderProduct.product_image, discount: orderProduct.discount == null ? <Typography>00.00</Typography> : <Typography>{orderProduct.discount}</Typography> })
                 }
                 setOrderInvoiceData(invoiceOrderProductList);
@@ -101,7 +101,8 @@ const GiftsetInvoicePrint = ({ orderId }: any) => {
             }
         } catch (e: any) {
         }
-        return false;
+        
+return false;
     }
     useEffect(() => {
         invoiceDetailsData();
@@ -145,6 +146,7 @@ const GiftsetInvoicePrint = ({ orderId }: any) => {
             field: 'product_tax',
             text: 'text'
         },
+
         // {
         //     flex: 1,
         //     value: 'discount',
@@ -171,7 +173,7 @@ const GiftsetInvoicePrint = ({ orderId }: any) => {
                                 <Grid item sm={6} xs={6} sx={{ mb: { sm: 0, xs: 4 } }}>
                                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                         <Box sx={{ mb: 6, display: 'flex', alignItems: 'center' }}>
-                                            <img width={110} height={50} src={`${IMG_ENDPOINT}${SYSTEM_LOGO_MAIN}`} />
+                                            <img width={110} height={50} src={``} alt="Nungu Diamonds logo" />
 
                                             {/* <Typography
                                                 variant='h6'
@@ -283,7 +285,7 @@ const GiftsetInvoicePrint = ({ orderId }: any) => {
                                         <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{`${CURRENCY_VALUE}`}00.00</Typography>
                                     </CalcWrapper>
                                     {orderTaxData && orderTaxData.map((t: any) => (
-                                        <CalcWrapper>
+                                        <CalcWrapper key={`${t.name}-${t.rate}`}>
                                             <Typography sx={{ color: 'text.secondary' }}>{t.name}({t.rate})%</Typography>
                                             <Typography sx={{ fontWeight: 500, color: 'text.secondary' }}>{`${CURRENCY_VALUE}`}{t.tax_amount}</Typography>
                                         </CalcWrapper>

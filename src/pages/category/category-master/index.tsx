@@ -1,5 +1,5 @@
 // ** MUI Imports
-import { Button, Card, CardContent, Checkbox, Box, FormControl, FormControlLabel, FormHelperText, Grid, Switch, TextField, Typography, SelectChangeEvent, Autocomplete } from "@mui/material"
+import { Alert, Button, Card, CardContent, Checkbox, Box, FormControl, FormControlLabel, FormHelperText, Grid, Switch, TextField, Typography, SelectChangeEvent, Autocomplete } from "@mui/material"
 import { alpha, styled } from '@mui/material/styles'
 import MuiTreeView, { TreeViewProps } from '@mui/lab/TreeView'
 import TreeItem from '@mui/lab/TreeItem'
@@ -15,7 +15,7 @@ import TccInput from "src/customComponents/Form-Elements/inputField"
 import DeleteDataModel from "src/customComponents/delete-model"
 
 const TreeView = styled(MuiTreeView)<TreeViewProps>(({ theme }) => ({
-  Height: 264,
+  minHeight: 264,
 
   '& .MuiTreeItem-iconContainer .close': {
     opacity: 0.3
@@ -126,7 +126,8 @@ const CategoryMaster = () => {
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
     }
-    return false;
+    
+return false;
   }
   useEffect(() => {
     getAllDropDownData()
@@ -166,7 +167,7 @@ const CategoryMaster = () => {
     formData.append("is_length", lengthChecked ? '1' : '0')
     itemSize.map((value, index) => formData.append(`id_size[${index}]`, value.id || ""))
     itemLength.map((value, index) => formData.append(`id_length[${index}]`, value.id || ""))
-    { parentCategoryId == '' ? '' : formData.append("parent_id", parentCategoryId) }
+    if (parentCategoryId !== '') formData.append("parent_id", parentCategoryId)
 
     try {
       const data = await ADD_CATEGORY(formData)
@@ -198,7 +199,7 @@ const CategoryMaster = () => {
     formData.append("is_length", lengthChecked ? '1' : '0')
     itemSize.map((value, index) => formData.append(`id_size[${index}]`, value.id || ""))
     itemLength.map((value, index) => formData.append(`id_length[${index}]`, value.id || ""))
-    { parentCategoryId == "" && formData.append("parent_id", parentCategoryId) }
+    if (parentCategoryId !== '') formData.append("parent_id", parentCategoryId)
 
     try {
       const data = await EDIT_CATEGORY(formData)
@@ -308,57 +309,80 @@ const CategoryMaster = () => {
   return (
     <>
       <Grid container gridRow={1} spacing={6}>
-        <Grid item xs={12} md={6} lg={6}>
-
+        <Grid item xs={12}>
           <Card>
             <CardContent>
+              <Typography variant='h4' sx={{ mb: 1 }}>
+                Category Management
+              </Typography>
+              <Typography color='text.secondary' sx={{ mb: 3 }}>
+                Maintain the storefront category tree and decide which categories expose setting style, size, and length selectors.
+              </Typography>
+              <Alert severity='info'>
+                Select a category on the left to edit it. Use the form on the right for both top-level categories and nested subcategories.
+                Searchable controls whether the category is exposed in filtering/navigation surfaces.
+              </Alert>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={5} lg={5}>
+          <Card>
+            <CardContent>
+              <Typography variant='h6' sx={{ mb: 4 }}>
+                Category Tree
+              </Typography>
               <TreeView
                 defaultExpanded={['1']}
-                sx={{ marginBottom: 10 }}
+                sx={{ marginBottom: 4 }}
                 defaultExpandIcon={<Icon icon='tabler:square-plus' />}
                 defaultCollapseIcon={<Icon icon='tabler:square-minus' />}
                 defaultEndIcon={<Icon icon='tabler:square-x' className='close' />}
               >
-                {categoryList.filter(((t: any) => t.parent_id === null)).map((category: any, index) => (
-                  <>
-                    <TreeItem key={category.id} nodeId={category.id} label={category.category_name} sx={{ marginBottom: 2 }}
-                      onClick={() => {
-                        editOnClickHandler(category)
-                      }}
-                    >
-                      {categoryList.filter(((t: any) => t.parent_id === category.id)).map((subcategory: any, index) => (
-
-                        <TreeItem key={subcategory.id} nodeId={subcategory.id} label={subcategory.category_name}
-                          onClick={() => {
-                            editOnClickHandler(subcategory)
-                          }}
-                        >
-                          {categoryList.filter(((t: any) => t.parent_id === subcategory.id)).map((subsubcategory: any, index) => (
-
-                            <TreeItem key={subsubcategory.id} nodeId={subsubcategory.id} label={subsubcategory.category_name}
-                              onClick={() => {
-                                editOnClickHandler(subsubcategory)
-                              }}
-                            />
-                          ))}
-
-                        </ TreeItem>
-
-                      ))}
-
-                    </TreeItem>
-
-                  </>
-
+                {categoryList.filter(((t: any) => t.parent_id === null)).map((category: any) => (
+                  <TreeItem key={category.id} nodeId={String(category.id)} label={category.category_name} sx={{ marginBottom: 2 }}
+                    onClick={() => {
+                      editOnClickHandler(category)
+                    }}
+                  >
+                    {categoryList.filter(((t: any) => t.parent_id === category.id)).map((subcategory: any) => (
+                      <TreeItem key={subcategory.id} nodeId={String(subcategory.id)} label={subcategory.category_name}
+                        onClick={() => {
+                          editOnClickHandler(subcategory)
+                        }}
+                      >
+                        {categoryList.filter(((t: any) => t.parent_id === subcategory.id)).map((subsubcategory: any) => (
+                          <TreeItem key={subsubcategory.id} nodeId={String(subsubcategory.id)} label={subsubcategory.category_name}
+                            onClick={() => {
+                              editOnClickHandler(subsubcategory)
+                            }}
+                          />
+                        ))}
+                      </TreeItem>
+                    ))}
+                  </TreeItem>
                 ))}
               </TreeView>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6} lg={6}>
+        <Grid item xs={12} md={7} lg={7}>
           <Card>
             <CardContent>
-              <Typography variant='h6' color='black' sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>{`${dialogTitle} Category`}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 2, mb: 4 }}>
+                <Box>
+                  <Typography variant='h6' color='black'>{`${dialogTitle} Category`}</Typography>
+                  <Typography variant='body2' color='text.secondary'>
+                    {dialogTitle === 'Edit'
+                      ? 'Update naming, hierarchy, media, and selector behavior for the selected category.'
+                      : 'Create a top-level category or assign a parent to create a subcategory.'}
+                  </Typography>
+                </Box>
+                {dialogTitle === 'Edit' && (
+                  <Button variant='outlined' type='button' onClick={clearFormData}>
+                    New Category
+                  </Button>
+                )}
+              </Box>
               <form onSubmit={handleSubmit(onsubmit)}>
                 {dialogTitle === 'Edit' && <TccInput
                   value={categoryId}
@@ -472,7 +496,7 @@ const CategoryMaster = () => {
                     activeStatusDataApi(check)
                   }} size="medium" color='success' />} label='Status' /> <br />
                   <FormControlLabel
-                    label='Controlled'
+                    label='Searchable'
                     control={<Checkbox checked={checked} onChange={(event, check) => {
                       setChecked(check)
                       searchableDataUpdate(check)
@@ -491,7 +515,7 @@ const CategoryMaster = () => {
 
                   </>
                   }
-                  <Button variant='contained' sx={{ mr: 3, mt: 2 }} type="submit" onClick={clearFormData}>
+                  <Button variant='outlined' sx={{ mr: 3, mt: 2 }} type="button" onClick={clearFormData}>
                     CANCEL
                   </Button>
 

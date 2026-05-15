@@ -93,7 +93,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
   const handleAddURL = async () => {
     if (!desktopURL.trim()) {
       setValidationError('Desktop URL is required');
-      return;
+      
+return;
     }
 
     setIsValidating(true);
@@ -105,7 +106,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
       if (!desktopValidation.isValid) {
         setValidationError('Invalid desktop URL or unsupported media format');
         setIsValidating(false);
-        return;
+        
+return;
       }
 
       // Validate mobile URL if provided
@@ -115,7 +117,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
         if (!mobileValidation.isValid) {
           setValidationError('Invalid mobile URL or unsupported media format');
           setIsValidating(false);
-          return;
+          
+return;
         }
       }
 
@@ -123,7 +126,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
       if (mobileURL.trim() && desktopValidation.type !== mobileValidation.type) {
         setValidationError('Desktop and mobile URLs must be the same media type (both video or both image)');
         setIsValidating(false);
-        return;
+        
+return;
       }
 
       const detectedType = desktopValidation.type!;
@@ -174,7 +178,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
   const handlePreview = () => {
     if (urlEntries.length === 0) {
       setValidationError('Please add URLs before previewing');
-      return;
+      
+return;
     }
 
     const desktopEntry = urlEntries.find(entry => entry.device === 'desktop');
@@ -182,7 +187,8 @@ const URLInputSection: React.FC<URLInputSectionProps> = ({ onURLAdded, onPreview
 
     if (!desktopEntry) {
       setValidationError('Desktop URL is required for preview');
-      return;
+      
+return;
     }
 
     onPreview({

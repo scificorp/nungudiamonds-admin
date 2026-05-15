@@ -25,6 +25,7 @@ const TccSwiperControls = (props: { direction: { direction: Direction }, imageAr
     rtl: props.direction.direction === 'rtl',
     slideChanged(slider) {
       setCurrentSlide(slider.track.details.rel)
+
       // console.log(slider);
 
     },

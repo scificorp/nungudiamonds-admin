@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Grid, Card, CardHeader, Divider, Box, IconButton, Tooltip } from '@mui/material'
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { useCallback, useState, useEffect } from 'react'
+import { Alert, Grid, Card, Divider, Box, Button } from '@mui/material'
 import { useRouter } from 'next/router'
 import toast from 'react-hot-toast'
 
 // ** Custom Components
-import TCCTableHeader from 'src/customComponents/data-table/header'
 import TccDataTable from 'src/customComponents/data-table/table'
 import DeleteDataModel from 'src/customComponents/delete-model'
-import TccSingleFileUpload from 'src/customComponents/Form-Elements/file-upload/singleFile-upload'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 // ** Icons
 import { Icon } from '@iconify/react'
@@ -17,44 +15,77 @@ import { Icon } from '@iconify/react'
 import { ICommonPagination } from 'src/data/interface'
 
 // ** API
-import { appErrors, FIELD_REQUIRED, SEARCH_DELAY_TIME } from 'src/AppConstants'
+import { appErrors, SEARCH_DELAY_TIME } from 'src/AppConstants'
 import { createPagination } from 'src/utils/sharedFunction'
-import { ADD_COLLECTION, DELETE_COLLECTION, EDIT_COLLECTION, GET_ALL_COLLECTION, STATUS_COLLECTION } from 'src/services/AdminServices'
+import { DELETE_COLLECTION, GET_ALL_COLLECTION, STATUS_COLLECTION } from 'src/services/AdminServices'
 
 const CollectionsList = () => {
   const router = useRouter()
+  const CACHE_KEY = 'nungu-admin:collections-list-cache'
 
   // ** States
   const [collections, setCollections] = useState([])
   const [searchFilter, setSearchFilter] = useState('')
   const [filteredData, setFilteredData] = useState([])
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 })
   const [pagination, setPagination] = useState(createPagination())
+  const [isLoading, setIsLoading] = useState(false)
+  const [usingCache, setUsingCache] = useState(false)
   const [showModel, setShowModel] = useState(false)
   const [selectedId, setSelectedId] = useState('')
+  const handleSortChanges = () => null
 
   // ** Hooks
   const toggleModel = () => setShowModel(!showModel)
 
   /////////////////////// GET API ///////////////////////
-  const getAllApi = async (mbPagination: ICommonPagination) => {
+  const getAllApi = useCallback(async (mbPagination: ICommonPagination) => {
     try {
+      setIsLoading(true)
       const data = await GET_ALL_COLLECTION(mbPagination)
       if (data.code === 200 || data.code === '200') {
-        setPagination(data.data.pagination)
-        setCollections(data.data.result)
-        setFilteredData(data.data.result)
+        const nextCollections = Array.isArray(data.data.result) ? data.data.result : []
+        const nextPagination = data.data.pagination || mbPagination
+        setPagination(nextPagination)
+        setCollections(nextCollections)
+        setFilteredData(nextCollections)
+        setUsingCache(false)
+
+        if (typeof window !== 'undefined') {
+          window.sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+            collections: nextCollections,
+            pagination: nextPagination
+          }))
+        }
       } else {
         return toast.error(data.message)
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [CACHE_KEY])
 
   useEffect(() => {
-    getAllApi(pagination)
-  }, [])
+    if (typeof window !== 'undefined') {
+      const cached = window.sessionStorage.getItem(CACHE_KEY)
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached)
+          if (Array.isArray(parsed.collections)) {
+            setCollections(parsed.collections)
+            setFilteredData(parsed.collections)
+            setPagination(parsed.pagination || createPagination())
+            setUsingCache(true)
+          }
+        } catch (error) {
+          window.sessionStorage.removeItem(CACHE_KEY)
+        }
+      }
+    }
+
+    getAllApi(createPagination())
+  }, [CACHE_KEY, getAllApi])
 
   const handleChangePerPageRows = (perPageRows: number) => {
     getAllApi({ ...pagination, per_page_rows: perPageRows, current_page: 1 })
@@ -113,101 +144,67 @@ const CollectionsList = () => {
   }, [searchFilter, collections])
 
   /////////////////////// COLUMNS ///////////////////////
-  const columns: GridColDef[] = [
+  const columns = [
     {
-      field: 'name',
+      flex: 1,
+      headerName: 'Collection Image',
+      field: 'image',
+      avatars: 'Collection Image',
+      value: 'image.image_path'
+    },
+    {
+      flex: 2,
       headerName: 'Collection Name',
-      flex: 1,
-      minWidth: 200,
-      renderCell: ({ row }) => (
-        <div className="flex items-center gap-3">
-          {row.image && (
-            <img
-              src={row.image.image_path || '/images/placeholder.png'}
-              alt={row.name}
-              className="w-10 h-10 rounded object-cover"
-            />
-          )}
-          <span className="font-medium">{row.name}</span>
-        </div>
-      )
+      field: 'name',
+      text: 'text',
+      value: 'name'
     },
     {
-      field: 'slug',
+      flex: 1,
       headerName: 'Slug',
+      field: 'slug',
+      text: 'text',
+      value: 'slug'
+    },
+    {
       flex: 1,
-      minWidth: 150
-    },
-    {
-      field: 'is_featured',
       headerName: 'Featured',
-      width: 100,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded text-xs ${
-          row.is_featured === '1'
-            ? 'bg-green-100 text-green-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {row.is_featured === '1' ? 'Yes' : 'No'}
-        </span>
-      )
+      field: 'is_featured',
+      chips: 'chips',
+      value: 'is_featured'
     },
     {
-      field: 'sort_order',
+      flex: 1,
       headerName: 'Sort Order',
-      width: 120,
-      type: 'number'
+      field: 'sort_order',
+      text: 'text',
+      value: 'sort_order'
     },
     {
-      field: 'is_active',
+      flex: 1,
       headerName: 'Status',
-      width: 100,
-      renderCell: ({ row }) => (
-        <span className={`px-2 py-1 rounded text-xs ${
-          row.is_active === '1'
-            ? 'bg-green-100 text-green-800'
-            : 'bg-red-100 text-red-800'
-        }`}>
-          {row.is_active === '1' ? 'Active' : 'Inactive'}
-        </span>
-      )
+      field: 'is_active',
+      chips: 'chips',
+      value: 'is_active'
     },
     {
-      field: 'actions',
+      flex: 2,
       headerName: 'Actions',
-      width: 150,
-      sortable: false,
-      renderCell: ({ row }) => (
-        <div className="flex gap-2">
-          <Tooltip title="Edit">
-            <IconButton
-              size="small"
-              onClick={() => router.push(`/collections/edit-collection/${row.id}`)}
-            >
-              <Icon icon="tabler:edit" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Delete">
-            <IconButton
-              size="small"
-              onClick={() => {
-                setSelectedId(row.id)
-                toggleModel()
-              }}
-            >
-              <Icon icon="tabler:trash" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={row.is_active === '1' ? 'Deactivate' : 'Activate'}>
-            <IconButton
-              size="small"
-              onClick={() => statusApi(row.is_active === '0', row)}
-            >
-              <Icon icon={row.is_active === '1' ? 'tabler:eye-off' : 'tabler:eye'} />
-            </IconButton>
-          </Tooltip>
-        </div>
-      )
+      field: 'action',
+      view: 'view',
+      viewTitle: 'Assign / Review Products',
+      viewOnClick: (row: any) => router.push(`/collections/collection-products/${row.id}`),
+      edit: 'edit',
+      editTitle: 'Edit Collection Details',
+      editOnClick: (row: any) => router.push(`/collections/edit-collection/${row.id}`),
+      deleted: 'deleted',
+      deleteTitle: 'Delete Collection',
+      deletedOnClick: (row: any) => {
+        setSelectedId(row.id)
+        toggleModel()
+      },
+      switch: 'switch',
+      SwitchonChange: (checked: boolean, row: any) => statusApi(checked, row)
     }
   ]
 
@@ -215,27 +212,62 @@ const CollectionsList = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title="Collections Management" />
           <Divider />
-          <Box>
-            <TCCTableHeader
-              isButton
-              value={searchFilter}
-              onChange={(e: any) => setSearchFilter(e.target.value)}
-              toggle={() => router.push('/collections/add-collection')}
-              ButtonName="Add Collection"
+          <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+            <AdminPageHeader
+              title='Collections Management'
+              subtitle='Create collections, assign products, and keep the storefront structure clean.'
+              searchValue={searchFilter}
+              onSearchChange={setSearchFilter}
+              actions={
+                <>
+                  <Button
+                    variant='outlined'
+                    onClick={() => router.push('/collections/assign-products')}
+                    startIcon={<Icon icon='tabler:link' />}
+                    sx={{
+                      borderColor: '#c6a55a',
+                      color: '#c6a55a',
+                      '&:hover': {
+                        borderColor: '#b8944d',
+                        backgroundColor: '#c6a55a',
+                        color: 'white'
+                      }
+                    }}
+                  >
+                    Assign Products
+                  </Button>
+                  <Button
+                    variant='contained'
+                    onClick={() => router.push('/collections/add-collection')}
+                    startIcon={<Icon icon='tabler:plus' />}
+                  >
+                    Add Collection
+                  </Button>
+                </>
+              }
             />
+            <Alert severity='info' sx={{ mt: 3 }}>
+              Use <strong>Assign Products</strong> for membership changes. In the table, the eye icon opens assigned products and the pencil edits collection details.
+            </Alert>
+            {(isLoading || usingCache) && (
+              <Alert severity={usingCache ? 'warning' : 'info'} sx={{ mt: 2 }}>
+                {usingCache ? 'Showing the last loaded collections while refreshing the latest data.' : 'Refreshing collections...'}
+              </Alert>
+            )}
           </Box>
+          <Divider />
           <TccDataTable
             column={columns}
             rows={filteredData}
-            handleSortChanges={() => {}}
+            handleSortChanges={handleSortChanges}
             pageSize={parseInt(pagination.per_page_rows.toString())}
             onChangepage={handleChangePerPageRows}
             rowCount={pagination.total_items}
             page={pagination.current_page - 1}
             onPageChange={handleOnPageChange}
             iconTitle="Collection"
+            emptyMessage='No collections found.'
           />
         </Card>
       </Grid>

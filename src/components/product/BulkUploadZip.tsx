@@ -41,7 +41,8 @@ const BulkUploadZip = ({ onSuccess }: BulkUploadZipProps) => {
         }
       } else {
         toast.error(data.message);
-        return toast.error(data.data.map((t: any) => t.error_message));
+        
+return toast.error(data.data.map((t: any) => t.error_message));
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);

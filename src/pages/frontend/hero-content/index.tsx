@@ -59,9 +59,14 @@ interface PreviewData {
   content_type: 'video' | 'image'
 }
 
+const debugLog = (..._args: unknown[]) => {
+  if (process.env.NEXT_PUBLIC_DEBUG_HERO_CONTENT === 'true') {
+    // Keep verbose upload diagnostics opt-in for local troubleshooting only.
+    console.info(..._args)
+  }
+}
+
 const HeroContentManagement = () => {
-  console.log('🚀 DEBUG: Enhanced HeroContentManagement component loaded (index.tsx - REPLACED)')
-  console.log('🚀 DEBUG: This IS the enhanced version with comprehensive logging')
   const [heroContent, setHeroContent] = useState<HeroContentData>({
     desktop_video_url: '',
     mobile_video_url: '',
@@ -118,16 +123,19 @@ const HeroContentManagement = () => {
   useEffect(() => {
     loadHeroContent()
     loadUploadedFiles()
+
+    // Hero content initializes once, then explicit refreshes reload after save.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Load hero content from API
   const loadHeroContent = async () => {
-    console.log('📥 loadHeroContent called')
+    debugLog('📥 loadHeroContent called')
 
     try {
       setIsLoading(true)
       const apiUrl = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`
-      console.log('🌐 Loading from API:', apiUrl)
+      debugLog('🌐 Loading from API:', apiUrl)
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -135,43 +143,46 @@ const HeroContentManagement = () => {
         }
       })
 
-      console.log('🌐 Load response status:', response.status)
+      debugLog('🌐 Load response status:', response.status)
 
       if (response.ok) {
         const result = await response.json()
-        console.log('📋 Loaded hero content from API:', result)
+        debugLog('📋 Loaded hero content from API:', result)
 
         if (result.code === 200 && result.data) {
-          console.log('✅ Setting hero content from API data')
+          debugLog('✅ Setting hero content from API data')
           setHeroContent(result.data)
+
           // Update form with loaded data
           Object.keys(result.data).forEach(key => {
-            console.log(`📝 Setting form field ${key} to:`, result.data[key])
+            debugLog(`📝 Setting form field ${key} to:`, result.data[key])
             setValue(key as keyof HeroContentData, result.data[key])
           })
+
           // Store in localStorage for offline access
           localStorage.setItem('nungu_hero_content', JSON.stringify(result.data))
           toast.success('Current hero content loaded successfully')
         }
       } else {
-        console.log('⚠️ API failed, falling back to localStorage')
+        debugLog('⚠️ API failed, falling back to localStorage')
+
         // Fallback to localStorage
         const storedContent = localStorage.getItem('nungu_hero_content')
         if (storedContent) {
           const parsedContent = JSON.parse(storedContent)
-          console.log('📋 Loaded hero content from localStorage:', parsedContent)
+          debugLog('📋 Loaded hero content from localStorage:', parsedContent)
           setHeroContent(parsedContent)
           Object.keys(parsedContent).forEach(key => {
             setValue(key as keyof HeroContentData, parsedContent[key])
           })
-          toast.info('Loaded hero content from local cache (API unavailable)')
+          toast('Loaded hero content from local cache (API unavailable)')
         } else {
-          console.log('⚠️ No localStorage data found')
-          toast.warning('No existing hero content found')
+          debugLog('⚠️ No localStorage data found')
+          toast('No existing hero content found')
         }
       }
     } catch (error) {
-      console.error('❌ Failed to load hero content:', error)
+      debugLog('❌ Failed to load hero content:', error)
       toast.error('Failed to load hero content')
     } finally {
       setIsLoading(false)
@@ -179,36 +190,37 @@ const HeroContentManagement = () => {
   }
 
   const loadUploadedFiles = async () => {
-    console.log('📁 loadUploadedFiles called')
+    debugLog('📁 loadUploadedFiles called')
 
     try {
       const storedFiles = localStorage.getItem('nungu_uploaded_files')
       if (storedFiles) {
         const parsedFiles = JSON.parse(storedFiles)
-        console.log('📁 Loaded uploaded files from localStorage:', parsedFiles.map(f => ({ name: f.name, url: f.url, isUploaded: f.isUploaded })))
+        debugLog('📁 Loaded uploaded files from localStorage:', parsedFiles.map((f: UploadedFile) => ({ name: f.name, url: f.url, isUploaded: f.isUploaded })))
         setUploadedFiles(parsedFiles)
       } else {
-        console.log('📁 No uploaded files found in localStorage')
+        debugLog('📁 No uploaded files found in localStorage')
       }
     } catch (error) {
-      console.error('❌ Failed to load uploaded files:', error)
+      debugLog('❌ Failed to load uploaded files:', error)
     }
   }
 
   // Handle file drop - just create local previews, don't upload to S3 yet
   async function handleFileDrop(acceptedFiles: File[]) {
-    console.log('🔄 handleFileDrop called with files:', acceptedFiles.map(f => f.name))
+    debugLog('🔄 handleFileDrop called with files:', acceptedFiles.map(f => f.name))
 
     if (acceptedFiles.length === 0) {
-      console.log('❌ No files to process')
-      return
+      debugLog('❌ No files to process')
+      
+return
     }
 
     const newFiles: UploadedFile[] = acceptedFiles.map((file) => {
       const fileId = `${Date.now()}-${file.name}`
       const blobUrl = URL.createObjectURL(file)
 
-      console.log(`📁 Creating file entry for ${file.name}:`, {
+      debugLog(`📁 Creating file entry for ${file.name}:`, {
         id: fileId,
         name: file.name,
         blobUrl,
@@ -232,23 +244,23 @@ const HeroContentManagement = () => {
 
     // Add to uploaded files list
     const updatedFiles = [...uploadedFiles, ...newFiles]
-    console.log('📋 Updated files list:', updatedFiles.map(f => ({ name: f.name, url: f.url, isUploaded: f.isUploaded })))
+    debugLog('📋 Updated files list:', updatedFiles.map(f => ({ name: f.name, url: f.url, isUploaded: f.isUploaded })))
     setUploadedFiles(updatedFiles)
 
     // Save to localStorage for persistence
     localStorage.setItem('nungu_uploaded_files', JSON.stringify(updatedFiles))
 
     toast.success(`Added ${acceptedFiles.length} file(s) for preview`)
-    console.log('✅ Files added successfully for preview')
+    debugLog('✅ Files added successfully for preview')
   }
 
   // Upload file to S3 (only called when confirming save)
   async function uploadFileToS3(file: File, fileId: string): Promise<{ url: string; name: string }> {
-    console.log(`📤 uploadFileToS3 called for ${file.name} with ID ${fileId}`)
+    debugLog(`📤 uploadFileToS3 called for ${file.name} with ID ${fileId}`)
 
     const formData = new FormData()
     formData.append('heroFile', file)
-    console.log('📦 FormData created with heroFile field')
+    debugLog('📦 FormData created with heroFile field')
 
     const xhr = new XMLHttpRequest()
 
@@ -256,72 +268,72 @@ const HeroContentManagement = () => {
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable) {
           const progress = Math.round((event.loaded / event.total) * 100)
-          console.log(`📊 Upload progress for ${file.name}: ${progress}%`)
+          debugLog(`📊 Upload progress for ${file.name}: ${progress}%`)
           setUploadProgress(prev => ({ ...prev, [fileId]: progress }))
         }
       })
 
       xhr.addEventListener('load', () => {
-        console.log(`🌐 Upload completed for ${file.name}, status: ${xhr.status}`)
-        console.log('🌐 Response text:', xhr.responseText)
+        debugLog(`🌐 Upload completed for ${file.name}, status: ${xhr.status}`)
+        debugLog('🌐 Response text:', xhr.responseText)
 
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
             const result = JSON.parse(xhr.responseText)
-            console.log('📋 Parsed response:', result)
+            debugLog('📋 Parsed response:', result)
 
             if (result.code === 200 && result.data && result.data.url) {
-              console.log(`✅ Upload successful for ${file.name}, URL: ${result.data.url}`)
+              debugLog(`✅ Upload successful for ${file.name}, URL: ${result.data.url}`)
               resolve({
                 url: result.data.url,
                 name: file.name
               })
             } else {
-              console.error('❌ Upload failed - invalid response structure:', result)
+              debugLog('❌ Upload failed - invalid response structure:', result)
               reject(new Error(result.message || 'Upload failed - no URL returned'))
             }
           } catch (error) {
-            console.error('❌ Failed to parse response:', error)
+            debugLog('❌ Failed to parse response:', error)
             reject(new Error('Invalid response from server'))
           }
         } else {
-          console.error(`❌ Upload failed with status ${xhr.status}`)
+          debugLog(`❌ Upload failed with status ${xhr.status}`)
           reject(new Error(`Upload failed with status ${xhr.status}`))
         }
       })
 
       xhr.addEventListener('error', () => {
-        console.error(`❌ Network error during upload of ${file.name}`)
+        debugLog(`❌ Network error during upload of ${file.name}`)
         reject(new Error('Network error during upload'))
       })
 
       xhr.addEventListener('timeout', () => {
-        console.error(`❌ Upload timeout for ${file.name}`)
+        debugLog(`❌ Upload timeout for ${file.name}`)
         reject(new Error('Upload timeout'))
       })
 
       xhr.timeout = 5 * 60 * 1000
       const apiEndpoint = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/upload`
-      console.log('🌐 Upload endpoint:', apiEndpoint)
+      debugLog('🌐 Upload endpoint:', apiEndpoint)
 
       xhr.open('POST', apiEndpoint)
 
       const token = localStorage.getItem('accessToken')
       if (token) {
-        console.log('🔑 Adding authorization header')
+        debugLog('🔑 Adding authorization header')
         xhr.setRequestHeader('Authorization', `${token}`)
       } else {
-        console.log('⚠️ No token found for authorization')
+        debugLog('⚠️ No token found for authorization')
       }
 
-      console.log(`🚀 Starting upload for ${file.name}`)
+      debugLog(`🚀 Starting upload for ${file.name}`)
       xhr.send(formData)
     })
   }
 
   // Handle file selection for hero content
   const handleFileSelect = (file: UploadedFile, device: 'desktop' | 'mobile') => {
-    console.log(`🎯 handleFileSelect called:`, {
+    debugLog(`🎯 handleFileSelect called:`, {
       fileName: file.name,
       device,
       fileUrl: file.url,
@@ -337,17 +349,17 @@ const HeroContentManagement = () => {
     // Update form values
     if (file.type === 'video') {
       const fieldName = device === 'desktop' ? 'desktop_video_url' : 'mobile_video_url'
-      console.log(`📝 Setting ${fieldName} to:`, file.url)
+      debugLog(`📝 Setting ${fieldName} to:`, file.url)
       setValue(fieldName, file.url)
       setValue('content_type', 'video')
     } else {
       const fieldName = device === 'desktop' ? 'desktop_image_url' : 'mobile_image_url'
-      console.log(`📝 Setting ${fieldName} to:`, file.url)
+      debugLog(`📝 Setting ${fieldName} to:`, file.url)
       setValue(fieldName, file.url)
       setValue('content_type', 'image')
     }
 
-    console.log('✅ File selection completed')
+    debugLog('✅ File selection completed')
   }
 
   // Handle URL input
@@ -374,7 +386,7 @@ const HeroContentManagement = () => {
 
   // Handle form submission - show preview first
   const onSubmit = async (data: HeroContentData) => {
-    console.log('🚀 onSubmit called with data:', data)
+    debugLog('🚀 onSubmit called with data:', data)
 
     const preview: PreviewData = {
       desktop_url: data.content_type === 'video' ? data.desktop_video_url : data.desktop_image_url,
@@ -384,26 +396,27 @@ const HeroContentManagement = () => {
       content_type: data.content_type
     }
 
-    console.log('👀 Preview data created:', preview)
-    console.log('📋 Setting pending data for confirmation:', data)
+    debugLog('👀 Preview data created:', preview)
+    debugLog('📋 Setting pending data for confirmation:', data)
 
     setPendingData(data)
     setPreviewData(preview)
     setPreviewOpen(true)
 
-    console.log('✅ Preview modal should now be open')
+    debugLog('✅ Preview modal should now be open')
   }
 
   // Confirm and save changes - upload to S3 first, then save to database
   const handleConfirmSave = async () => {
-    console.log('💾 handleConfirmSave called')
+    debugLog('💾 handleConfirmSave called')
 
     if (!pendingData) {
-      console.log('❌ No pending data to save')
-      return
+      debugLog('❌ No pending data to save')
+      
+return
     }
 
-    console.log('📋 Pending data to save:', pendingData)
+    debugLog('📋 Pending data to save:', pendingData)
     setIsLoading(true)
 
     try {
@@ -411,7 +424,7 @@ const HeroContentManagement = () => {
       const updatedData = { ...pendingData }
       const filesToUpload: { file: File; field: keyof HeroContentData }[] = []
 
-      console.log('🔍 Checking for blob URLs that need uploading...')
+      debugLog('🔍 Checking for blob URLs that need uploading...')
 
       // Check each URL field to see if it's a blob URL that needs uploading
       const urlFields: (keyof HeroContentData)[] = [
@@ -423,46 +436,46 @@ const HeroContentManagement = () => {
 
       for (const field of urlFields) {
         const url = updatedData[field] as string
-        console.log(`🔍 Checking field ${field}:`, url)
+        debugLog(`🔍 Checking field ${field}:`, url)
 
         if (url && url.startsWith('blob:')) {
-          console.log(`🎯 Found blob URL in ${field}:`, url)
+          debugLog(`🎯 Found blob URL in ${field}:`, url)
 
           // Find the file associated with this blob URL
           const file = uploadedFiles.find(f => f.url === url || f.preview === url)
-          console.log(`📁 Found associated file:`, file ? { name: file.name, isUploaded: file.isUploaded } : 'NOT FOUND')
+          debugLog(`📁 Found associated file:`, file ? { name: file.name, isUploaded: file.isUploaded } : 'NOT FOUND')
 
           if (file && file.file && !file.isUploaded) {
-            console.log(`➕ Adding ${file.name} to upload queue for field ${field}`)
+            debugLog(`➕ Adding ${file.name} to upload queue for field ${field}`)
             filesToUpload.push({ file: file.file, field })
           }
         } else if (url) {
-          console.log(`✅ Field ${field} has non-blob URL:`, url)
+          debugLog(`✅ Field ${field} has non-blob URL:`, url)
         } else {
-          console.log(`⚪ Field ${field} is empty`)
+          debugLog(`⚪ Field ${field} is empty`)
         }
       }
 
-      console.log(`📤 Files to upload: ${filesToUpload.length}`, filesToUpload.map(f => ({ name: f.file.name, field: f.field })))
+      debugLog(`📤 Files to upload: ${filesToUpload.length}`, filesToUpload.map(f => ({ name: f.file.name, field: f.field })))
 
       // Upload files to S3
       if (filesToUpload.length > 0) {
-        console.log(`📤 Starting S3 upload for ${filesToUpload.length} files`)
+        debugLog(`📤 Starting S3 upload for ${filesToUpload.length} files`)
         setUploadStatus(`Uploading ${filesToUpload.length} file(s) to S3...`)
 
         for (let i = 0; i < filesToUpload.length; i++) {
           const { file, field } = filesToUpload[i]
-          console.log(`📤 Uploading file ${i + 1}/${filesToUpload.length}: ${file.name} for field ${field}`)
+          debugLog(`📤 Uploading file ${i + 1}/${filesToUpload.length}: ${file.name} for field ${field}`)
           setUploadStatus(`Uploading ${file.name} (${i + 1}/${filesToUpload.length})...`)
 
           try {
             const uploadResult = await uploadFileToS3(file, `${Date.now()}-${file.name}`)
-            console.log(`✅ Upload successful for ${file.name}:`, uploadResult.url)
-            updatedData[field] = uploadResult.url as any
+            debugLog(`✅ Upload successful for ${file.name}:`, uploadResult.url)
+            ;(updatedData as Record<string, any>)[field] = uploadResult.url
 
             // Update the file in our list to mark as uploaded
             const fileIndex = uploadedFiles.findIndex(f => f.file === file)
-            console.log(`🔄 Updating file status in list, index: ${fileIndex}`)
+            debugLog(`🔄 Updating file status in list, index: ${fileIndex}`)
 
             if (fileIndex !== -1) {
               const updatedFiles = [...uploadedFiles]
@@ -471,31 +484,32 @@ const HeroContentManagement = () => {
                 url: uploadResult.url,
                 isUploaded: true
               }
-              console.log(`✅ File ${file.name} marked as uploaded with URL:`, uploadResult.url)
+              debugLog(`✅ File ${file.name} marked as uploaded with URL:`, uploadResult.url)
               setUploadedFiles(updatedFiles)
               localStorage.setItem('nungu_uploaded_files', JSON.stringify(updatedFiles))
             }
           } catch (error) {
-            console.error('❌ S3 upload failed for', file.name, error)
+            debugLog('❌ S3 upload failed for', file.name, error)
             toast.error(`Failed to upload ${file.name} to S3. Please try again.`)
             setIsLoading(false)
-            return
+            
+return
           }
         }
 
-        console.log('✅ All files uploaded successfully')
+        debugLog('✅ All files uploaded successfully')
         setUploadStatus('Files uploaded successfully! Saving to database...')
       } else {
-        console.log('⚪ No files to upload, proceeding to database save')
+        debugLog('⚪ No files to upload, proceeding to database save')
         setUploadStatus('Saving to database...')
       }
 
-      console.log('💾 Final data to save to database:', updatedData)
+      debugLog('💾 Final data to save to database:', updatedData)
 
       // Now save to database with the S3 URLs
-      console.log('🌐 Making API call to save to database...')
+      debugLog('🌐 Making API call to save to database...')
       const apiUrl = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`
-      console.log('🌐 API URL:', apiUrl)
+      debugLog('🌐 API URL:', apiUrl)
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -506,20 +520,21 @@ const HeroContentManagement = () => {
         body: JSON.stringify(updatedData)
       })
 
-      console.log('🌐 API response status:', response.status)
+      debugLog('🌐 API response status:', response.status)
 
       if (response.ok) {
         const result = await response.json()
-        console.log('🌐 API response:', result)
+        debugLog('🌐 API response:', result)
 
         if (result.code === 200) {
-          console.log('✅ Database save successful')
+          debugLog('✅ Database save successful')
           setHeroContent(updatedData)
           localStorage.setItem('nungu_hero_content', JSON.stringify(updatedData))
           toast.success('Hero content updated successfully! The new content is now live on your website.')
           setPreviewOpen(false)
           setPendingData(null)
           setUploadStatus('')
+
           // Reload the hero content to show the updated version
           setTimeout(() => {
             loadHeroContent()
@@ -529,11 +544,11 @@ const HeroContentManagement = () => {
         }
       } else {
         const errorText = await response.text()
-        console.error('❌ API error response:', errorText)
+        debugLog('❌ API error response:', errorText)
         throw new Error('Failed to save hero content to database')
       }
     } catch (error) {
-      console.error('❌ Save error:', error)
+      debugLog('❌ Save error:', error)
       toast.error(`Failed to save hero content: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setIsLoading(false)
@@ -545,7 +560,7 @@ const HeroContentManagement = () => {
   const handleReset = () => {
     reset(heroContent)
     setSelectedFiles({})
-    toast.info('Form reset to last saved state')
+    toast('Form reset to last saved state')
   }
 
   // Delete uploaded file
@@ -620,8 +635,33 @@ const HeroContentManagement = () => {
                   </Grid>
                   <Grid item xs={12} md={6}>
                     <Typography variant="subtitle2" sx={{ mb: 1 }}>Mobile Content:</Typography>
+                    <Box sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'center' } }}>
+                      <Box
+                        sx={{
+                          width: 180,
+                          height: 320,
+                          p: 1,
+                          borderRadius: '28px',
+                          border: theme => `1px solid ${theme.palette.divider}`,
+                          bgcolor: 'common.black',
+                          boxShadow: theme => theme.shadows[4],
+                          position: 'relative',
+                          '&:before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 8,
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 52,
+                            height: 5,
+                            borderRadius: 999,
+                            bgcolor: 'grey.800',
+                            zIndex: 1
+                          }
+                        }}
+                      >
                     {heroContent.content_type === 'video' && (heroContent.mobile_video_url || heroContent.desktop_video_url) ? (
-                      <Box sx={{ position: 'relative', width: '100%', height: 200, borderRadius: 1, overflow: 'hidden' }}>
+                      <Box sx={{ position: 'relative', width: '100%', height: '100%', borderRadius: '22px', overflow: 'hidden' }}>
                         <video
                           src={heroContent.mobile_video_url || heroContent.desktop_video_url}
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -630,7 +670,7 @@ const HeroContentManagement = () => {
                         />
                       </Box>
                     ) : heroContent.content_type === 'image' && (heroContent.mobile_image_url || heroContent.desktop_image_url) ? (
-                      <Box sx={{ position: 'relative', width: '100%', height: 200, borderRadius: 1, overflow: 'hidden' }}>
+                      <Box sx={{ position: 'relative', width: '100%', height: '100%', borderRadius: '22px', overflow: 'hidden' }}>
                         <img
                           src={heroContent.mobile_image_url || heroContent.desktop_image_url}
                           alt="Mobile hero content"
@@ -638,8 +678,27 @@ const HeroContentManagement = () => {
                         />
                       </Box>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">Using desktop content for mobile</Typography>
+                      <Box
+                        sx={{
+                          width: '100%',
+                          height: '100%',
+                          borderRadius: '22px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          bgcolor: 'background.paper',
+                          p: 2,
+                          textAlign: 'center'
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">Using desktop content for mobile</Typography>
+                      </Box>
                     )}
+                      </Box>
+                    </Box>
+                    <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 1, textAlign: { xs: 'left', md: 'center' } }}>
+                      Phone-frame preview approximates portrait crop; confirm final art direction on the storefront.
+                    </Typography>
                   </Grid>
                 </Grid>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
@@ -652,8 +711,8 @@ const HeroContentManagement = () => {
             )}
 
             <form onSubmit={handleSubmit((data) => {
-              console.log('📝 Form submitted with data:', data)
-              console.log('📝 Current form values:', getValues())
+              debugLog('📝 Form submitted with data:', data)
+              debugLog('📝 Current form values:', getValues())
               onSubmit(data)
             })}>
               {/* Content Type Selection */}

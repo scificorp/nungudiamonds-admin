@@ -167,6 +167,17 @@ export const apiEndPoints = {
   EDIT_SILVER_RATE: "/rate/silver/edit",
   EDIT_PLATINUM_RATE: "/rate/platinum/edit",
 
+  FX_RATE_GET: "/fx-rate",
+  FX_RATE_UPDATE: "/fx-rate/update",
+  FX_RATE_HISTORY: "/fx-rate/history",
+
+  DIAMOND_QUALITY_MATRIX_GET: "/diamond/quality-matrix",
+  DIAMOND_QUALITY_MATRIX_ADD: "/diamond/quality-matrix/add",
+  DIAMOND_QUALITY_MATRIX_EDIT: "/diamond/quality-matrix/edit",
+  DIAMOND_QUALITY_MATRIX_DELETE: "/diamond/quality-matrix/delete",
+
+  DIAMOND_SHAPE_MULTIPLIERS_GET: "/diamond/shape-multipliers",
+  DIAMOND_SHAPE_MULTIPLIERS_EDIT: "/diamond/shape-multipliers/edit",
 
   ADD_PRODUCT_DROPDOWN_LIST: "/add-product/dropDown/list",
   PRODUCT_METAL_TONE_LIST: "/product/metalTone",
@@ -176,6 +187,7 @@ export const apiEndPoints = {
   ADD_PRODUCT_METAL_DIAMOND_DETAILS: "/product-metal-diamond-details",
   GET_ALL_PRODUCT_LIST: "/product",
   ADD_PRODUCT_IMAGES: "/product-images",
+  SET_MAIN_PRODUCT_IMAGE: "/product-images/set-main",
   STATUS_UPDATE_PRODUCT: "/active-inactive-product",
   TRENDING_STATUS_UPDATE_PRODUCT:"/product/trending/status",
   FEATURE_STATUS_UPDATE_PRODUCT: "/product/featured/status",
@@ -184,6 +196,7 @@ export const apiEndPoints = {
   GET_BY_ID_PRODUCTS: "/product",
   ADD_PRODUCT_MRTAL_DATA: "/product/add/metal",
   BULK_UPLOAD_ADD_PRODUCT: "/product-csv",
+  VALIDATE_BULK_UPLOAD_PRODUCT: "/product-csv/validate",
   ZIPFILE_BULK_UPLOAD_ADD_PRODUCT: "/product-imagezip",
   PRODUCT_IMAGE_DELETE: "/product-images/deleted",
 
@@ -264,6 +277,7 @@ export const apiEndPoints = {
   GET_ALL_CART_PRODUCT: "product/cart/list/admin",
 
   GET_ALL_GENERAL_ENQUIRIES: "enquiries/general",
+  UPDATE_GENERAL_ENQUIRIES: "enquiries/general/update",
   GET_ALL_PRODUCT_ENQUIRIES: "/enquiries/product",
   PRODUCT_INQUIRIES_DETAIL: "/enquiries/product/details",
   UPDATE_PRODUCT_INQUIRIES: 'enquiries/product/update',
@@ -302,6 +316,14 @@ export const apiEndPoints = {
   COLLECTION_EDIT: "collection/edit",
   COLLECTION_DELETE: "collection/delete",
   COLLECTION_STATUS: "collection/status",
+
+  // Product Collections
+  PRODUCT_COLLECTION_ASSIGN: "product-collection/assign",
+  PRODUCT_COLLECTION_REMOVE: "product-collection/remove",
+  PRODUCT_COLLECTION_BY_COLLECTION: "product-collection/by-collection",
+  PRODUCT_COLLECTION_BY_PRODUCT: "product-collection/by-product",
+  PRODUCT_COLLECTION_ASSIGNMENTS: "product-collection/assignments",
+  EMAIL_CONFIG: "email-config",
 
   CHANGE_PASSWORD: "/change-password",
   FORGOT_PASSWORD: "/forgot-password",

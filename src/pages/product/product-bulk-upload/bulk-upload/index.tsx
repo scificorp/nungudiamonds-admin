@@ -34,7 +34,8 @@ const ProductBulkUpload = () => {
 
       } else {
         toast.error(data.message);
-        return toast.error(data.data.map((t: any) => t.error_message));
+        
+return toast.error(data.data.map((t: any) => t.error_message));
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
@@ -42,7 +43,8 @@ const ProductBulkUpload = () => {
 
     return false;
   }
-  return (
+  
+return (
     <>
       {/* <Button variant='contained' sx={{ mr: 3, mb: 4, '& svg': { mr: 2 } }} onClick={() => Router.back()}>
         <Icon icon='material-symbols:arrow-back-rounded' />

@@ -1,10 +1,9 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card } from '@mui/material'
-import { useEffect, useState } from 'react'
-import TCCTableHeader from 'src/customComponents/data-table/header'
+import { Alert, Divider, Grid, Card, Button } from '@mui/material'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import TccDataTable from 'src/customComponents/data-table/table'
-import Box, { BoxProps } from '@mui/material/Box'
+import Box from '@mui/material/Box'
 import { appErrors, SEARCH_DELAY_TIME } from 'src/AppConstants'
 import { createPagination } from 'src/utils/sharedFunction'
 import { GIFTSET_DELETE, GIFTSET_GET_ALL, GIFTSET_STATUS } from 'src/services/AdminServices'
@@ -12,16 +11,16 @@ import { toast } from 'react-hot-toast'
 import { ICommonPagination } from 'src/data/interface'
 import DeleteDataModel from 'src/customComponents/delete-model'
 import Router from 'next/router'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 const GiftSet = () => {
 
-    let timer: any;
-    const [searchFilter, setSearchFilter] = useState()
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const [searchFilter, setSearchFilter] = useState('')
     const [id, setId] = useState('');
     const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
     const [showModel, setShowModel] = useState(false);
     const [result, setResult] = useState([])
-    const [slug, setSlug] = useState('')
 
     const editOnClickHandler = async (data: any) => {
         Router.push({ pathname: "/product/gift-set/gift-add", query: { slug: data.slug } })
@@ -40,14 +39,13 @@ const GiftSet = () => {
 
     /////////////////////// GET API ///////////////////////
 
-    const getAllApi = async (mbPagination: ICommonPagination) => {
+    const getAllApi = useCallback(async (mbPagination: ICommonPagination) => {
         try {
             const data = await GIFTSET_GET_ALL(mbPagination);
 
             if (data.code === 200 || data.code === "200") {
-                setResult(data.data.result)
-                setSlug(data.data.result.slug);
-                setPagination(data.data.pagination)
+                setResult(Array.isArray(data.data.result) ? data.data.result : [])
+                setPagination(data.data.pagination || mbPagination)
             } else {
                 return toast.error(data.message);
             }
@@ -56,10 +54,11 @@ const GiftSet = () => {
         }
 
         return false;
-    }
+    }, [])
+
     useEffect(() => {
-        getAllApi(pagination);
-    }, []);
+        getAllApi({ ...createPagination(), search_text: "" });
+    }, [getAllApi]);
 
     const handleChangePerPageRows = (perPageRows: number) => {
         getAllApi({ ...pagination, per_page_rows: perPageRows, current_page: 1 })
@@ -72,19 +71,19 @@ const GiftSet = () => {
     const handleChangeSortBy = (orderSort: any) => {
         getAllApi({ ...pagination, sort_by: orderSort == undefined ? "id" : orderSort.map((t: any) => t.field), order_by: orderSort == undefined ? "DESC" : orderSort.map((t: any) => t.sort) })
     }
-    const searchBusinessUser = async () => {
-        if (timer) {
-            clearTimeout(timer);
+    const searchBusinessUser = useCallback(async () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current)
         }
 
-        timer = setTimeout(() => {
-            getAllApi({ ...pagination, current_page: 1, search_text: searchFilter });
+        timerRef.current = setTimeout(() => {
+            getAllApi({ ...createPagination(), current_page: 1, search_text: searchFilter });
         }, SEARCH_DELAY_TIME);
-    }
+    }, [getAllApi, searchFilter]);
 
     useEffect(() => {
         searchBusinessUser();
-    }, [searchFilter]);
+    }, [searchBusinessUser]);
 
 
     /////////////////////// DELETE  API ///////////////////////
@@ -192,18 +191,29 @@ const GiftSet = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Gift Sets'></CardHeader>
                     <Divider />
-                    <Box>
-                        <TCCTableHeader isButton value={searchFilter}
-                            onChange={(e: any) => setSearchFilter(e.target.value)}
-                            toggle={() => {
-                                Router.push("/product/gift-set/gift-add")
-                            }}
-                            ButtonName='Add Gift Set'
+                    <Box sx={{ px: 6, pt: 6, pb: 4 }}>
+                        <AdminPageHeader
+                            title='Legacy Gift Products'
+                            subtitle='Manage standalone gift products used by the legacy giftset order flow.'
+                            searchValue={searchFilter}
+                            onSearchChange={setSearchFilter}
+                            actions={
+                                <Button
+                                    variant='contained'
+                                    onClick={() => Router.push("/product/gift-set/gift-add")}
+                                    startIcon={<Icon icon='tabler:plus' />}
+                                >
+                                    Add Gift Product
+                                </Button>
+                            }
                         />
-
+                        <Alert severity='warning' sx={{ mt: 3 }}>
+                            This is not a bundle builder. The current API stores standalone gift products and
+                            giftset orders separately; it does not attach multiple catalog products into one bundled offer.
+                        </Alert>
                     </Box>
+                    <Divider />
                     <TccDataTable
                         column={column}
                         rows={result}
@@ -213,7 +223,8 @@ const GiftSet = () => {
                         rowCount={pagination.total_items}
                         page={pagination.current_page - 1}
                         onPageChange={handleOnPageChange}
-                        iconTitle='Gift Set'
+                        iconTitle='Gift Product'
+                        emptyMessage='No legacy gift products found.'
                     />
                 </Card>
             </Grid>

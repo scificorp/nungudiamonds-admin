@@ -1,9 +1,9 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
 import { Box, Button, Divider, Drawer, FormControl, FormHelperText, TextField, Typography } from '@mui/material'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import { forwardRef, useEffect, useState } from 'react'
 import DrawerHeader from 'src/customComponents/components/drawer-header'
@@ -92,6 +92,7 @@ const FeaturesSection = () => {
     const clearFormData = () => {
         setImageShow("");
         reset()
+
         // setfeatureId("")
     }
 
@@ -106,6 +107,7 @@ const FeaturesSection = () => {
         setValue("content", data.content)
         setStartDate(new Date(data.active_date))
         setEndDate(new Date(data.expiry_date))
+
         // console.log(data);
         setDialogTitle('Edit')
         toggleAddFeatureSection()
@@ -162,7 +164,8 @@ const FeaturesSection = () => {
                 toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
             }
         }
-        return false
+        
+return false
     }
 
     ///////////////////////// EDIT API ////////////////////////
@@ -326,7 +329,7 @@ const FeaturesSection = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Features Section'></CardHeader>
+                    <AdminPageHeader title='Features Section' />
                     <Divider />
                     <TCCTableHeader
                         isButton

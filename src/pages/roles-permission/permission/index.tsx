@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { Divider, CardHeader, Grid, Card, Drawer, Button } from '@mui/material'
+import { Alert, Divider, Grid, Card, Drawer, Button } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import Box from '@mui/material/Box'
@@ -192,6 +193,9 @@ const UserList = () => {
   useEffect(() => {
     fetchBusinessUser(pagination);
     getAllRoles();
+
+    // Legacy table fetch intentionally runs once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const getAllRoles = async () => {
@@ -233,6 +237,9 @@ const UserList = () => {
 
   useEffect(() => {
     searchBusinessUser();
+
+    // Debounced search is driven only by the input value.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFilter]);
 
   const saveBusinessUser = async (values: IBUFormState) => {
@@ -295,8 +302,14 @@ const UserList = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='User List'></CardHeader>
+          <AdminPageHeader
+            title='User Management'
+            subtitle='Create admin portal users by pairing an email/password with a role. Active users are created in the backend AppUser table.'
+          />
           <Divider />
+          <Alert severity='info' sx={{ m: 4, mb: 0 }}>
+            Adding a user here does grant admin access when a valid role and password are provided. Use Roles to control what that user can access.
+          </Alert>
           <TCCTableHeader isButton value={searchFilter}
             onChange={(e: any) => setSearchFilter(e.target.value)}
             toggle={() => {
@@ -327,7 +340,7 @@ const UserList = () => {
         sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
       >
         <DrawerHeader
-          title={`${dialogTitle} New user`}
+          title={dialogTitle === 'Add' ? 'Add Admin User' : 'Edit Admin User'}
           onClick={() => {
             toggleAddUserDrawer()
           }}

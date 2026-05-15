@@ -39,6 +39,7 @@ export interface ICommonPagination {
   order_by?: string
   sort_by?: string
   is_active?: TBitFieldValue
+  no_pagination?: 1 | '1' | boolean
   total_pages?: number
   total_items?: number
   search_text?: string

@@ -3,7 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 interface DeleteDataModelProps {
     showModel: boolean;
     toggle: (show: boolean) => void;
-    onClick: () => void;
+    onClick: (data?: any) => void;
     title?: string;
     description?: string;
 }

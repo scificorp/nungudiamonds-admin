@@ -1,12 +1,14 @@
-import { config } from 'process'
 import { apiEndPoints } from 'src/AppConstants'
-import { IBusinessUser, ICommonOrderPagination, ICommonPagination, IRoleConfiguration } from 'src/data/interface'
+import { IBusinessUser, ICommonOrderPagination, ICommonPagination, IRole, IRoleConfiguration } from 'src/data/interface'
+import { ApiResponse, LoginResponse, DashboardData, Product, Order, Customer, Category, Collection } from 'src/data/api-types'
 import { getEncryptedText, getQueryUrlFormPagiantion, getQueryUrlOrderPagiantion } from 'src/utils/sharedFunction'
 import { httpMethods, serviceMaker } from './ServiceWarpper'
 
-export const ADMIN_LOGIN = (payload: any) => serviceMaker(`${apiEndPoints.ADMIN_LOGIN}`, httpMethods.POST, payload)
+export const ADMIN_LOGIN = (payload: { username: string; password: string }) => 
+  serviceMaker<ApiResponse<LoginResponse>>(`${apiEndPoints.ADMIN_LOGIN}`, httpMethods.POST, payload)
 
-export const GET_ALL_ROLES = () => serviceMaker(`${apiEndPoints.GET_ALL_ROLES}?no_pagination=1`, httpMethods.GET)
+export const GET_ALL_ROLES = () => 
+  serviceMaker<ApiResponse<IRole[]>>(`${apiEndPoints.GET_ALL_ROLES}?no_pagination=1`, httpMethods.GET)
 
 export const GET_ALL_MENU_ITEMS = () =>
   serviceMaker(`${apiEndPoints.GET_ALL_MENU_ITEMS}?no_pagination=1`, httpMethods.GET)
@@ -186,8 +188,8 @@ export const METAL_MASTER_DELETE = (payload: any) => serviceMaker(`${apiEndPoint
 export const METAL_MASTER_STATUS = (payload: any) => serviceMaker(`${apiEndPoints.METAL_MASTER_STATUS}`, httpMethods.PUT, payload);
 
 export const METAL_MASTER_DROPDOWN = () => serviceMaker(`${apiEndPoints.METAL_MASTER_DROPDOWN}`, httpMethods.GET);
-export const CARAT_MASTER_DROPDOWN = (payload: any) => serviceMaker(`${apiEndPoints.CARAT_MASTER_DROPDOWN}`, httpMethods.POST, payload);
-export const METAL_TONE_DROPDOWN = (payload: any) => serviceMaker(`${apiEndPoints.METAL_TONE_DROPDOWN}`, httpMethods.POST, payload);
+export const CARAT_MASTER_DROPDOWN = (payload: any = {}) => serviceMaker(`${apiEndPoints.CARAT_MASTER_DROPDOWN}`, httpMethods.POST, payload);
+export const METAL_TONE_DROPDOWN = (_payload?: any) => serviceMaker(`${apiEndPoints.METAL_TONE_DROPDOWN}`, httpMethods.GET);
 
 export const METAL_GROUP_MASTER_ADD = (payload: any) => serviceMaker(`${apiEndPoints.METAL_GROUP_MASTER_ADD}`, httpMethods.POST,payload);
 export const METAL_GROUP_MASTER_GET_ALL = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.METAL_GROUP_MASTER_GET_ALL}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
@@ -202,6 +204,18 @@ export const EDIT_GOLD_RATE = (payload: any) => serviceMaker(`${apiEndPoints.EDI
 export const EDIT_SILVER_RATE = (payload: any) => serviceMaker(`${apiEndPoints.EDIT_SILVER_RATE}`, httpMethods.PUT, payload)
 export const EDIT_PLATINUM_RATE = (payload: any) => serviceMaker(`${apiEndPoints.EDIT_PLATINUM_RATE}`, httpMethods.PUT, payload)
 
+export const FX_RATE_GET = () => serviceMaker(`${apiEndPoints.FX_RATE_GET}`, httpMethods.GET)
+export const FX_RATE_UPDATE = (payload: any) => serviceMaker(`${apiEndPoints.FX_RATE_UPDATE}`, httpMethods.PUT, payload)
+export const FX_RATE_HISTORY = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.FX_RATE_HISTORY}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
+
+export const DIAMOND_QUALITY_MATRIX_GET = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.DIAMOND_QUALITY_MATRIX_GET}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
+export const DIAMOND_QUALITY_MATRIX_ADD = (payload: any) => serviceMaker(`${apiEndPoints.DIAMOND_QUALITY_MATRIX_ADD}`, httpMethods.POST, payload);
+export const DIAMOND_QUALITY_MATRIX_EDIT = (payload: any) => serviceMaker(`${apiEndPoints.DIAMOND_QUALITY_MATRIX_EDIT}`, httpMethods.PUT, payload);
+export const DIAMOND_QUALITY_MATRIX_DELETE = (payload: any) => serviceMaker(`${apiEndPoints.DIAMOND_QUALITY_MATRIX_DELETE}`, httpMethods.POST, payload);
+
+export const DIAMOND_SHAPE_MULTIPLIERS_GET = () => serviceMaker(`${apiEndPoints.DIAMOND_SHAPE_MULTIPLIERS_GET}`, httpMethods.GET);
+export const DIAMOND_SHAPE_MULTIPLIERS_EDIT = (payload: any) => serviceMaker(`${apiEndPoints.DIAMOND_SHAPE_MULTIPLIERS_EDIT}`, httpMethods.PUT, payload);
+
 export const ADD_PRODUCT_DROPDOWN_LIST = () => serviceMaker(`${apiEndPoints.ADD_PRODUCT_DROPDOWN_LIST}`, httpMethods.GET)
 export const METAL_TONE_DROPDOWN_LIST = (payload: any) => serviceMaker(`${apiEndPoints.PRODUCT_METAL_TONE_LIST}`, httpMethods.POST, payload)
 export const ADD_PRODUCT_BASIC_DETAILS = (payload: any) => serviceMaker(`${apiEndPoints.ADD_PRODUCT_BASIC_DETAILS}`, httpMethods.POST, payload)
@@ -215,10 +229,12 @@ export const FEATURE_STATUS_UPDATE_PRODUCT = (payload: any) => serviceMaker(`${a
 export const TRENDING_STATUS_UPDATE_PRODUCT = (payload: any) => serviceMaker(`${apiEndPoints.TRENDING_STATUS_UPDATE_PRODUCT}`, httpMethods.POST, payload)
 export const DELETE_PRODUCT_API = (payload: any) => serviceMaker(`${apiEndPoints.DELETE_PRODUCT_API}`, httpMethods.POST, payload)
 export const ADD_PRODUCT_IMAGES = (payload: any) => serviceMaker(`${apiEndPoints.ADD_PRODUCT_IMAGES}`, httpMethods.POST_CONFIG, payload,  { headers: { 'Content-Type': 'multipart/form-data' }})
+export const SET_MAIN_PRODUCT_IMAGE = (payload: any) => serviceMaker(`${apiEndPoints.SET_MAIN_PRODUCT_IMAGE}`, httpMethods.POST, payload)
 export const ADD_PRODUCT_VIDEO = (payload: any) => serviceMaker(`${apiEndPoints.ADD_PRODUCT_VIDEO}`, httpMethods.POST_CONFIG, payload,  { headers: { 'Content-Type': 'multipart/form-data' }})
 export const GET_BY_ID_PRODUCTS = (id: number) =>serviceMaker(`${apiEndPoints.GET_BY_ID_PRODUCTS}/${id}`,httpMethods.GET)
 export const ADD_PRODUCT_MRTAL_DATA = (payload: any) => serviceMaker(`${apiEndPoints.ADD_PRODUCT_MRTAL_DATA}`, httpMethods.POST, payload)
 export const BULK_UPLOAD_ADD_PRODUCT = (payload: any) => serviceMaker(`${apiEndPoints.BULK_UPLOAD_ADD_PRODUCT}`, httpMethods.POST_CONFIG, payload, {headers: { 'Content-Type' : 'multipart/form-data'}});
+export const VALIDATE_BULK_UPLOAD_PRODUCT = (payload: any) => serviceMaker(`${apiEndPoints.VALIDATE_BULK_UPLOAD_PRODUCT}`, httpMethods.POST_CONFIG, payload, {headers: { 'Content-Type' : 'multipart/form-data'}});
 export const ZIPFILE_BULK_UPLOAD_ADD_PRODUCT = (payload: any) => serviceMaker(`${apiEndPoints.ZIPFILE_BULK_UPLOAD_ADD_PRODUCT}`, httpMethods.POST_CONFIG, payload, {headers: { 'Content-Type' : 'multipart/form-data'}});
 export const PRODUCT_IMAGE_DELETE = (payload: any) => serviceMaker(`${apiEndPoints.PRODUCT_IMAGE_DELETE}`, httpMethods.POST, payload)
 
@@ -301,6 +317,7 @@ export const GET_ALL_WISHLIST = (payload: ICommonPagination) => serviceMaker(`${
 export const GET_ALL_CART_PRODUCT = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.GET_ALL_CART_PRODUCT}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
 
 export const GET_ALL_GENERAL_ENQUIRIES = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.GET_ALL_GENERAL_ENQUIRIES}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
+export const UPDATE_GENERAL_ENQUIRIES = (payload: any) => serviceMaker(`${apiEndPoints.UPDATE_GENERAL_ENQUIRIES}`, httpMethods.POST, payload);
 export const GET_ALL_PRODUCT_ENQUIRIES = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.GET_ALL_PRODUCT_ENQUIRIES}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
 export const PRODUCT_INQUIRIES_DETAIL = (payload: any) => serviceMaker(`${apiEndPoints.PRODUCT_INQUIRIES_DETAIL}`, httpMethods.POST, payload);
 export const UPDATE_PRODUCT_INQUIRIES = (payload: any) => serviceMaker(`${apiEndPoints.UPDATE_PRODUCT_INQUIRIES}`, httpMethods.POST, payload);
@@ -322,7 +339,11 @@ export const GIFTSET_ORDER_STATUS_UPDATE = (payload: any) => serviceMaker(`${api
 export const GIFTSET_DELIVERY_STATUS = (payload: any) => serviceMaker(`${apiEndPoints.GIFTSET_DELIVERY_STATUS}`, httpMethods.PUT, payload);
 export const GIFTSET_INVOICE_DETAIL = (payload: any) => serviceMaker(`${apiEndPoints.GIFTSET_INVOICE_DETAIL}`, httpMethods.POST, payload);
 
-export const GET_ALL_DASHBOARD = () => serviceMaker(`${apiEndPoints.GET_ALL_DASHBOARD}`, httpMethods.GET);
+export const GET_ALL_DASHBOARD = () => 
+  serviceMaker<ApiResponse<DashboardData>>(`${apiEndPoints.GET_ALL_DASHBOARD}`, httpMethods.GET);
+
+export const GET_EMAIL_CONFIG = () => serviceMaker(`${apiEndPoints.EMAIL_CONFIG}`, httpMethods.GET);
+export const UPDATE_EMAIL_CONFIG = (payload: any) => serviceMaker(`${apiEndPoints.EMAIL_CONFIG}`, httpMethods.PUT, payload);
 
 export const SIDE_SETTING_STYLE_ADD = (payload: any) => serviceMaker(`${apiEndPoints.SIDE_SETTING_STYLE_ADD}`, httpMethods.POST_CONFIG, payload, {headers: { 'Content-Type' : 'multipart/form-data'}});
 export const SIDE_SETTING_STYLE_GET_ALL = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.SIDE_SETTING_STYLE_GET_ALL}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
@@ -366,3 +387,10 @@ export const EDIT_COLLECTION = (payload: any) => serviceMaker(`${apiEndPoints.CO
 export const DELETE_COLLECTION = (payload: any) => serviceMaker(`${apiEndPoints.COLLECTION_DELETE}`, httpMethods.POST, payload);
 export const STATUS_COLLECTION = (payload: any) => serviceMaker(`${apiEndPoints.COLLECTION_STATUS}`, httpMethods.PUT, payload);
 export const GET_BY_ID_COLLECTION = (id: number) => serviceMaker(`${apiEndPoints.COLLECTION_GET_BY_ID}/${id}`, httpMethods.GET)
+
+// Product Collections
+export const ASSIGN_PRODUCTS_TO_COLLECTION = (payload: any) => serviceMaker(`${apiEndPoints.PRODUCT_COLLECTION_ASSIGN}`, httpMethods.POST, payload);
+export const REMOVE_PRODUCTS_FROM_COLLECTION = (payload: any) => serviceMaker(`${apiEndPoints.PRODUCT_COLLECTION_REMOVE}`, httpMethods.POST, payload);
+export const GET_PRODUCTS_BY_COLLECTION = (collection_id: number, payload: ICommonPagination) => serviceMaker(`${apiEndPoints.PRODUCT_COLLECTION_BY_COLLECTION}/${collection_id}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
+export const GET_COLLECTIONS_BY_PRODUCT = (product_id: number) => serviceMaker(`${apiEndPoints.PRODUCT_COLLECTION_BY_PRODUCT}/${product_id}`, httpMethods.GET);
+export const GET_ALL_PRODUCT_COLLECTION_ASSIGNMENTS = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.PRODUCT_COLLECTION_ASSIGNMENTS}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);

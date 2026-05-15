@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
-import { CardContent, CardHeader, Grid, Card, Typography, Button, FormControl, TextField, FormHelperText, Autocomplete } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { Alert, CardContent, CardHeader, Grid, Card, Typography, Button, FormControl, TextField, FormHelperText, Autocomplete } from '@mui/material'
+import { useCallback, useEffect, useState } from 'react'
 import TccSingleFileUpload from 'src/customComponents/Form-Elements/file-upload/singleFile-upload'
 import TccEditor from 'src/customComponents/Form-Elements/editor'
 import { Controller, useForm } from 'react-hook-form'
@@ -8,8 +8,6 @@ import { appErrors, FIELD_REQUIRED } from 'src/AppConstants'
 import { ADD_PRODUCT_DROPDOWN_LIST, GIFTSET_ADD, GIFTSET_EDIT, GIFTSET_GET_BY_ID, GIFTSET_IMAGE_DELETE } from 'src/services/AdminServices'
 import { toast } from 'react-hot-toast'
 import Router, { useRouter } from 'next/router'
-import TccSelect from 'src/customComponents/Form-Elements/select'
-import TccInput from 'src/customComponents/Form-Elements/inputField'
 import TccMultipleImageUpload from 'src/customComponents/Form-Elements/file-upload/image-upload'
 import DeleteDataModel from 'src/customComponents/delete-model'
 
@@ -37,7 +35,7 @@ const AddGiftSet = () => {
     const [gender, setGender] = useState<{ id: null, name: "" }[]>([])
     const [price, setPrice] = useState('')
     const [editerData, setEditerData] = useState("")
-    const [edit, setEdit] = useState<String>('<p></p>')
+    const [edit, setEdit] = useState<string>('<p></p>')
     const [called, setCalled] = useState(true)
     const [testid, setTestId] = useState('');
     const [imageFile, setImageFile] = useState<string>()
@@ -90,7 +88,7 @@ const AddGiftSet = () => {
 
     /////////////////////// GETBYID API ///////////////////////
 
-    const getByIdData = async (dropDownData: any, slugData: any) => {
+    const getByIdData = useCallback(async (dropDownData: any, slugData: any) => {
 
         const payload = {
             "slug": slugData,
@@ -100,20 +98,26 @@ const AddGiftSet = () => {
             const data = await GIFTSET_GET_BY_ID(payload);
 
             if (data.code === 200 || data.code === "200") {
-                setImageShow(data.data.gift_product_images.filter((t: any) => t.image_type == 1)[0].image_path)
-                setBannerImageShow(data.data.gift_product_images.filter((t: any) => t.image_type == 2))
+                const giftImages = Array.isArray(data.data.gift_product_images) ? data.data.gift_product_images : []
+                const thumbImage = giftImages.find((t: any) => t.image_type == 1)
+                const featureImages = giftImages.filter((t: any) => t.image_type == 2)
+
+                setImageShow(thumbImage?.image_path || '')
+                setBannerImageShow(featureImages)
                 setTestId(data.data.id);
                 setValue('productName', data.data.product_title)
                 setValue('productSku', data.data.sku)
                 setValue('shortDescription', data.data.short_des)
                 setEdit(data.data.long_des)
+                const savedTags = data.data.tags || ''
                 const tags = dropDownData.keyWords?.filter((t: any) => {
-                    if (data.data.tags.indexOf(parseInt(t.id)) >= 0) return t;
+                    if (savedTags.indexOf(parseInt(t.id)) >= 0) return t;
                 });
                 setKeyword(tags)
 
+                const savedGender = data.data.genders || data.data.gender || ''
                 const gender: any = genderData?.filter((t: any) => {
-                    if (data.data.genders.indexOf(parseInt(t.id)) >= 0) return t;
+                    if (savedGender.indexOf(parseInt(t.id)) >= 0) return t;
                 });
                 setGender(gender)
                 setValue('price', data.data.price)
@@ -127,11 +131,11 @@ const AddGiftSet = () => {
 
         return false;
 
-    }
+    }, [setValue])
 
     /////////////////////// DROPDOWN DATA /////////////////
 
-    const getAllDropDownData = async (productSlug: any) => {
+    const getAllDropDownData = useCallback(async (productSlug: any) => {
         try {
             const data = await ADD_PRODUCT_DROPDOWN_LIST();
             if (data.code === 200 || data.code === "200") {
@@ -147,11 +151,14 @@ const AddGiftSet = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
         }
-    }
+    }, [getByIdData])
 
     useEffect(() => {
+        if (!router.isReady) {
+            return
+        }
 
-        let slugData: string = slug as string
+        const slugData: string = slug as string
         if (slugData != undefined) {
             setDialogTitle('Edit')
             setCalled(true)
@@ -161,7 +168,7 @@ const AddGiftSet = () => {
             setDialogTitle('Add')
             setCalled(true)
         }
-    }, [router.isReady])
+    }, [getAllDropDownData, router.isReady, slug])
 
     /////////////////////// ADD API ///////////////////////
 
@@ -195,7 +202,8 @@ const AddGiftSet = () => {
                 toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
             }
         }
-        return false;
+        
+return false;
     }
 
     /////////////////////// EDIT API ///////////////////////
@@ -254,7 +262,8 @@ const AddGiftSet = () => {
         } catch (e: any) {
             toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
         }
-        return false;
+        
+return false;
     }
 
     const onSubmit = (data: any) => {
@@ -270,14 +279,18 @@ const AddGiftSet = () => {
 
     return (
         <>
-            <Button variant='contained' sx={{ ml: 3, mb: 4, mt: -2, '& svg': { mr: 2 } }} onClick={() => Router.back()}>
+            <Button variant='contained' sx={{ ml: 3, mb: 4, mt: -2, '& svg': { mr: 2 } }} onClick={() => Router.push('/product/gift-set/gift-list')}>
                 <Icon icon='material-symbols:arrow-back-rounded' />
-                Back
+                Back to Gift Products
             </Button>
             <Card>
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <CardContent>
-                        {action === "view" ? <></> : <CardHeader sx={{ mt: -5, ml: -5 }} title={`${dialogTitle} Gift Set`}></CardHeader>}
+                        {action === "view" ? <></> : <CardHeader sx={{ mt: -5, ml: -5 }} title={`${dialogTitle} Gift Product`}></CardHeader>}
+                        <Alert severity='warning' sx={{ mb: 4 }}>
+                            This legacy screen creates a standalone gift product for the giftset order flow.
+                            It does not bundle existing catalog products together.
+                        </Alert>
                         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                             <Grid item xs={6}>
                                 <FormControl fullWidth sx={{ mb: 4 }}>

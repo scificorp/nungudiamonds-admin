@@ -1,7 +1,6 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import CardHeader from '@mui/material/CardHeader'
 import { Button, CardContent, FormControlLabel, Radio, RadioGroup, Typography } from '@mui/material'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import { ChangeEvent, useEffect, useState } from 'react'
@@ -10,6 +9,7 @@ import TccColorPicker from 'src/customComponents/color-picker'
 import { EDIT_COMPANY_INFO, GET_COMPANY_INFO } from 'src/services/AdminServices'
 import { toast } from 'react-hot-toast'
 import { appErrors } from 'src/AppConstants'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 
 const CompanyInfoSetup = () => {
 
@@ -39,9 +39,6 @@ const CompanyInfoSetup = () => {
   const [darkImageFile, setDarkImageFile] = useState<File>()
   const [lightImageFile, setLightImageFile] = useState<File>()
 
-  console.log("-------", darkImageFile)
-  console.log("1111111", lightImageFile)
-
   const handleRadioChangeStripe = (event: ChangeEvent<HTMLInputElement>) => {
 
     setRadioButtonStripe((event.target as HTMLInputElement).value)
@@ -51,8 +48,6 @@ const CompanyInfoSetup = () => {
     try {
       const data = await GET_COMPANY_INFO();
       if (data.code === 200 || data.code === "200") {
-
-        console.log(data.data)
 
         const statusValue = data.data.companyInfo.announce_is_active == "1" ? "checked" : "unchecked"
 
@@ -88,7 +83,6 @@ const CompanyInfoSetup = () => {
   const editCompanyInfoDataApi = async () => {
     const statusValue = radioButtonStripe === "checked" ? "1" : "0"
 
-    console.log(statusValue)
     const formData = new FormData()
     formData.append("id", compnayInfoId)
     formData.append("dark_image", darkImageFile || "")
@@ -139,7 +133,12 @@ const CompanyInfoSetup = () => {
       <Grid container gridRow={1} spacing={6}>
         <Grid item xs={12}>
           <Card>
-            <CardHeader title='Company Info Setup'></CardHeader>
+            <CardContent>
+              <AdminPageHeader
+                title='Company Info Setup'
+                subtitle='Manage public company details, brand assets, social links, theme colors, and announcement banner copy.'
+              />
+            </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={6} lg={6}>

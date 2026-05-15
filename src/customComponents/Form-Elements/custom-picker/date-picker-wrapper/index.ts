@@ -438,6 +438,7 @@ const DatePickerWrapper = styled(Box)<BoxProps>(({ theme }: any) => {
         '& .react-datepicker__time-box': {
           width: '100%'
         },
+
         // '& .react-datepicker__time-list': {
         //   '&::-webkit-scrollbar': {
         //     width: 8

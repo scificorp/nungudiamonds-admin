@@ -1,5 +1,5 @@
 // ** React Imports
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode, useCallback, useEffect, useState } from 'react'
 
 // ** MUI Imports
 import { Theme } from '@mui/material/styles'
@@ -34,15 +34,32 @@ interface Props {
   contentHeightFixed?: boolean
 }
 
+const findChildrenByParentId = (idParent: number, menuItems: IUserAccessMenuItems[]) => {
+  const findChildItem: NavLink[] | NavGroup[] = []
+  let findInnerChildItem: NavLink[] | NavGroup[] = []
+  menuItems.forEach((item: IUserAccessMenuItems) => {
+    if (item.id_parent_menu === idParent) {
+      if (item.nav_path) {
+        findChildItem.push({ title: item.name, path: item.nav_path, ...(item.icon ? { icon: item.icon } : {}) })
+
+      } else {
+        findInnerChildItem = findChildrenByParentId(item.id, menuItems)
+        findChildItem.push({ title: item.name, children: findInnerChildItem, ...(item.icon ? { icon: item.icon } : {}) })
+
+      }
+
+    }
+  })
+
+  return findChildItem
+}
+
 const UserLayout = ({ children, contentHeightFixed }: Props) => {
   // ** Hooks
   const { settings, saveSettings } = useSettings()
   const [verticalNavItems, setVerticalNavItems] = useState<VerticalNavItemsType>([]);
-  useEffect(() => {
-    fetchNavItems();
-  }, []);
 
-  const fetchNavItems = async () => {
+  const fetchNavItems = useCallback(async () => {
 
     try {
       const data = await GET_ACCESS_MENU_ITEMS()
@@ -60,7 +77,7 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
           findChildItem = findChildrenByParentId(parentMenu.id, data.data);
           if (parentMenu.menu_location == 3) {
 
-            console.log(parentMenu.nav_path)
+
             tempVerticalNavItems.push({ sectionTitle: parentMenu.name })
 
           }
@@ -88,27 +105,11 @@ const UserLayout = ({ children, contentHeightFixed }: Props) => {
     } catch (e: any) {
       toast.error(e?.data?.message)
     }
-  }
+  }, [])
 
-  const findChildrenByParentId = (idParent: number, menuItems: IUserAccessMenuItems[]) => {
-    const findChildItem: NavLink[] | NavGroup[] = [];
-    let findInnerChildItem: NavLink[] | NavGroup[] = [];
-    menuItems.forEach((item: IUserAccessMenuItems) => {
-      if (item.id_parent_menu === idParent) {
-        if (item.nav_path) {
-          findChildItem.push({ title: item.name, path: item.nav_path, ...(item.icon ? { icon: item.icon } : {}) })
-
-        } else {
-          findInnerChildItem = findChildrenByParentId(item.id, menuItems);
-          findChildItem.push({ title: item.name, children: findInnerChildItem, ...(item.icon ? { icon: item.icon } : {}) })
-
-        }
-
-      }
-    });
-
-    return findChildItem;
-  }
+  useEffect(() => {
+    fetchNavItems();
+  }, [fetchNavItems]);
 
 
   // ** Vars for server side navigation

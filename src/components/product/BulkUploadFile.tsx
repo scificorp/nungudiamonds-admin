@@ -27,7 +27,7 @@ const BulkUploadFile = ({ onSuccess }: BulkUploadFileProps) => {
     fetch(URL).then(response => {
       response.blob().then(blob => {
         const fileURL = window.URL.createObjectURL(blob);
-        let alink = document.createElement('a');
+        const alink = document.createElement('a');
         alink.href = fileURL;
         alink.download = 'SAMPLE_PRODUCT_Import.xlsx';
         alink.click();
@@ -40,6 +40,23 @@ const BulkUploadFile = ({ onSuccess }: BulkUploadFileProps) => {
       return toast.error('Please select a file to upload')
     }
 
+    // Validate file type
+    const allowedTypes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'application/vnd.ms-excel',
+      'text/csv'
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      return toast.error('Please upload a valid CSV or Excel file (.csv, .xlsx, .xls)')
+    }
+
+    // Validate file size (10MB limit)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      return toast.error('File size must be less than 10MB')
+    }
+
     setIsLoading(true)
     const formData: any = new FormData()
     formData.append("product_csv", file || "")
@@ -47,7 +64,7 @@ const BulkUploadFile = ({ onSuccess }: BulkUploadFileProps) => {
     try {
       const data = await BULK_UPLOAD_ADD_PRODUCT(formData);
       if (data.code === 200 || data.code === "200") {
-        toast.success(data.message);
+        toast.success(data.message || 'Products uploaded successfully');
         setFile(undefined)
         setBulkErrorMessage([])
         if (onSuccess) {
@@ -56,11 +73,19 @@ const BulkUploadFile = ({ onSuccess }: BulkUploadFileProps) => {
           Router.push({ pathname: "/product/all-products" })
         }
       } else {
-        return toast.error(data.data.map((t: any) => t.error_message));
+        const errorMessage = Array.isArray(data.data)
+          ? data.data.map((t: any) => t.error_message).join(', ')
+          : data.message || 'Upload failed';
+        
+return toast.error(errorMessage);
       }
     } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
-      setBulkErrorMessage(e.data.data)
+      console.error('Bulk upload error:', e);
+      const errorMessage = e?.data?.message || e?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN;
+      toast.error(errorMessage);
+      if (e?.data?.data) {
+        setBulkErrorMessage(e.data.data)
+      }
     } finally {
       setIsLoading(false)
     }
@@ -76,9 +101,10 @@ const BulkUploadFile = ({ onSuccess }: BulkUploadFileProps) => {
           <Divider />
           <CardContent>
             <Typography variant='h6' sx={{ mb: 2 }}>Information:</Typography>
-            <Typography sx={{ mb: 1 }}>1. Upload CSV or Excel files with product data</Typography>
+            <Typography sx={{ mb: 1 }}>1. Upload CSV (.csv) or Excel (.xlsx, .xls) files with product data</Typography>
             <Typography sx={{ mb: 1 }}>2. Follow the template format exactly</Typography>
-            <Typography sx={{ mb: 4 }}>3. Download the sample file below for reference</Typography>
+            <Typography sx={{ mb: 1 }}>3. Maximum file size: 10MB</Typography>
+            <Typography sx={{ mb: 4 }}>4. Download the sample file below for reference</Typography>
             <form>
               <TccFileUpload onDrop={setFile} />
               <Box sx={{ mt: 4 }}>

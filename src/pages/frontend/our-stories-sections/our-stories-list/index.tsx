@@ -1,7 +1,8 @@
 // ** MUI Imports
-import { Divider, CardHeader, Grid, Card } from '@mui/material'
+import { Divider, Grid, Card } from '@mui/material'
 import { useEffect, useState } from 'react'
 import TCCTableHeader from 'src/customComponents/data-table/header'
+import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
 import Box from '@mui/material/Box'
 import { appErrors, SEARCH_DELAY_TIME } from 'src/AppConstants'
@@ -145,6 +146,13 @@ const StoriesComponent = () => {
             text: 'text'
         },
         {
+            flex: 2,
+            value: 'subtitle',
+            headerName: 'Subtitle',
+            field: 'subtitle',
+            text: 'text'
+        },
+        {
             flex: 1,
             headerName: 'Status',
             field: '',
@@ -176,7 +184,7 @@ const StoriesComponent = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Our Stories'></CardHeader>
+                    <AdminPageHeader title='Our Stories' />
                     <Divider />
                     <Box>
                         <TCCTableHeader isButton value={searchFilter}

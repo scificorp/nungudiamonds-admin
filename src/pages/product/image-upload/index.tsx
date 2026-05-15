@@ -128,7 +128,7 @@ const ProductImageUpload = (data: any) => {
     }
 
     useEffect(() => {
-        let productDetailId: string = id as string
+        const productDetailId: string = id as string
 
         if (productDetailId != undefined) {
             setProductId(parseInt(productDetailId))
@@ -161,7 +161,8 @@ const ProductImageUpload = (data: any) => {
                 const metalData = metalToneList;
                 metalData[index].imageData = data
                 setMetalToneList([...metalData])
-                return (toast.success(data.message))
+                
+return (toast.success(data.message))
             }
             else {
                 toast.error(data.message);
@@ -201,7 +202,8 @@ const ProductImageUpload = (data: any) => {
                     const metalData = metalToneList;
                     metalData[index].featuredImage = data
                     setMetalToneList([...metalData])
-                    return (toast.success(data.message))
+                    
+return (toast.success(data.message))
                 }
                 else {
                     toast.error(data.message);
@@ -237,7 +239,8 @@ const ProductImageUpload = (data: any) => {
                 const metalData = metalToneList;
                 metalData[index].rotedImage = data
                 setMetalToneList([...metalData])
-                return (toast.success(data.message))
+                
+return (toast.success(data.message))
             }
             else {
                 toast.error(data.message);
@@ -274,7 +277,8 @@ const ProductImageUpload = (data: any) => {
                     const metalData = metalToneList;
                     metalData[index].productVideo = data
                     setMetalToneList([...metalData])
-                    return (toast.success(data.message))
+                    
+return (toast.success(data.message))
                 }
                 else {
                     toast.error(data.message);
@@ -326,7 +330,7 @@ const ProductImageUpload = (data: any) => {
             <Grid container spacing={6}>
                 {metalToneList && metalToneList.map((value, i) => {
                     return (
-                        <Grid item xs={12} md={12} lg={12} sx={{ ml: 5 }}>
+                        <Grid key={value.id || value.name || i} item xs={12} md={12} lg={12} sx={{ ml: 5 }}>
 
                             <Card key={i}>
                                 <CardContent>
@@ -408,7 +412,7 @@ const ProductImageUpload = (data: any) => {
                                     <Box>
                                         <Grid container spacing={6}>
                                             <Grid item xs={12} md={4} lg={4}>
-                                                <Typography variant="body2" sx={{ mb: 2, mt: 4 }}>Image Upload</Typography>
+                                                <Typography variant="body2" sx={{ mb: 2, mt: 4 }}>Featured Image Upload</Typography>
                                                 <TccMultipleImageUpload onDrop={(data: any) => {
                                                     const metalData = metalToneList;
                                                     metalData[i].imageData = data
@@ -418,13 +422,13 @@ const ProductImageUpload = (data: any) => {
                                                 {/* Display existing images */}
                                                 {value.imageData && value.imageData.length > 0 && typeof value.imageData[0] === 'string' && (
                                                     <Box sx={{ mt: 2 }}>
-                                                        <Typography variant="body2" sx={{ mb: 1 }}>Existing Images:</Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>Existing Featured Images:</Typography>
                                                         <Grid container spacing={1}>
                                                             {value.imageData.map((imagePath: string, imgIndex: number) => {
                                                                 // Extract image ID from the product_images array
                                                                 const imageObj = data.data?.findProduct?.product_images?.find(
                                                                     (img: any) => img.image_path === imagePath &&
-                                                                                 parseInt(img.image_type) === 2 &&
+                                                                                 parseInt(img.image_type) === 1 &&
                                                                                  parseInt(img.id_metal_tone) === parseInt(value.metalToneValue)
                                                                 );
                                                                 const imageId = imageObj?.id;
@@ -447,7 +451,7 @@ const ProductImageUpload = (data: any) => {
                                                                                         backgroundColor: 'rgba(255,255,255,0.7)',
                                                                                         '&:hover': { backgroundColor: 'rgba(255,0,0,0.1)' }
                                                                                     }}
-                                                                                    onClick={() => handleDeleteImage(imageId, 'Regular Image')}
+                                                                                    onClick={() => handleDeleteImage(imageId, 'Featured Image')}
                                                                                 >
                                                                                     <Icon icon='tabler:trash' fontSize={16} color="error" />
                                                                                 </IconButton>
@@ -461,7 +465,7 @@ const ProductImageUpload = (data: any) => {
                                                 )}
                                             </Grid>
                                             <Grid item xs={12} md={4} lg={4}>
-                                                <Typography variant="body2" sx={{ mb: 2, mt: 4 }}>Featured Image Upload</Typography>
+                                                <Typography variant="body2" sx={{ mb: 2, mt: 4 }}>Additional Images Upload</Typography>
                                                 <TccMultipleImageUpload onDrop={(data: any) => {
                                                     const metalData = metalToneList;
                                                     metalData[i].featuredImage = data
@@ -471,13 +475,13 @@ const ProductImageUpload = (data: any) => {
                                                 {/* Display existing featured images */}
                                                 {value.featuredImage && value.featuredImage.length > 0 && typeof value.featuredImage[0] === 'string' && (
                                                     <Box sx={{ mt: 2 }}>
-                                                        <Typography variant="body2" sx={{ mb: 1 }}>Existing Featured Images:</Typography>
+                                                        <Typography variant="body2" sx={{ mb: 1 }}>Existing Additional Images:</Typography>
                                                         <Grid container spacing={1}>
                                                             {value.featuredImage.map((imagePath: string, imgIndex: number) => {
                                                                 // Extract image ID from the product_images array
                                                                 const imageObj = data.data?.findProduct?.product_images?.find(
                                                                     (img: any) => img.image_path === imagePath &&
-                                                                                 parseInt(img.image_type) === 1 &&
+                                                                                 parseInt(img.image_type) === 2 &&
                                                                                  parseInt(img.id_metal_tone) === parseInt(value.metalToneValue)
                                                                 );
                                                                 const imageId = imageObj?.id;
@@ -491,9 +495,9 @@ const ProductImageUpload = (data: any) => {
                                                                                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                                                             />
                                                                             <Chip
-                                                                                label="Featured"
+                                                                                label="Additional"
                                                                                 size="small"
-                                                                                color="primary"
+                                                                                color="default"
                                                                                 sx={{ position: 'absolute', bottom: 2, left: 2 }}
                                                                             />
                                                                             {imageId && (
@@ -506,7 +510,7 @@ const ProductImageUpload = (data: any) => {
                                                                                         backgroundColor: 'rgba(255,255,255,0.7)',
                                                                                         '&:hover': { backgroundColor: 'rgba(255,0,0,0.1)' }
                                                                                     }}
-                                                                                    onClick={() => handleDeleteImage(imageId, 'Featured Image')}
+                                                                                    onClick={() => handleDeleteImage(imageId, 'Additional Image')}
                                                                                 >
                                                                                     <Icon icon='tabler:trash' fontSize={16} color="error" />
                                                                                 </IconButton>

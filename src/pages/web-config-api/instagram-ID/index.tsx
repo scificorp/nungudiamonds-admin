@@ -2,7 +2,7 @@
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import CardHeader from '@mui/material/CardHeader'
-import { Button, CardContent, Typography } from '@mui/material'
+import { Alert, Button, CardContent, Typography } from '@mui/material'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import { useState } from 'react'
 
@@ -15,7 +15,15 @@ const InstagramID = () => {
     <Grid container spacing={6}>
       <Grid item xs={12}>
         <Card>
-          <CardHeader title='Instagram ID'></CardHeader>
+          <CardHeader
+            title='Instagram ID'
+            subheader='Legacy placeholder. The storefront uses the public Instagram link from Company Info / static layout data, not this ID/key form.'
+          />
+          <CardContent sx={{ pt: 0 }}>
+            <Alert severity='warning'>
+              This page is kept for compatibility but does not currently update the storefront Instagram link. Use Company Info setup for the client-facing social link.
+            </Alert>
+          </CardContent>
         </Card>
       </Grid>
       <Grid item xs={12} md={6} lg={6}>

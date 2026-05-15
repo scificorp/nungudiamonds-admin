@@ -2,7 +2,7 @@
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
 import CardHeader from '@mui/material/CardHeader'
-import { Box, Button, Divider, Drawer, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Divider, Drawer, TextField, Typography } from '@mui/material'
 import TCCTableHeader from 'src/customComponents/data-table/header'
 import TccDataTable from 'src/customComponents/data-table/table'
 import { useEffect, useState } from 'react'
@@ -105,6 +105,9 @@ const HomeAboutSection = () => {
     useEffect(() => {
         getAllMainHomeAboutDataApi()
         getAllHomeAboutDataApi(pagination)
+
+        // Legacy table fetch intentionally runs once on mount.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleChangePerPageRows = (perPageRows: number) => {
@@ -131,6 +134,9 @@ const HomeAboutSection = () => {
 
     useEffect(() => {
         searchBusinessUser();
+
+        // Debounced search is driven only by the input value.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchFilter]);
 
     const editMainContentData = async () => {
@@ -146,7 +152,8 @@ const HomeAboutSection = () => {
             if (datas.code === 200 || datas.code === "200") {
                 toast.success("Successfully updated")
                 getAllHomeAboutDataApi(pagination)
-                return true
+                
+return true
             } else {
 
             }
@@ -306,8 +313,14 @@ const HomeAboutSection = () => {
         <Grid container spacing={6}>
             <Grid item xs={12}>
                 <Card>
-                    <CardHeader title='Home About Section'></CardHeader>
+                    <CardHeader
+                        title='Home About Section'
+                        subheader='Structured homepage content blocks. Use this only for the sections that the storefront template renders.'
+                    />
                     <Divider />
+                    <Alert severity='info' sx={{ m: 4, mb: 0 }}>
+                        This page edits the homepage about/feature content API. Keep copy concise and confirm changed blocks on the storefront before handover.
+                    </Alert>
                     <CardHeader title='Main Content Form'></CardHeader>
 
                     <form>

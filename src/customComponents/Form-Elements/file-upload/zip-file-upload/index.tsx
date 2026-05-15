@@ -36,6 +36,7 @@ const TccZipImageUpload = (props: any) => {
         // maxSize: 2000000,
         accept: {
             'file/*': ["zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed"]
+
             // ['.zip', '.7zip']
         },
         onDrop: (acceptedFiles: File[]) => {
