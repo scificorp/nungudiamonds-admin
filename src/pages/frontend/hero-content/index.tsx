@@ -593,6 +593,7 @@ const HeroContentManagement = () => {
     control,
     handleSubmit,
     setValue,
+    getValues,
     watch,
     reset,
     formState: { isDirty }
@@ -893,7 +894,7 @@ const HeroContentManagement = () => {
     }
   }
 
-  async function uploadFileToS3(file: File, fileId: string): Promise<UploadedFile> {
+  async function uploadFileToS3(file: File, fileId: string, previewUrl?: string): Promise<UploadedFile> {
     const formData = new FormData()
     formData.append('heroFile', file)
 
@@ -922,7 +923,7 @@ const HeroContentManagement = () => {
               id: result.data.id,
               name: result.data.name,
               url: result.data.url,
-              preview: result.data.url,
+              preview: previewUrl || result.data.url,
               type: result.data.type,
               size: result.data.size,
               uploadedAt: result.data.uploadedAt,
@@ -950,6 +951,65 @@ const HeroContentManagement = () => {
 
       xhr.send(formData)
     })
+  }
+
+  const replaceUploadedFile = (localFile: UploadedFile, uploadedFile: UploadedFile) => {
+    const localUrl = localFile.preview || localFile.url
+
+    setUploadedFiles(prev => prev.map(existing => (existing.id === localFile.id ? uploadedFile : existing)))
+    setSelectedFiles(prev => {
+      const nextSelectedFiles = { ...prev }
+
+      ;(['desktop', 'mobile'] as PreviewDevice[]).forEach(device => {
+        const selectedFile = nextSelectedFiles[device]
+        if (
+          selectedFile?.id === localFile.id ||
+          (localUrl && (selectedFile?.preview === localUrl || selectedFile?.url === localUrl))
+        ) {
+          nextSelectedFiles[device] = uploadedFile
+        }
+      })
+
+      return nextSelectedFiles
+    })
+
+    ;(['desktop', 'mobile'] as PreviewDevice[]).forEach(device => {
+      const videoField = device === 'desktop' ? 'desktop_video_url' : 'mobile_video_url'
+      const imageField = device === 'desktop' ? 'desktop_image_url' : 'mobile_image_url'
+      const activeField = localFile.type === 'video' ? videoField : imageField
+      const currentValue = getValues(activeField)
+
+      if (currentValue === localUrl || currentValue === localFile.url || currentValue === localFile.preview) {
+        setValue(activeField, uploadedFile.url, { shouldDirty: true })
+      }
+    })
+  }
+
+  const uploadDroppedFiles = async (localFiles: UploadedFile[]) => {
+    setIsUploading(true)
+    setSaveError('')
+
+    try {
+      for (let index = 0; index < localFiles.length; index += 1) {
+        const localFile = localFiles[index]
+
+        if (!localFile.file) {
+          continue
+        }
+
+        setUploadStatus(`Uploading ${localFile.name} (${index + 1}/${localFiles.length})...`)
+        const uploadedFile = await uploadFileToS3(localFile.file, `${localFile.id}`, localFile.preview || localFile.url)
+        replaceUploadedFile(localFile, uploadedFile)
+        toast.success(`${localFile.name} uploaded to CDN`)
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to upload hero asset'
+      setSaveError(message)
+      toast.error(message)
+    } finally {
+      setIsUploading(false)
+      setUploadStatus('')
+    }
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -982,7 +1042,8 @@ const HeroContentManagement = () => {
         handleFileSelect(firstFile, previewDevice)
       }
       setMediaPanelMode('gallery')
-      toast.success(`Added ${files.length} file(s) for preview`)
+      toast.success(`Uploading ${files.length} file(s) to CDN`)
+      void uploadDroppedFiles(localFiles)
     },
     onDropRejected: rejectedFiles => {
       rejectedFiles.forEach(rejection => {
@@ -1007,6 +1068,25 @@ const HeroContentManagement = () => {
         setValue('content_type', 'image', { shouldDirty: true })
       }
     }
+  }
+
+  const isFileSelectedForDevice = (file: UploadedFile, device: PreviewDevice) => {
+    const selectedFile = selectedFiles[device]
+    const selectedUrl = device === 'desktop'
+      ? file.type === 'video'
+        ? workingContent.desktop_video_url
+        : workingContent.desktop_image_url
+      : file.type === 'video'
+        ? workingContent.mobile_video_url
+        : workingContent.mobile_image_url
+
+    return (
+      selectedFile?.id === file.id ||
+      selectedFile?.url === file.url ||
+      selectedFile?.preview === file.preview ||
+      selectedUrl === file.url ||
+      selectedUrl === file.preview
+    )
   }
 
   const handleURLAdded = (url: string, type: HeroContentType, device: PreviewDevice) => {
@@ -1126,22 +1206,14 @@ const HeroContentManagement = () => {
                 : null)
           const localUrl = localAsset?.preview || localAsset?.url || ''
           setUploadStatus(`Uploading ${file.name} (${index + 1}/${filesToUpload.length})...`)
-          const uploadedAsset = await uploadFileToS3(file, `${localId}`)
+          const uploadedAsset = await uploadFileToS3(file, `${localId}`, localUrl)
           ;((payload as unknown) as Record<string, unknown>)[field] = uploadedAsset.url
 
-          setUploadedFiles(prev => prev.map(existing => (existing.id === localId ? uploadedAsset : existing)))
-          setSelectedFiles(prev => {
-            const nextSelectedFiles = { ...prev }
-
-            ;(['desktop', 'mobile'] as PreviewDevice[]).forEach(device => {
-              const selectedFile = nextSelectedFiles[device]
-              if (selectedFile?.id === localId || (localUrl && (selectedFile?.preview === localUrl || selectedFile?.url === localUrl))) {
-                nextSelectedFiles[device] = uploadedAsset
-              }
-            })
-
-            return nextSelectedFiles
-          })
+          if (localAsset) {
+            replaceUploadedFile(localAsset, uploadedAsset)
+          } else {
+            setUploadedFiles(prev => prev.map(existing => (existing.id === localId ? uploadedAsset : existing)))
+          }
           setValue(field, uploadedAsset.url, { shouldDirty: false })
 
           if (localUrl.startsWith('blob:')) {
@@ -2412,7 +2484,7 @@ const HeroContentManagement = () => {
                           }}
                         >
                           {uploadedFiles.map(file => (
-                            <Paper key={file.id} variant='outlined' sx={{ p: 1.5 }}>
+                            <Paper key={file.id} variant='outlined' sx={{ p: 1.5, borderColor: isFileSelectedForDevice(file, 'desktop') || isFileSelectedForDevice(file, 'mobile') ? 'primary.main' : undefined }}>
                               <Box
                                 sx={{
                                   position: 'relative',
@@ -2424,26 +2496,62 @@ const HeroContentManagement = () => {
                                 }}
                               >
                                 {file.type === 'video' ? (
-                                  <video src={file.preview || file.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted />
+                                  <>
+                                    <video src={file.preview || file.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted playsInline preload='metadata' />
+                                    <Box
+                                      sx={{
+                                        position: 'absolute',
+                                        inset: 0,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        pointerEvents: 'none',
+                                        background: 'linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.2))'
+                                      }}
+                                    >
+                                      <Icon icon='tabler:player-play-filled' color='rgba(255,255,255,0.72)' fontSize='2rem' />
+                                    </Box>
+                                  </>
                                 ) : (
                                   <img src={file.preview || file.url} alt={file.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                 )}
+                                {uploadProgress[file.id] && uploadProgress[file.id] < 100 ? (
+                                  <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 4, bgcolor: 'rgba(255,255,255,0.25)' }}>
+                                    <Box sx={{ width: `${uploadProgress[file.id]}%`, height: '100%', bgcolor: 'primary.main' }} />
+                                  </Box>
+                                ) : null}
                               </Box>
                               <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 1 }}>
                                 <Typography variant='body2' noWrap sx={{ flexGrow: 1 }} title={file.name}>
                                   {file.name}
                                 </Typography>
-                                <Chip size='small' label={file.source === 'cdn' ? 'CDN' : 'Local'} sx={file.source === 'cdn' ? statusChipColor('published') : statusChipColor('draft')} />
+                                <Chip
+                                  size='small'
+                                  label={file.source === 'cdn' ? 'CDN' : uploadProgress[file.id] ? `Uploading ${uploadProgress[file.id]}%` : 'Local'}
+                                  sx={file.source === 'cdn' ? statusChipColor('published') : statusChipColor('draft')}
+                                />
                               </Stack>
                               <Typography variant='caption' color='text.secondary'>
                                 {(file.size / 1024 / 1024).toFixed(1)} MB · {file.type}
                               </Typography>
                               <Stack direction='row' spacing={1} sx={{ mt: 1.25 }}>
-                                <Button size='small' variant='outlined' sx={{ textTransform: 'none' }} onClick={() => handleFileSelect(file, 'desktop')}>
-                                  Desktop
+                                <Button
+                                  size='small'
+                                  variant={isFileSelectedForDevice(file, 'desktop') ? 'contained' : 'outlined'}
+                                  sx={{ textTransform: 'none' }}
+                                  onClick={() => handleFileSelect(file, 'desktop')}
+                                  disabled={!file.isUploaded && Boolean(uploadProgress[file.id])}
+                                >
+                                  {isFileSelectedForDevice(file, 'desktop') ? 'Using desktop' : 'Desktop'}
                                 </Button>
-                                <Button size='small' variant='outlined' sx={{ textTransform: 'none' }} onClick={() => handleFileSelect(file, 'mobile')}>
-                                  Mobile
+                                <Button
+                                  size='small'
+                                  variant={isFileSelectedForDevice(file, 'mobile') ? 'contained' : 'outlined'}
+                                  sx={{ textTransform: 'none' }}
+                                  onClick={() => handleFileSelect(file, 'mobile')}
+                                  disabled={!file.isUploaded && Boolean(uploadProgress[file.id])}
+                                >
+                                  {isFileSelectedForDevice(file, 'mobile') ? 'Using mobile' : 'Mobile'}
                                 </Button>
                                 <IconButton size='small' onClick={() => void handleDeleteFile(file)} sx={{ ml: 'auto', color: 'error.main' }}>
                                   <Icon icon='tabler:trash' fontSize='1rem' />
