@@ -29,6 +29,9 @@ import { useDropzone } from 'react-dropzone'
 import Icon from 'src/@core/components/icon'
 import EnhancedPreviewModal from '../../../components/hero-content/enhanced-preview-modal'
 import URLInputSection from '../../../components/hero-content/url-input-section'
+import { API_ENDPOINT } from 'src/AppConfig'
+
+const HERO_API_BASE_URL = API_ENDPOINT.replace(/\/$/, '')
 
 interface HeroContentData {
   id?: number
@@ -124,7 +127,7 @@ const EnhancedHeroContentManagement = () => {
   const loadHeroContent = async () => {
     try {
       setIsLoading(true)
-      const apiUrl = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`
+      const apiUrl = `${HERO_API_BASE_URL}/hero-content/config`
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -244,7 +247,7 @@ const EnhancedHeroContentManagement = () => {
       })
 
       xhr.timeout = 5 * 60 * 1000
-      const apiEndpoint = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/upload`
+      const apiEndpoint = `${HERO_API_BASE_URL}/hero-content/upload`
 
       xhr.open('POST', apiEndpoint)
 
@@ -378,7 +381,7 @@ return
         setUploadStatus('Saving to database...')
       }
 
-      const apiUrl = `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`
+      const apiUrl = `${HERO_API_BASE_URL}/hero-content/config`
 
       const response = await fetch(apiUrl, {
         method: 'POST',

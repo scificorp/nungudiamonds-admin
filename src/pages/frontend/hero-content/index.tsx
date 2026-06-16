@@ -37,7 +37,7 @@ import { toast } from 'react-hot-toast'
 import Icon from 'src/@core/components/icon'
 import EnhancedPreviewModal from '../../../components/hero-content/enhanced-preview-modal'
 import URLInputSection from '../../../components/hero-content/url-input-section'
-import { LOCAL_ADMIN_AUTHORIZATION_TOKEN } from 'src/AppConfig'
+import { API_ENDPOINT, LOCAL_ADMIN_AUTHORIZATION_TOKEN } from 'src/AppConfig'
 import LoadingButton from 'src/components/common/LoadingButton'
 
 type HeroContentType = 'video' | 'image'
@@ -58,6 +58,7 @@ type OverlayLayer = 'group' | 'headline' | 'supporting_text' | 'cta'
 type ResizeHandle = 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
 const DRAG_ACTIVATION_THRESHOLD = 8
+const HERO_API_BASE_URL = API_ENDPOINT.replace(/\/$/, '')
 const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
 const getHeroAdminAccessToken = () => {
@@ -729,14 +730,14 @@ const HeroContentManagement = () => {
   async function loadHeroContent() {
     try {
       setIsLoading(true)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/admin-config`, {
+      const response = await fetch(`${HERO_API_BASE_URL}/hero-content/admin-config`, {
         headers: {
           Authorization: getHeroAdminAccessToken()
         }
       })
 
       if (response.status === 404) {
-        const fallbackResponse = await fetch(`${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`)
+        const fallbackResponse = await fetch(`${HERO_API_BASE_URL}/hero-content/config`)
 
         if (!fallbackResponse.ok) {
           throw new Error('Failed to load hero content settings')
@@ -792,7 +793,7 @@ const HeroContentManagement = () => {
   async function loadUploadedFiles(currentPage = 1, perPageRows = galleryPagination.per_page_rows) {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/files?current_page=${currentPage}&per_page_rows=${perPageRows}`,
+        `${HERO_API_BASE_URL}/hero-content/files?current_page=${currentPage}&per_page_rows=${perPageRows}`,
         {
         headers: {
           Authorization: getHeroAdminAccessToken()
@@ -939,7 +940,7 @@ const HeroContentManagement = () => {
       xhr.addEventListener('timeout', () => reject(new Error('Upload timeout')))
 
       xhr.timeout = 5 * 60 * 1000
-      xhr.open('POST', `${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/upload`)
+      xhr.open('POST', `${HERO_API_BASE_URL}/hero-content/upload`)
 
       const token = getHeroAdminAccessToken()
       if (token) {
@@ -1150,7 +1151,7 @@ const HeroContentManagement = () => {
 
       setUploadStatus(intentToSave === 'draft' ? 'Saving draft...' : intentToSave === 'schedule' ? 'Scheduling hero...' : 'Publishing hero...')
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/config`, {
+      const response = await fetch(`${HERO_API_BASE_URL}/hero-content/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1217,7 +1218,7 @@ const HeroContentManagement = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_REST_API_ENDPOINT}/hero-content/file`, {
+      const response = await fetch(`${HERO_API_BASE_URL}/hero-content/file`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
