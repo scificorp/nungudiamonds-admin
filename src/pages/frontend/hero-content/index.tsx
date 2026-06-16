@@ -222,6 +222,8 @@ interface UploadedFile {
   file?: File
   isUploaded: boolean
   source: 'cdn' | 'local'
+  uploadState?: 'local' | 'uploading' | 'uploaded' | 'failed'
+  uploadError?: string
 }
 
 interface PreviewData {
@@ -821,7 +823,8 @@ const HeroContentManagement = () => {
         ...file,
         preview: file.url,
         isUploaded: true,
-        source: 'cdn' as const
+        source: 'cdn' as const,
+        uploadState: 'uploaded' as const
       }))
 
       setUploadedFiles(prev => {
@@ -928,7 +931,8 @@ const HeroContentManagement = () => {
               size: result.data.size,
               uploadedAt: result.data.uploadedAt,
               isUploaded: true,
-              source: 'cdn'
+              source: 'cdn',
+              uploadState: 'uploaded'
             })
 
             return
@@ -985,31 +989,71 @@ const HeroContentManagement = () => {
     })
   }
 
+  const markLocalFileUploading = (fileId: string | number) => {
+    setUploadedFiles(prev =>
+      prev.map(file =>
+        file.id === fileId
+          ? {
+              ...file,
+              uploadState: 'uploading',
+              uploadError: undefined
+            }
+          : file
+      )
+    )
+  }
+
+  const markLocalFileFailed = (fileId: string | number, message: string) => {
+    setUploadProgress(prev => {
+      const next = { ...prev }
+      delete next[String(fileId)]
+
+      return next
+    })
+    setUploadedFiles(prev =>
+      prev.map(file =>
+        file.id === fileId
+          ? {
+              ...file,
+              uploadState: 'failed',
+              uploadError: message
+            }
+          : file
+      )
+    )
+  }
+
   const uploadDroppedFiles = async (localFiles: UploadedFile[]) => {
     setIsUploading(true)
     setSaveError('')
+    let lastError = ''
 
-    try {
-      for (let index = 0; index < localFiles.length; index += 1) {
-        const localFile = localFiles[index]
+    for (let index = 0; index < localFiles.length; index += 1) {
+      const localFile = localFiles[index]
 
-        if (!localFile.file) {
-          continue
-        }
+      if (!localFile.file) {
+        continue
+      }
 
+      try {
+        markLocalFileUploading(localFile.id)
         setUploadStatus(`Uploading ${localFile.name} (${index + 1}/${localFiles.length})...`)
         const uploadedFile = await uploadFileToS3(localFile.file, `${localFile.id}`, localFile.preview || localFile.url)
         replaceUploadedFile(localFile, uploadedFile)
         toast.success(`${localFile.name} uploaded to CDN`)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to upload hero asset'
+        lastError = message
+        markLocalFileFailed(localFile.id, message)
+        toast.error(message)
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to upload hero asset'
-      setSaveError(message)
-      toast.error(message)
-    } finally {
-      setIsUploading(false)
-      setUploadStatus('')
     }
+
+    if (lastError) {
+      setSaveError(lastError)
+    }
+    setIsUploading(false)
+    setUploadStatus('')
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -1032,7 +1076,8 @@ const HeroContentManagement = () => {
           uploadedAt: new Date(),
           file,
           isUploaded: false,
-          source: 'local'
+          source: 'local',
+          uploadState: 'local'
         }
       })
 
@@ -1087,6 +1132,34 @@ const HeroContentManagement = () => {
       selectedUrl === file.url ||
       selectedUrl === file.preview
     )
+  }
+
+  const getFileUploadLabel = (file: UploadedFile) => {
+    if (file.source === 'cdn') {
+      return 'CDN'
+    }
+
+    if (file.uploadState === 'failed') {
+      return 'Upload failed'
+    }
+
+    if (file.uploadState === 'uploading' || uploadProgress[file.id]) {
+      return `Uploading ${uploadProgress[file.id] || 0}%`
+    }
+
+    return 'Local preview'
+  }
+
+  const getFileUploadChipSx = (file: UploadedFile) => {
+    if (file.source === 'cdn') {
+      return statusChipColor('published')
+    }
+
+    if (file.uploadState === 'failed') {
+      return { backgroundColor: '#ffebee', color: '#c62828' }
+    }
+
+    return statusChipColor('draft')
   }
 
   const handleURLAdded = (url: string, type: HeroContentType, device: PreviewDevice) => {
@@ -2484,7 +2557,19 @@ const HeroContentManagement = () => {
                           }}
                         >
                           {uploadedFiles.map(file => (
-                            <Paper key={file.id} variant='outlined' sx={{ p: 1.5, borderColor: isFileSelectedForDevice(file, 'desktop') || isFileSelectedForDevice(file, 'mobile') ? 'primary.main' : undefined }}>
+                            <Paper
+                              key={file.id}
+                              variant='outlined'
+                              sx={{
+                                p: 1.5,
+                                borderColor:
+                                  file.uploadState === 'failed'
+                                    ? 'error.main'
+                                    : isFileSelectedForDevice(file, 'desktop') || isFileSelectedForDevice(file, 'mobile')
+                                      ? 'primary.main'
+                                      : undefined
+                              }}
+                            >
                               <Box
                                 sx={{
                                   position: 'relative',
@@ -2520,6 +2605,28 @@ const HeroContentManagement = () => {
                                     <Box sx={{ width: `${uploadProgress[file.id]}%`, height: '100%', bgcolor: 'primary.main' }} />
                                   </Box>
                                 ) : null}
+                                {file.uploadState === 'failed' ? (
+                                  <Box
+                                    sx={{
+                                      position: 'absolute',
+                                      inset: 0,
+                                      display: 'flex',
+                                      flexDirection: 'column',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      gap: 1,
+                                      p: 2,
+                                      textAlign: 'center',
+                                      color: '#fff',
+                                      bgcolor: 'rgba(198, 40, 40, 0.78)'
+                                    }}
+                                  >
+                                    <Icon icon='tabler:alert-triangle' fontSize='2rem' />
+                                    <Typography variant='body2' sx={{ color: 'inherit' }}>
+                                      Upload failed. Preview is local only.
+                                    </Typography>
+                                  </Box>
+                                ) : null}
                               </Box>
                               <Stack direction='row' spacing={1} alignItems='center' sx={{ mb: 1 }}>
                                 <Typography variant='body2' noWrap sx={{ flexGrow: 1 }} title={file.name}>
@@ -2527,10 +2634,15 @@ const HeroContentManagement = () => {
                                 </Typography>
                                 <Chip
                                   size='small'
-                                  label={file.source === 'cdn' ? 'CDN' : uploadProgress[file.id] ? `Uploading ${uploadProgress[file.id]}%` : 'Local'}
-                                  sx={file.source === 'cdn' ? statusChipColor('published') : statusChipColor('draft')}
+                                  label={getFileUploadLabel(file)}
+                                  sx={getFileUploadChipSx(file)}
                                 />
                               </Stack>
+                              {file.uploadState === 'failed' && file.uploadError ? (
+                                <Alert severity='error' sx={{ mt: 1 }}>
+                                  {file.uploadError}
+                                </Alert>
+                              ) : null}
                               <Typography variant='caption' color='text.secondary'>
                                 {(file.size / 1024 / 1024).toFixed(1)} MB · {file.type}
                               </Typography>
@@ -2540,7 +2652,6 @@ const HeroContentManagement = () => {
                                   variant={isFileSelectedForDevice(file, 'desktop') ? 'contained' : 'outlined'}
                                   sx={{ textTransform: 'none' }}
                                   onClick={() => handleFileSelect(file, 'desktop')}
-                                  disabled={!file.isUploaded && Boolean(uploadProgress[file.id])}
                                 >
                                   {isFileSelectedForDevice(file, 'desktop') ? 'Using desktop' : 'Desktop'}
                                 </Button>
@@ -2549,7 +2660,6 @@ const HeroContentManagement = () => {
                                   variant={isFileSelectedForDevice(file, 'mobile') ? 'contained' : 'outlined'}
                                   sx={{ textTransform: 'none' }}
                                   onClick={() => handleFileSelect(file, 'mobile')}
-                                  disabled={!file.isUploaded && Boolean(uploadProgress[file.id])}
                                 >
                                   {isFileSelectedForDevice(file, 'mobile') ? 'Using mobile' : 'Mobile'}
                                 </Button>
