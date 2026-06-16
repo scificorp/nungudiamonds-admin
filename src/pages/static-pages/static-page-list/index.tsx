@@ -24,6 +24,8 @@ const StaticPageList = () => {
   const [showModel, setShowModel] = useState(false)
   const [name, setName] = useState("")
   const [slug, setSlug] = useState("")
+  const [metaTitle, setMetaTitle] = useState("")
+  const [metaDescription, setMetaDescription] = useState("")
   const [staticPageId, setStaticPageId] = useState("")
   const [editerData, setEditerData] = useState("")
   const [edit, setEdit] = useState<string>('<p></p>')
@@ -43,7 +45,9 @@ const StaticPageList = () => {
 
   const defaultValues = {
     name: name,
-    slug: slug
+    slug: slug,
+    meta_title: metaTitle,
+    meta_description: metaDescription
   }
 
   const {
@@ -60,11 +64,19 @@ const StaticPageList = () => {
 
   const clearFormData = () => {
     reset()
+    setName("")
+    setSlug("")
+    setMetaTitle("")
+    setMetaDescription("")
     setEdit('<p><p>')
   }
   const editOnClickHandler = (data: any) => {
     setValue("name", data.page_title)
     setValue("slug", data.slug)
+    setValue("meta_title", data.meta_title || "")
+    setValue("meta_description", data.meta_description || "")
+    setMetaTitle(data.meta_title || "")
+    setMetaDescription(data.meta_description || "")
     setEdit(data.content)
     setStaticPageId(data.id)
     setDialogTitle('Edit')
@@ -131,6 +143,8 @@ const StaticPageList = () => {
       "name": data.name,
       "slug": data.slug,
       "content": editerData,
+      "meta_title": data.meta_title,
+      "meta_description": data.meta_description,
     }
     try {
       const data = await ADD_STATIC_PAGE(payload)
@@ -157,6 +171,8 @@ const StaticPageList = () => {
       "name": data.name,
       "slug": data.slug,
       "content": editerData,
+      "meta_title": data.meta_title,
+      "meta_description": data.meta_description,
     }
     try {
       const data = await EDIT_STATIC_PAGE(payload)
@@ -359,6 +375,38 @@ const StaticPageList = () => {
                 )}
               />
               {errors.slug && <FormHelperText sx={{ color: 'error.main' }}>{FIELD_REQUIRED}</FormHelperText>}
+            </FormControl>
+            <FormControl fullWidth sx={{ mb: 4 }}>
+              <Controller
+                name='meta_title'
+                control={control}
+                render={({ field }: any) => (
+                  <TextField
+                    size='small'
+                    label='Meta Title'
+                    value={metaTitle}
+                    onChange={(e) => setMetaTitle(e.target.value)}
+                    {...field}
+                  />
+                )}
+              />
+            </FormControl>
+            <FormControl fullWidth sx={{ mb: 4 }}>
+              <Controller
+                name='meta_description'
+                control={control}
+                render={({ field }: any) => (
+                  <TextField
+                    size='small'
+                    multiline
+                    minRows={3}
+                    label='Meta Description'
+                    value={metaDescription}
+                    onChange={(e) => setMetaDescription(e.target.value)}
+                    {...field}
+                  />
+                )}
+              />
             </FormControl>
 
             <TccEditor getHtmlData={setEditerData} data={edit} called={called} />

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { Avatar, Button, Card, CardContent, CardHeader, Divider, Grid, Typography } from "@mui/material"
+import { Alert, Avatar, Button, Card, CardContent, CardHeader, Divider, Grid, Typography } from "@mui/material"
 import { Box } from "@mui/system"
 import moment from "moment"
 import Router, { useRouter } from "next/router"
@@ -95,6 +95,9 @@ const OrderDetails = () => {
     const [deliveryStatus, setDeliveryStatus] = useState('')
     const [orderNumberData, setOrderNumber] = useState('')
     const [orderTaxData, setOrderTaxData] = useState([])
+    const [isUpdatingOrderStatus, setIsUpdatingOrderStatus] = useState(false)
+    const [isUpdatingDeliveryStatus, setIsUpdatingDeliveryStatus] = useState(false)
+    const [statusUpdateError, setStatusUpdateError] = useState('')
 
     const router = useRouter();
     const { orderNumber } = router.query;
@@ -141,6 +144,7 @@ const OrderDetails = () => {
                     orderTableData.push({ id: item.product.id, quantity: item.quantity, sub_total: item.sub_total?.toFixed(2), product_tax: item.product_tax == null ? <Typography>00.00</Typography> : <Typography>{item.product_tax}</Typography>, product_name: item.product_name, product_sku: item.product_sku, metal: item.metal, diamond_rate: item.diamond_rate, Karat: item.Karat, Metal_tone: item.Metal_tone, product_size: item.product_size, product_length: item.product_length, product_images: item.product.product_images[0].image_path, product_price: item.product_price.toFixed(2), delivery_status: item.delivery_status, discount: item.discount == null ? <Typography>00.00</Typography> : <Typography>{item.discount}</Typography> });
                 }
                 setOrderDetailData(orderTableData);
+                setDeliveryStatus(String(orderTableData[0]?.delivery_status || ''))
                 setShippingData(data.data.order_shipping_address)
                 setBillingData(data.data.order_billing_address)
 
@@ -164,6 +168,8 @@ return false;
     //////////////////// ORDER STATUS API ///////////////////////
 
     const orderStatusApi = async (order: number) => {
+        setStatusUpdateError('')
+        setIsUpdatingOrderStatus(true)
         const payload = {
             "id": orderData.id,
             "order_status": order,
@@ -171,32 +177,40 @@ return false;
         try {
             const data = await ORDER_STATUS_UPDATE(payload);
             if (data.code === 200 || data.code === "200") {
-                ordersDetailsData(orderNumber)
+                setOrderStatusUpdate(String(order))
+                await ordersDetailsData(orderNumber)
 
                 toast.success(data.message);
             } else {
-                return toast.error(data.message);
+                const message = data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+                setStatusUpdateError(message)
+
+                return toast.error(message);
             }
         } catch (e: any) {
-            toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+            const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+            setStatusUpdateError(message)
+            toast.error(message);
+        } finally {
+            setIsUpdatingOrderStatus(false)
         }
         
 return false;
     }
 
     const handleChangeOrderStatus = (e: any) => {
-        orderStatusApi(e.target.value)
-        setOrderStatusUpdate(e.target.value);
+        void orderStatusApi(e.target.value)
     }
 
     const handleChangeDeliveryStatus = (event: any) => {
-        deliveryStatusApi(event.target.value)
-        setDeliveryStatus(event.target.value)
+        void deliveryStatusApi(event.target.value)
     }
 
     //////////////////// DELIVERY STATUS API ///////////////////////
 
     const deliveryStatusApi = async (delivery: number) => {
+        setStatusUpdateError('')
+        setIsUpdatingDeliveryStatus(true)
         const payload = {
             "order_id": orderData.id,
             "delivery_status": delivery,
@@ -205,15 +219,21 @@ return false;
         try {
             const data = await DELIVERY_STATUS(payload);
             if (data.code === 200 || data.code === "200") {
-                ordersDetailsData(orderNumber)
-                setDeliveryStatus(data.data)
+                setDeliveryStatus(String(data.data || delivery))
+                await ordersDetailsData(orderNumber)
                 toast.success(data.message);
-                ordersDetailsData
             } else {
-                return toast.error(data.message);
+                const message = data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+                setStatusUpdateError(message)
+
+                return toast.error(message);
             }
         } catch (e: any) {
-            toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+            const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+            setStatusUpdateError(message)
+            toast.error(message);
+        } finally {
+            setIsUpdatingDeliveryStatus(false)
         }
         
 return false;
@@ -318,10 +338,21 @@ return false;
                                     value={orderStatusUpdate}
                                     title='title'
                                     onChange={handleChangeOrderStatus}
+                                    disabled={isUpdatingOrderStatus || isUpdatingDeliveryStatus || !orderData.id}
                                     sx={{ width: '200px' }}
                                 />
+                                {isUpdatingOrderStatus && (
+                                    <Typography variant='caption' sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                                        Saving order status…
+                                    </Typography>
+                                )}
                             </Box>
                         </CardContent>
+                        {statusUpdateError && (
+                            <CardContent sx={{ pt: 0 }}>
+                                <Alert severity='error'>Order update failed: {statusUpdateError}</Alert>
+                            </CardContent>
+                        )}
                         <Divider />
                     </Card>
                 </Grid>
@@ -424,9 +455,16 @@ return false;
                                     label='Delivery Status'
                                     title='title'
                                     Options={DeliverStatus}
+                                    value={deliveryStatus}
                                     onChange={handleChangeDeliveryStatus}
+                                    disabled={isUpdatingDeliveryStatus || isUpdatingOrderStatus || !orderData.id}
                                     fullWidth
                                 />
+                                {isUpdatingDeliveryStatus && (
+                                    <Typography variant='caption' sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                                        Saving delivery status…
+                                    </Typography>
+                                )}
                             </CardContent>
                         </Card>
                         <Card sx={{ mt: 6 }} >

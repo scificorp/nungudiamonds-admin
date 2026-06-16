@@ -1,5 +1,6 @@
 // ** MUI Imports
 import { Alert, Button, Card, CardContent, Divider, Drawer, FormControl, Grid, Stack, TextField, Typography } from '@mui/material'
+import LoadingButton from '@mui/lab/LoadingButton'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import TccDataTable from 'src/customComponents/data-table/table'
@@ -61,6 +62,7 @@ const GeneralEnquirie = () => {
   const [leadNotes, setLeadNotes] = useState('')
   const [hasLoaded, setHasLoaded] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [saveError, setSaveError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -73,6 +75,7 @@ const GeneralEnquirie = () => {
   }
 
   const editOnClickHandler = (data: any) => {
+    setSaveError('')
     setEditorId(data.id)
     setLeadStatus(String(data.lead_status ?? 0))
     setLeadNotes(data.lead_notes || '')
@@ -153,6 +156,7 @@ const GeneralEnquirie = () => {
   }, [getAllApi, pagination.order_by, pagination.per_page_rows, pagination.sort_by, searchFilter]);
 
   const updateGeneralEnquiry = async () => {
+    setSaveError('')
     setIsSaving(true)
     try {
       const data = await UPDATE_GENERAL_ENQUIRIES({
@@ -163,14 +167,20 @@ const GeneralEnquirie = () => {
 
       if (data.code === 200 || data.code === '200') {
         setEditorDrawerAction(false)
+        setSaveError('')
         getAllApi(pagination)
 
         return toast.success(data.message)
       }
 
-      return toast.error(data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+      const message = data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+      setSaveError(message)
+
+      return toast.error(message)
     } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
+      const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+      setSaveError(message)
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -376,6 +386,11 @@ const GeneralEnquirie = () => {
             <Alert severity='info'>
               Status and notes are saved against this enquiry id so sales staff can avoid duplicate follow-up.
             </Alert>
+            {saveError && (
+              <Alert severity='error'>
+                Follow-up could not be saved: {saveError}
+              </Alert>
+            )}
             <TccSelect
               fullWidth
               inputLabel='Lead Status'
@@ -385,10 +400,12 @@ const GeneralEnquirie = () => {
               onChange={(event: any) => setLeadStatus(String(event.target.value))}
               title='name'
               Options={GENERAL_LEAD_STATUSES}
+              disabled={isSaving}
             />
             <FormControl fullWidth>
               <TextField
                 autoFocus
+                disabled={isSaving}
                 multiline
                 minRows={4}
                 value={leadNotes}
@@ -397,9 +414,15 @@ const GeneralEnquirie = () => {
               />
             </FormControl>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Button variant='contained' sx={{ mr: 3 }} disabled={isSaving} onClick={updateGeneralEnquiry}>
-                {isSaving ? 'Saving...' : 'Save Follow-Up'}
-              </Button>
+              <LoadingButton
+                variant='contained'
+                sx={{ mr: 3 }}
+                loading={isSaving}
+                disabled={!editorId}
+                onClick={() => void updateGeneralEnquiry()}
+              >
+                Save Follow-Up
+              </LoadingButton>
             </Box>
           </Stack>
         </Box>

@@ -31,7 +31,7 @@ const PaymentManagement = () => {
         <Card>
           <CardHeader
             title='Payment Management'
-            subheader='Checkout currently records Yoco transactions through the API. The PayPal and Stripe forms below are legacy placeholders and are not wired as active checkout configuration.'
+            subtitle='Checkout currently records Yoco transactions through the API. The PayPal and Stripe forms below are legacy placeholders and are not wired as active checkout configuration.'
           />
           <CardContent sx={{ pt: 0 }}>
             <Alert severity='info'>

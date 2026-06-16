@@ -130,7 +130,7 @@ const MailConfig = () => {
         <Card>
           <CardHeader
             title='Email Setup'
-            subheader='Configure the transactional email account used by the API for enquiry replies, subscriptions, and order messages.'
+            subtitle='Configure the transactional email account used by the API for enquiry replies, subscriptions, and order messages.'
           />
           <CardContent sx={{ pt: 0 }}>
             <Alert severity='info'>

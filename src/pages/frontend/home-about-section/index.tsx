@@ -315,7 +315,7 @@ return true
                 <Card>
                     <CardHeader
                         title='Home About Section'
-                        subheader='Structured homepage content blocks. Use this only for the sections that the storefront template renders.'
+                        subtitle='Structured homepage content blocks. Use this only for the sections that the storefront template renders.'
                     />
                     <Divider />
                     <Alert severity='info' sx={{ m: 4, mb: 0 }}>

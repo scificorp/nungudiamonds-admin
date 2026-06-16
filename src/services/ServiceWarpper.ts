@@ -1,10 +1,30 @@
 import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { localStorageUtils } from '../utils/localStorageUtils'
-import { API_ENDPOINT, PUBLIC_AUTHORIZATION_TOKEN } from '../AppConfig'
+import { API_ENDPOINT, LOCAL_ADMIN_AUTHORIZATION_TOKEN, PUBLIC_AUTHORIZATION_TOKEN } from '../AppConfig'
 import { appConstant } from '../AppConstants'
 import Router from 'next/router'
 
 const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
+
+const publicReadPatterns = [
+  '/hero-content/config',
+  '/collections/active',
+  '/collection/slug/',
+  '/product/search/list',
+  '/product/search/suggestions',
+  '/product/list/user',
+  '/product/featured/list',
+  '/product/trending/list'
+]
+
+const isPublicReadRequest = (config: AxiosRequestConfig) => {
+  const method = (config.method || 'get').toLowerCase()
+  const url = config.url || ''
+
+  if (method !== 'get') return false
+
+  return publicReadPatterns.some(pattern => url.includes(pattern))
+}
 
 export function isValidResponse(resp: AxiosResponse): boolean {
   if (!resp || resp.status !== 200) return false
@@ -25,11 +45,17 @@ CONFIG.interceptors.request.use(async (config: AxiosRequestConfig) => {
   try {
     let token = await localStorageUtils.getAccessToken()
     if (!token) {
-      token = PUBLIC_AUTHORIZATION_TOKEN
+      if (loginDisabled && LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
+        token = LOCAL_ADMIN_AUTHORIZATION_TOKEN
+      } else if (isPublicReadRequest(config)) {
+        token = PUBLIC_AUTHORIZATION_TOKEN
+      }
     }
 
     const headers = (config.headers || {}) as Record<string, string>
-    headers.Authorization = `${token}`
+    if (token) {
+      headers.Authorization = `${token}`
+    }
     if (!headers['Content-Type']) {
       headers['Content-Type'] = 'application/json'
     }

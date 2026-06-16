@@ -1,5 +1,6 @@
 // ** MUI Imports
-import { Alert, Button, Card, Divider, Drawer, FormControl, Grid, Stack, TextField } from '@mui/material'
+import { Alert, Card, Divider, Drawer, FormControl, Grid, Stack, TextField } from '@mui/material'
+import LoadingButton from '@mui/lab/LoadingButton'
 import Box from '@mui/material/Box'
 import Router from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -39,6 +40,8 @@ const ProductEnquirie = () => {
   const [id, setId] = useState('')
   const [hasLoaded, setHasLoaded] = useState(false)
   const [loadError, setLoadError] = useState('')
+  const [saveError, setSaveError] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
 
   const toggleEditorDrawer = () => setEditorDrawerAction(!editorDrawerAction)
 
@@ -47,6 +50,7 @@ const ProductEnquirie = () => {
   }
 
   const editOnClickHandler = (data: any) => {
+    setSaveError('')
     toggleEditorDrawer()
     setId(data.id)
     setAction(data.admin_action)
@@ -133,6 +137,8 @@ const ProductEnquirie = () => {
   ///////////////////////UPDATE PRODUCT-INQUIRIES-DETAIL API ///////////////////////
 
   const updateProductInquiries = async () => {
+    setSaveError('')
+    setIsSaving(true)
     const payload = {
       "id": id,
       "action": action,
@@ -142,15 +148,23 @@ const ProductEnquirie = () => {
       const data = await UPDATE_PRODUCT_INQUIRIES(payload);
       if (data.code === 200 || data.code === "200") {
         toggleEditorDrawer()
+        setSaveError('')
         getAllApi(pagination);
 
-return toast.success(data.message);
+        return toast.success(data.message);
 
       } else {
-        return toast.error(data.message);
+        const message = data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+        setSaveError(message)
+
+        return toast.error(message);
       }
     } catch (e: any) {
-      toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+      const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+      setSaveError(message)
+      toast.error(message);
+    } finally {
+      setIsSaving(false)
     }
 
     return false;
@@ -260,6 +274,11 @@ return toast.success(data.message);
             <Alert severity='info'>
               This status is saved to the existing product enquiry fields: `admin_action` and `admin_comments`.
             </Alert>
+            {saveError && (
+              <Alert severity='error'>
+                Follow-up could not be saved: {saveError}
+              </Alert>
+            )}
             <TccSelect
               fullWidth
               inputLabel='Lead Status'
@@ -269,10 +288,12 @@ return toast.success(data.message);
               onChange={handleChange}
               title='name'
               Options={PRODUCT_LEAD_ACTIONS}
+              disabled={isSaving}
             />
             <FormControl fullWidth>
               <TextField
                 autoFocus
+                disabled={isSaving}
                 multiline
                 minRows={4}
                 value={message}
@@ -281,9 +302,15 @@ return toast.success(data.message);
               />
             </FormControl>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Button variant='contained' sx={{ mr: 3 }} onClick={updateProductInquiries}>
+              <LoadingButton
+                variant='contained'
+                sx={{ mr: 3 }}
+                loading={isSaving}
+                disabled={!id}
+                onClick={() => void updateProductInquiries()}
+              >
                 Save Follow-Up
-              </Button>
+              </LoadingButton>
             </Box>
           </Stack>
         </Box>

@@ -1,3 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600;700&display=swap');
+
+@font-face {
+  font-family: 'Canela Text Trial';
+  src: url('/assets/fonts/Canela_Text_Trial/CanelaText-Regular-Trial.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela Text Trial';
+  src: url('/assets/fonts/Canela_Text_Trial/CanelaText-Medium-Trial.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela Text Trial';
+  src: url('/assets/fonts/Canela_Text_Trial/CanelaText-Bold-Trial.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 html,
 body {
   min-height: 100%;

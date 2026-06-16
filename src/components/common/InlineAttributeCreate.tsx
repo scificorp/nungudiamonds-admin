@@ -135,7 +135,7 @@ return
     <Dialog open={open} onClose={handleReset} maxWidth='sm' fullWidth>
       <DialogTitle>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <Icon icon='tabler:plus-circle' color='#c6a55a' />
+          <Icon icon='tabler:plus-circle' color='primary' />
           Create New {selectedTypeInfo?.label || 'Attribute'}
         </Box>
       </DialogTitle>
@@ -231,7 +231,7 @@ return
           onClick={handleCreate}
           variant='contained'
           disabled={loading || (!name.trim() && !numericValue)}
-          sx={{ backgroundColor: '#c6a55a', '&:hover': { backgroundColor: '#b8944d' } }}
+          color='primary'
         >
           {loading ? (
             <>

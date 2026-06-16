@@ -17,7 +17,7 @@ const InstagramID = () => {
         <Card>
           <CardHeader
             title='Instagram ID'
-            subheader='Legacy placeholder. The storefront uses the public Instagram link from Company Info / static layout data, not this ID/key form.'
+            subtitle='Legacy placeholder. The storefront uses the public Instagram link from Company Info / static layout data, not this ID/key form.'
           />
           <CardContent sx={{ pt: 0 }}>
             <Alert severity='warning'>

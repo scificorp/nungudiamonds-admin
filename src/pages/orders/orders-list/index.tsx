@@ -1,7 +1,7 @@
 // ** MUI Imports
 import Card from '@mui/material/Card'
 import Grid from '@mui/material/Grid'
-import { Badge, Divider, TextField, Typography } from '@mui/material'
+import { Alert, Badge, Divider, TextField, Typography } from '@mui/material'
 import { forwardRef, useCallback, useEffect, useState } from 'react'
 import TccDataTable from 'src/customComponents/data-table/table'
 import { Box } from '@mui/system'
@@ -58,6 +58,8 @@ const OrdersList = () => {
     const [result, setResult] = useState([])
     const [count, setCount] = useState<Partial<statusCount>>({})
     const [orderStatus, setOrderStatus] = useState<number>()
+    const [loadError, setLoadError] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
     const viewOnClickHandler = (data: any) => {
         Router.push({ pathname: "/orders/orders-details", query: { orderNumber: data.order_number } })
@@ -66,18 +68,27 @@ const OrdersList = () => {
     /////////////////////// GET API ///////////////////////
 
     const getAllApi = useCallback(async (mbPagination: ICommonOrderPagination) => {
+        setLoadError('')
+        setIsLoading(true)
         try {
             const data = await GET_ALL_ORDERS(mbPagination);
 
             if (data.code === 200 || data.code === "200") {
-                setPagination(data.data.pagination)
-                setResult(data.data.result)
+                setPagination(data.data.pagination || mbPagination)
+                setResult(Array.isArray(data.data.result) ? data.data.result : [])
                 setCount(data.data.count || {})
             } else {
-                return toast.error(data.message);
+                const message = data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+                setLoadError(message)
+
+                return toast.error(message);
             }
         } catch (e: any) {
-            toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN);
+            const message = e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN
+            setLoadError(message)
+            toast.error(message);
+        } finally {
+            setIsLoading(false)
         }
 
         return false;
@@ -230,6 +241,14 @@ const OrdersList = () => {
                         </DatePickerWrapper>
                     </Box>
 
+                    {loadError && (
+                        <Box sx={{ px: 6, pb: 4 }}>
+                            <Alert severity='error'>
+                                Product orders could not be loaded: {loadError}
+                            </Alert>
+                        </Box>
+                    )}
+
                     <TccDataTable
                         column={column}
                         rows={result}
@@ -239,6 +258,8 @@ const OrdersList = () => {
                         rowCount={pagination.total_items}
                         page={pagination.current_page - 1}
                         onPageChange={handleOnPageChange}
+                        emptyMessage='No product orders match the current filters'
+                        loading={isLoading}
                     />
                 </Card>
             </Grid>

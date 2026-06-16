@@ -161,7 +161,7 @@ return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
       <Card>
         <CardHeader 
           title='Bulk Image Upload Utility' 
-          subheader='Upload images to S3 and copy their CDN URLs into content/product fields.'
+          subtitle='Upload images to S3 and copy their CDN URLs into content/product fields.'
         />
         <CardContent>
           <Alert severity='info' sx={{ mb: 4 }}>

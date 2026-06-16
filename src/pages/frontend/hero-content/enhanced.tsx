@@ -55,7 +55,16 @@ interface UploadedFile {
 interface PreviewData {
   desktop_url: string
   mobile_url: string
+  desktop_content_type: 'video' | 'image'
+  mobile_content_type: 'video' | 'image'
   content_type: 'video' | 'image'
+  headline_font_family?: 'display-serif' | 'body-sans'
+  supporting_text_font_family?: 'display-serif' | 'body-sans'
+  cta_font_family?: 'display-serif' | 'body-sans'
+  headline_color?: 'white' | 'soft-white' | 'gold'
+  supporting_text_color?: 'white' | 'soft-white' | 'gold'
+  cta_text_color?: 'white' | 'charcoal' | 'gold'
+  cta_background_color?: 'gold' | 'charcoal' | 'white'
 }
 
 const EnhancedHeroContentManagement = () => {
@@ -279,6 +288,8 @@ const EnhancedHeroContentManagement = () => {
     const preview: PreviewData = {
       desktop_url: urls.desktop,
       mobile_url: urls.mobile,
+      desktop_content_type: urls.type,
+      mobile_content_type: urls.type,
       content_type: urls.type
     }
     setPreviewData(preview)
@@ -291,6 +302,8 @@ const EnhancedHeroContentManagement = () => {
       mobile_url: data.content_type === 'video' ?
         (data.mobile_video_url || data.desktop_video_url) :
         (data.mobile_image_url || data.desktop_image_url),
+      desktop_content_type: data.content_type,
+      mobile_content_type: data.content_type,
       content_type: data.content_type
     }
 

@@ -24,14 +24,22 @@ const AppBarContent = (props: Props) => {
   // ** Props
   const { hidden, settings, saveSettings, toggleNavVisibility } = props
 
+  const handleMenuToggle = () => {
+    if (hidden) {
+      toggleNavVisibility()
+
+      return
+    }
+
+    saveSettings({ ...settings, navCollapsed: !settings.navCollapsed })
+  }
+
   return (
     <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <Box className='actions-left' sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
-        {hidden ? (
-          <IconButton color='inherit' sx={{ ml: -2.75 }} onClick={toggleNavVisibility}>
-            <Icon fontSize='1.5rem' icon='tabler:menu-2' />
-          </IconButton>
-        ) : null}
+        <IconButton color='inherit' sx={{ ml: -2.75 }} onClick={handleMenuToggle}>
+          <Icon fontSize='1.5rem' icon={hidden || settings.navCollapsed ? 'tabler:menu-2' : 'tabler:layout-sidebar-left-collapse'} />
+        </IconButton>
 
         {/* <ModeToggler settings={settings} saveSettings={saveSettings} /> */}
         <Icon icon='mi:notification' />

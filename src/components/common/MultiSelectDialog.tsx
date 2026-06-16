@@ -124,7 +124,7 @@ return opt ? opt[labelKey] : ''
       <DialogContent dividers>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 4 }}>
-            <CircularProgress size={32} sx={{ color: '#c6a55a' }} />
+            <CircularProgress size={32} color='primary' />
           </Box>
         ) : (
           <>
@@ -156,11 +156,7 @@ return opt ? opt[labelKey] : ''
                     key={idx}
                     label={name}
                     size='small'
-                    sx={{
-                      backgroundColor: '#c6a55a',
-                      color: '#000',
-                      fontWeight: 500
-                    }}
+                    color='primary'
                   />
                 ))
               )}
@@ -197,7 +193,7 @@ return (
                         p: 1,
                         cursor: 'pointer',
                         borderRadius: 1,
-                        bgcolor: isSelected ? 'rgba(198, 165, 90, 0.15)' : 'transparent',
+                        bgcolor: isSelected ? 'primary.light' : 'transparent',
                         '&:hover': { bgcolor: 'action.hover' },
                         transition: 'background-color 0.2s'
                       }}
@@ -210,7 +206,7 @@ return (
                         }}
                       />
                       {isSelected && (
-                        <Iconify icon='tabler:check' color='#c6a55a' />
+                        <Iconify icon='tabler:check' color='primary' />
                       )}
                     </Box>
                   )
@@ -227,7 +223,7 @@ return (
         <Button
           onClick={handleConfirm}
           variant='contained'
-          sx={{ backgroundColor: '#c6a55a', '&:hover': { backgroundColor: '#b8944d' } }}
+          color='primary'
         >
           OK
         </Button>

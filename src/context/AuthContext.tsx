@@ -9,7 +9,7 @@ import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
-import { PUBLIC_AUTHORIZATION_TOKEN } from 'src/AppConfig'
+import { LOCAL_ADMIN_AUTHORIZATION_TOKEN } from 'src/AppConfig'
 
 // ** Types
 import { AuthValuesType, RegisterParams, LoginParams, ErrCallbackType, UserDataType } from './types'
@@ -34,23 +34,23 @@ type Props = {
 
 const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
-const guestStorageUser = {
-  id: 0,
+const localDevStorageUser = {
+  id: 1,
   role: 'admin',
-  password: 'guest',
-  fullName: 'Guest Admin',
-  username: 'guest',
-  email: 'guest@nungu.app',
-  user_type: 'guest'
+  password: 'local-dev-admin',
+  fullName: 'Local Dev Admin',
+  username: 'local-admin',
+  email: 'local-admin@nungu.app',
+  user_type: 'admin'
 }
 
-const guestAuthUser: UserDataType = {
-  id: guestStorageUser.id,
-  role: guestStorageUser.role,
-  password: guestStorageUser.password,
-  fullName: guestStorageUser.fullName,
-  username: guestStorageUser.username,
-  email: guestStorageUser.email
+const localDevAuthUser: UserDataType = {
+  id: localDevStorageUser.id,
+  role: localDevStorageUser.role,
+  password: localDevStorageUser.password,
+  fullName: localDevStorageUser.fullName,
+  username: localDevStorageUser.username,
+  email: localDevStorageUser.email
 }
 
 const AuthProvider = ({ children }: Props) => {
@@ -61,18 +61,24 @@ const AuthProvider = ({ children }: Props) => {
   // ** Hooks
   const router = useRouter()
 
-  const applyGuestUser = () => {
-    window.localStorage.setItem('userData', JSON.stringify(guestStorageUser))
-    localStorageUtils.setAccessToken(PUBLIC_AUTHORIZATION_TOKEN, PUBLIC_AUTHORIZATION_TOKEN)
-    localStorageUtils.setUserInfo(guestStorageUser)
-    setUser(guestAuthUser)
+  const applyLocalDevAdminUser = () => {
+    if (!LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
+      setUser(null)
+
+      return
+    }
+
+    window.localStorage.setItem('userData', JSON.stringify(localDevStorageUser))
+    localStorageUtils.setAccessToken(LOCAL_ADMIN_AUTHORIZATION_TOKEN, LOCAL_ADMIN_AUTHORIZATION_TOKEN)
+    localStorageUtils.setUserInfo(localDevStorageUser)
+    setUser(localDevAuthUser)
   }
 
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       setLoading(true)
       if (loginDisabled) {
-        applyGuestUser()
+        applyLocalDevAdminUser()
         setLoading(false)
         
 return
@@ -107,7 +113,7 @@ return
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
     if (loginDisabled) {
-      applyGuestUser()
+      applyLocalDevAdminUser()
       router.replace('/')
       
 return
@@ -138,7 +144,7 @@ return
 
   const handleLogout = () => {
     if (loginDisabled) {
-      applyGuestUser()
+      applyLocalDevAdminUser()
       router.replace('/')
       
 return

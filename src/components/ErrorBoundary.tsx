@@ -124,12 +124,9 @@ return (
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
               variant='contained'
+              color='primary'
               onClick={this.handleReload}
               startIcon={<Icon icon='tabler:refresh' />}
-              sx={{
-                backgroundColor: '#c6a55a',
-                '&:hover': { backgroundColor: '#b8944d' }
-              }}
             >
               Reload Page
             </Button>
