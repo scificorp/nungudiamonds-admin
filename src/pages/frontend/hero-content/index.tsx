@@ -59,6 +59,7 @@ type ResizeHandle = 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 
 const DRAG_ACTIVATION_THRESHOLD = 8
 const HERO_API_BASE_URL = API_ENDPOINT.replace(/\/$/, '')
+const HERO_UPLOAD_TIMEOUT_MS = 15 * 60 * 1000
 const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
 const getHeroAdminAccessToken = () => {
@@ -939,7 +940,7 @@ const HeroContentManagement = () => {
       xhr.addEventListener('error', () => reject(new Error('Network error during upload')))
       xhr.addEventListener('timeout', () => reject(new Error('Upload timeout')))
 
-      xhr.timeout = 5 * 60 * 1000
+      xhr.timeout = HERO_UPLOAD_TIMEOUT_MS
       xhr.open('POST', `${HERO_API_BASE_URL}/hero-content/upload`)
 
       const token = getHeroAdminAccessToken()
