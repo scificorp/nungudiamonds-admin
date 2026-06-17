@@ -224,6 +224,7 @@ interface UploadedFile {
   source: 'cdn' | 'local'
   uploadState?: 'local' | 'uploading' | 'uploaded' | 'failed'
   uploadError?: string
+  isReadOnly?: boolean
 }
 
 interface PreviewData {
@@ -448,6 +449,58 @@ const getMediaUrl = (content: Partial<HeroContentData>, device: PreviewDevice) =
   return device === 'desktop'
     ? content.desktop_video_url || ''
     : content.mobile_video_url || (getContentTypeForDevice(content, 'desktop') === 'video' ? content.desktop_video_url || '' : '')
+}
+
+const getFilenameFromUrl = (url: string) => {
+  try {
+    return decodeURIComponent(new URL(url).pathname.split('/').filter(Boolean).pop() || 'Hero media')
+  } catch {
+    return url.split('/').filter(Boolean).pop() || 'Hero media'
+  }
+}
+
+const buildActiveHeroGalleryFiles = (content: HeroContentData): UploadedFile[] => {
+  const seenUrls = new Set<string>()
+
+  return (['desktop', 'mobile'] as PreviewDevice[]).flatMap(device => {
+    const mediaUrl = getMediaUrl(content, device)
+
+    if (!mediaUrl || seenUrls.has(mediaUrl)) {
+      return []
+    }
+
+    seenUrls.add(mediaUrl)
+
+    const type = getContentTypeForDevice(content, device)
+
+    return [
+      {
+        id: `active-hero-${device}-${type}`,
+        name: `Current ${device} hero · ${getFilenameFromUrl(mediaUrl)}`,
+        url: mediaUrl,
+        preview: mediaUrl,
+        type,
+        size: 0,
+        uploadedAt: content.published_at || undefined,
+        isUploaded: true,
+        source: 'cdn' as const,
+        uploadState: 'uploaded' as const,
+        isReadOnly: true
+      }
+    ]
+  })
+}
+
+const mergeActiveHeroGalleryFiles = (files: UploadedFile[], content: HeroContentData) => {
+  const activeHeroFiles = buildActiveHeroGalleryFiles(content)
+  const localFiles = files.filter(file => file.source === 'local')
+  const cdnFiles = files.filter(file => file.source !== 'local' && !file.isReadOnly)
+
+  return [...localFiles, ...activeHeroFiles, ...cdnFiles].filter((file, index, mergedFiles) => {
+    const firstMatchingIndex = mergedFiles.findIndex(candidate => candidate.url === file.url && candidate.type === file.type)
+
+    return firstMatchingIndex === index
+  })
 }
 
 const OVERLAY_POSITION_FIELDS: Record<PreviewDevice, Record<OverlayLayer, { x: keyof HeroContentData; y: keyof HeroContentData }>> = {
@@ -757,6 +810,11 @@ const HeroContentManagement = () => {
           scheduled_content: null
         })
         setLiveHeroContent(fallbackContent)
+        setUploadedFiles(prev => mergeActiveHeroGalleryFiles(prev, fallbackContent))
+        setGalleryPagination(prev => ({
+          ...prev,
+          total_items: Math.max(prev.total_items, buildActiveHeroGalleryFiles(fallbackContent).length)
+        }))
         reset(fallbackContent)
         setSaveIntent('publish')
 
@@ -779,6 +837,11 @@ const HeroContentManagement = () => {
         scheduled_content: data?.scheduled_content ? normalizeHeroContent(data.scheduled_content) : null
       })
       setLiveHeroContent(liveContent)
+      setUploadedFiles(prev => mergeActiveHeroGalleryFiles(prev, liveContent))
+      setGalleryPagination(prev => ({
+        ...prev,
+        total_items: Math.max(prev.total_items, buildActiveHeroGalleryFiles(liveContent).length)
+      }))
       reset(editableContent)
       setSaveIntent(
         editableContent.publication_status === 'draft'
@@ -829,15 +892,21 @@ const HeroContentManagement = () => {
 
       setUploadedFiles(prev => {
         const localFiles = prev.filter(file => file.source === 'local')
+        const activeHeroFiles = prev.filter(file => file.isReadOnly)
+        const mergedCdnFiles = [...activeHeroFiles, ...cdnFiles].filter((file, index, files) => {
+          const firstMatchingIndex = files.findIndex(candidate => candidate.url === file.url && candidate.type === file.type)
 
-        return [...localFiles, ...cdnFiles]
+          return firstMatchingIndex === index
+        })
+
+        return [...localFiles, ...mergedCdnFiles]
       })
       if (pagination) {
         setGalleryPagination(prev => ({
           ...prev,
           current_page: pagination.current_page || currentPage,
           per_page_rows: pagination.per_page_rows || perPageRows,
-          total_items: pagination.total_items || cdnFiles.length,
+          total_items: Math.max(prev.total_items, pagination.total_items || 0, cdnFiles.length),
           total_pages: pagination.total_pages || 1
         }))
       }
@@ -1135,6 +1204,10 @@ const HeroContentManagement = () => {
   }
 
   const getFileUploadLabel = (file: UploadedFile) => {
+    if (file.isReadOnly) {
+      return 'Current hero'
+    }
+
     if (file.source === 'cdn') {
       return 'CDN'
     }
@@ -2644,7 +2717,8 @@ const HeroContentManagement = () => {
                                 </Alert>
                               ) : null}
                               <Typography variant='caption' color='text.secondary'>
-                                {(file.size / 1024 / 1024).toFixed(1)} MB · {file.type}
+                                {file.size ? `${(file.size / 1024 / 1024).toFixed(1)} MB · ` : ''}
+                                {file.type}
                               </Typography>
                               <Stack direction='row' spacing={1} sx={{ mt: 1.25 }}>
                                 <Button
@@ -2663,9 +2737,11 @@ const HeroContentManagement = () => {
                                 >
                                   {isFileSelectedForDevice(file, 'mobile') ? 'Using mobile' : 'Mobile'}
                                 </Button>
-                                <IconButton size='small' onClick={() => void handleDeleteFile(file)} sx={{ ml: 'auto', color: 'error.main' }}>
-                                  <Icon icon='tabler:trash' fontSize='1rem' />
-                                </IconButton>
+                                {!file.isReadOnly ? (
+                                  <IconButton size='small' onClick={() => void handleDeleteFile(file)} sx={{ ml: 'auto', color: 'error.main' }}>
+                                    <Icon icon='tabler:trash' fontSize='1rem' />
+                                  </IconButton>
+                                ) : null}
                               </Stack>
                             </Paper>
                           ))}
