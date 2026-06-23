@@ -1,6 +1,6 @@
 // ** MUI Imports
 import { Icon } from '@iconify/react'
-import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText } from '@mui/material'
+import { CardContent, Divider, CardHeader, Grid, Card, Drawer, Typography, IconButton, Button, FormControl, TextField, FormHelperText, FormControlLabel, Checkbox } from '@mui/material'
 import { Fragment, forwardRef, useEffect, useState } from 'react'
 import TccSingleFileUpload from 'src/customComponents/Form-Elements/file-upload/singleFile-upload'
 import TccEditor from 'src/customComponents/Form-Elements/editor'
@@ -31,6 +31,16 @@ const statusType = [
         name: "unpublished"
     }
 ]
+const contentTypes = [
+    {
+        id: 'story',
+        name: 'Story'
+    },
+    {
+        id: 'special_project',
+        name: 'Special Project'
+    }
+]
 const AddBlog = () => {
 
     const [title, setTitle] = useState('')
@@ -50,6 +60,8 @@ const AddBlog = () => {
     const [called, setCalled] = useState(true)
     const [dialogTitle, setDialogTitle] = useState<'Add' | 'Edit'>('Add')
     const [statusTypeData, setStatusTypeData] = useState('')
+    const [isFeaturedHome, setIsFeaturedHome] = useState(false)
+    const [contentTypeData, setContentTypeData] = useState('story')
     const [publishDate, setPublishDate] = useState<any>(new Date())
 
     const router = useRouter();
@@ -115,6 +127,8 @@ const AddBlog = () => {
                 setValue('metakeyword', data.data.meta_keywords)
                 setValue('metadescription', data.data.meta_description)
                 setStatusTypeData(data.data.is_status)
+                setIsFeaturedHome(data.data.is_featured_home === '1')
+                setContentTypeData(data.data.content_type || 'story')
                 setImageShow(data.data.image_path);
                 setPublishDate(new Date(data.data.publish_date))
                 setBannerImageShow(data.data.banner_image_path);
@@ -162,6 +176,8 @@ const AddBlog = () => {
         formData.append("meta_description", data.metadescription)
         formData.append("meta_keywords", data.metakeyword)
         formData.append("is_status", statusTypeData || "")
+        formData.append("is_featured_home", isFeaturedHome ? "1" : "0")
+        formData.append("content_type", contentTypeData || "story")
         formData.append("publish_date", moment(publishDate).format("YYYY-MM-DD"))
 
         try {
@@ -196,6 +212,8 @@ const AddBlog = () => {
         formData.append("description", editerData)
         formData.append("author", data.author)
         formData.append("is_status", statusTypeData || "")
+        formData.append("is_featured_home", isFeaturedHome ? "1" : "0")
+        formData.append("content_type", contentTypeData || "story")
         formData.append("publish_date", moment(publishDate).format("YYYY-MM-DD"))
 
 
@@ -384,6 +402,33 @@ const AddBlog = () => {
                                     title='name'
                                     Options={statusType}
                                 />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TccSelect
+                                    fullWidth
+                                    size='small'
+                                    inputLabel='Content Type'
+                                    label='Content Type'
+                                    id='blog-content-type'
+                                    value={contentTypeData}
+                                    onChange={(e: any) => setContentTypeData(e.target.value)}
+                                    title='name'
+                                    Options={contentTypes}
+                                />
+                            </Grid>
+                            <Grid item xs={12}>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={isFeaturedHome}
+                                            onChange={(event) => setIsFeaturedHome(event.target.checked)}
+                                        />
+                                    }
+                                    label='Feature this story on the homepage'
+                                />
+                                <Typography variant='body2' sx={{ color: 'text.secondary', ml: 8 }}>
+                                    Only one published blog should be featured on the homepage at a time.
+                                </Typography>
                             </Grid>
                             <Grid item xs={12}>
                                 <Typography sx={{ mb: 1 }}>Description</Typography>

@@ -27,6 +27,9 @@ type GeneralEnquiryRecord = {
   email: string
   phone_number: string | number
   message: string
+  occasion_type?: string
+  budget_range?: string
+  source?: string
   created_date?: string
   date?: string
   time?: string
@@ -220,9 +223,30 @@ const GeneralEnquirie = () => {
     },
     {
       flex: 1,
+      value: 'source',
+      headerName: 'Source',
+      field: 'source',
+      text: 'text'
+    },
+    {
+      flex: 1,
       value: 'lead_status_label',
       headerName: 'Lead Status',
       field: 'lead_status_label',
+      text: 'text'
+    },
+    {
+      flex: 1,
+      value: 'occasion_type',
+      headerName: 'Occasion',
+      field: 'occasion_type',
+      text: 'text'
+    },
+    {
+      flex: 1,
+      value: 'budget_range',
+      headerName: 'Budget',
+      field: 'budget_range',
       text: 'text'
     },
     {
@@ -352,6 +376,29 @@ const GeneralEnquirie = () => {
                     Last updated: {enquiriedata.lead_handled_at}
                   </Typography>
                 )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent sx={{ pb: 4 }}>
+                <Typography variant='overline' sx={{ color: 'text.disabled' }}>
+                  Bespoke Brief
+                </Typography>
+                <Stack spacing={1.5} sx={{ mt: 2 }}>
+                  <Typography>
+                    <strong>Source:</strong> {enquiriedata.source || 'General enquiry'}
+                  </Typography>
+                  <Typography>
+                    <strong>Occasion:</strong> {enquiriedata.occasion_type || 'Not specified'}
+                  </Typography>
+                  <Typography>
+                    <strong>Budget:</strong> {enquiriedata.budget_range || 'Not specified'}
+                  </Typography>
+                  <Typography>
+                    <strong>Preferred appointment:</strong>{' '}
+                    {[enquiriedata.date, enquiriedata.time].filter(Boolean).join(' at ') || 'Not specified'}
+                  </Typography>
+                </Stack>
               </CardContent>
             </Card>
 
