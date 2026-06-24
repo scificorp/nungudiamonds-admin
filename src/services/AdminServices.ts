@@ -91,6 +91,11 @@ export const GET_ALL_STATIC_PAGE = (payload: ICommonPagination) => serviceMaker(
 export const DELETE_STATIC_PAGE = (payload: any) => serviceMaker(`${apiEndPoints.DELETE_STATIC_PAGE}`, httpMethods.POST, payload);
 
 export const STATUS_UPDATE_STATIC_PAGE = (payload: any) => serviceMaker(`${apiEndPoints.STATUS_UPDATE_STATIC_PAGE}`, httpMethods.PUT, payload);
+export const GET_STATIC_PAGE_SECTIONS = (pageId: number | string) => serviceMaker(`${apiEndPoints.STATIC_PAGE_SECTIONS}/${pageId}/sections`, httpMethods.GET);
+export const ADD_STATIC_PAGE_SECTION = (pageId: number | string, payload: any) => serviceMaker(`${apiEndPoints.STATIC_PAGE_SECTIONS}/${pageId}/sections`, httpMethods.POST, payload);
+export const EDIT_STATIC_PAGE_SECTION = (sectionId: number | string, payload: any) => serviceMaker(`${apiEndPoints.STATIC_PAGE_SECTION}/${sectionId}`, httpMethods.PUT, payload);
+export const REORDER_STATIC_PAGE_SECTIONS = (pageId: number | string, payload: any) => serviceMaker(`${apiEndPoints.STATIC_PAGE_SECTIONS}/${pageId}/sections/reorder`, httpMethods.PUT, payload);
+export const DELETE_STATIC_PAGE_SECTION = (sectionId: number | string) => serviceMaker(`${apiEndPoints.STATIC_PAGE_SECTION}/${sectionId}`, httpMethods.DELETE, { data: {} });
 
 export const CARAT_SIZE_ADD = (payload: any) => serviceMaker(`${apiEndPoints.CARAT_SIZE_ADD}`, httpMethods.POST_CONFIG, payload, {headers: { 'Content-Type' : 'multipart/form-data'}});
 export const CARAT_SIZE_GET_ALL = (payload: ICommonPagination) => serviceMaker(`${apiEndPoints.CARAT_SIZE_GET_ALL}?${getQueryUrlFormPagiantion(payload)}`, httpMethods.GET);
