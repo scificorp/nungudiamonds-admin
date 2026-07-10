@@ -79,7 +79,11 @@ const UserDropdown = (props: Props) => {
     setAnchorEl(event.currentTarget)
   }
 
-  const userData = localStorageUtils.getUserInfo()
+  const userData = localStorageUtils.getUserInfo() || {
+    username: 'Local Dev Admin',
+    email: 'local-admin@nungu.app',
+    user_type: 'admin'
+  }
 
   const handleDropdownClose = (url?: string) => {
     if (url) {

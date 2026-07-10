@@ -5,8 +5,8 @@ export const IMG_ENDPOINT = process.env.NEXT_PUBLIC_IMG_ENDPOINT || 'https://d2y
 export const PUBLIC_AUTHORIZATION_TOKEN = process.env.NEXT_PUBLIC_AUTHORIZATION_TOKEN || 'PUBLIC_AUTHORIZATION_TOKEN'
 export const LOCAL_ADMIN_AUTHORIZATION_TOKEN =
   process.env.NEXT_PUBLIC_LOCAL_ADMIN_AUTHORIZATION_TOKEN || ''
-export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || 'd54g32sgrdd5r84gs134g8ees13ds56g'
-export const CRYPTO_JS_IV = process.env.CRYPTO_JS_IV || 'f4g536g4s3d3r8r64s2sa35jj8ki8ufg'
+export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || ''
+export const CRYPTO_JS_IV = process.env.CRYPTO_JS_IV || ''
 
 export const MEATL_GOLD_ID = process.env.MEATL_GOLD_ID || 1
 

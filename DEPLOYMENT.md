@@ -32,8 +32,8 @@ NEXT_PUBLIC_API_ENDPOINT=https://api.nungudiamonds.co.za/api/v2/
 NEXT_PUBLIC_REST_API_ENDPOINT=https://api.nungudiamonds.co.za/api/v2
 NEXT_PUBLIC_IMG_ENDPOINT=https://d2yhu6nvl7lle6.cloudfront.net
 NEXT_PUBLIC_AUTHORIZATION_TOKEN=PUBLIC_AUTHORIZATION_TOKEN
-CRYPTO_JS_KEY=d54g32sgrdd5r84gs134g8ees13ds56g
-CRYPTO_JS_IV=f4g536g4s3d3r8r64s2sa35jj8ki8ufg
+CRYPTO_JS_KEY=<generate-strong-key>
+CRYPTO_JS_IV=<generate-strong-iv>
 ```
 
 ### 4. Build Configuration
