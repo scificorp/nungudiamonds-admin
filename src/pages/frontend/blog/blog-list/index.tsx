@@ -20,8 +20,14 @@ const Blog = () => {
     const [searchFilter, setSearchFilter] = useState()
     const [id, setId] = useState('');
     const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
-    const [result, setResult] = useState([])
+    const [result, setResult] = useState<any[]>([])
     const [showModel, setShowModel] = useState(false);
+
+    const formatBlogRows = (rows: any[] = []) => rows.map(row => ({
+        ...row,
+        content_type: row.content_type === 'special_project' ? 'Special Project' : 'Story',
+        is_featured_home: row.is_featured_home === '1' ? 'Yes' : 'No'
+    }))
 
 
     const editOnClickHandler = async (data: any) => {
@@ -43,7 +49,7 @@ const Blog = () => {
             const data = await GET_ALL_BLOG(mbPagination);
             if (data.code === 200 || data.code === "200") {
                 setPagination(data.data.pagination)
-                setResult(data.data.result)
+                setResult(formatBlogRows(data.data.result))
             } else {
                 return toast.error(data.message);
             }
@@ -123,6 +129,20 @@ const Blog = () => {
             value: 'name',
             headerName: 'Blog Title',
             field: 'name',
+            text: 'text'
+        },
+        {
+            flex: 2,
+            value: 'content_type',
+            headerName: 'Content Type',
+            field: 'content_type',
+            text: 'text'
+        },
+        {
+            flex: 2,
+            value: 'is_featured_home',
+            headerName: 'Homepage Feature',
+            field: 'is_featured_home',
             text: 'text'
         },
 

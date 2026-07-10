@@ -129,6 +129,8 @@ export const apiEndPoints = {
   EDIT_STATIC_PAGE: "staticPage/edit",
   DELETE_STATIC_PAGE: "staticPage/delete",
   STATUS_UPDATE_STATIC_PAGE: "staticPage/status",
+  STATIC_PAGE_SECTIONS: "staticPage",
+  STATIC_PAGE_SECTION: "staticPage/sections",
 
 
   ITEM_SIZE_ADD: "attribute/itemSize/add",
