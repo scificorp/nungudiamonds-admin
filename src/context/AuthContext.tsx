@@ -10,6 +10,7 @@ import axios from 'axios'
 // ** Config
 import authConfig from 'src/configs/auth'
 import { LOCAL_ADMIN_AUTHORIZATION_TOKEN } from 'src/AppConfig'
+import { isLocalAdminLoginDisabled } from 'src/configs/local-auth'
 
 // ** Types
 import { AuthValuesType, RegisterParams, LoginParams, ErrCallbackType, UserDataType } from './types'
@@ -31,8 +32,6 @@ const AuthContext = createContext(defaultProvider)
 type Props = {
   children: ReactNode
 }
-
-const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
 const localDevStorageUser = {
   id: 1,
@@ -77,7 +76,7 @@ const AuthProvider = ({ children }: Props) => {
   useEffect(() => {
     const initAuth = async (): Promise<void> => {
       setLoading(true)
-      if (loginDisabled) {
+      if (isLocalAdminLoginDisabled) {
         applyLocalDevAdminUser()
         setLoading(false)
         
@@ -112,7 +111,7 @@ return
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    if (loginDisabled) {
+    if (isLocalAdminLoginDisabled) {
       applyLocalDevAdminUser()
       router.replace('/')
       
@@ -143,7 +142,7 @@ return
   }
 
   const handleLogout = () => {
-    if (loginDisabled) {
+    if (isLocalAdminLoginDisabled) {
       applyLocalDevAdminUser()
       router.replace('/')
       

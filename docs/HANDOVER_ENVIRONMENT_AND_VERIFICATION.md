@@ -58,6 +58,18 @@ npm run smoke:catalog
 npm run build
 ```
 
+The build runs `verify:production-config` first. For a production release, run
+the guard explicitly with `NODE_ENV=production`; it rejects the local login
+bypass and local admin token before the Next.js build starts:
+
+```sh
+NODE_ENV=production npm run verify:production-config
+```
+
+The local bypass is enabled only when all three conditions hold: the build is
+not production, `NEXT_PUBLIC_DISABLE_ADMIN_LOGIN=true`, and an explicit
+`NEXT_PUBLIC_LOCAL_ADMIN_AUTHORIZATION_TOKEN` is present.
+
 API:
 
 ```sh

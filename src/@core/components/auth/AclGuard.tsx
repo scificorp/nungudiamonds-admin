@@ -19,6 +19,7 @@ import BlankLayout from 'src/@core/layouts/BlankLayout'
 
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
+import { isLocalAdminLoginDisabled } from 'src/configs/local-auth'
 
 interface AclGuardProps {
   children: ReactNode
@@ -35,14 +36,13 @@ const AclGuard = (props: AclGuardProps) => {
   // ** Hooks
   const auth = useAuth()
   const router = useRouter()
-  const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
   // If guestGuard is true and user is not logged in or its an error page, render the page without checking access
   if (guestGuard || router.route === '/404' || router.route === '/500' || router.route === '/') {
     return <>{children}</>
   }
 
-  if (loginDisabled) {
+  if (isLocalAdminLoginDisabled) {
     const localDevAbility = buildAbilityFor('admin', aclAbilities.subject)
 
     return localDevAbility ? <AbilityContext.Provider value={localDevAbility}>{children}</AbilityContext.Provider> : <>{children}</>

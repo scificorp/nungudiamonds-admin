@@ -1,10 +1,9 @@
 import Axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 import { localStorageUtils } from '../utils/localStorageUtils'
 import { API_ENDPOINT, LOCAL_ADMIN_AUTHORIZATION_TOKEN, PUBLIC_AUTHORIZATION_TOKEN } from '../AppConfig'
+import { isLocalAdminLoginDisabled } from '../configs/local-auth'
 import { appConstant } from '../AppConstants'
 import Router from 'next/router'
-
-const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
 
 const publicReadPatterns = [
   '/hero-content/config',
@@ -45,7 +44,7 @@ CONFIG.interceptors.request.use(async (config: AxiosRequestConfig) => {
   try {
     let token = await localStorageUtils.getAccessToken()
     if (!token) {
-      if (loginDisabled && LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
+      if (isLocalAdminLoginDisabled && LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
         token = LOCAL_ADMIN_AUTHORIZATION_TOKEN
       } else if (isPublicReadRequest(config)) {
         token = PUBLIC_AUTHORIZATION_TOKEN
@@ -148,7 +147,7 @@ export const serviceMaker = async <T = any>(
                       error?.response?.data?.code ?? error?.response?.status
 
     if (errorCode == 401 || errorCode == '401') {
-      if (loginDisabled) {
+      if (isLocalAdminLoginDisabled) {
         console.warn('Unauthorized response ignored while admin login disabled.')
       } else {
         localStorageUtils.removeAcessToken()

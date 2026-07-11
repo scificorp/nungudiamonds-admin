@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "WATCHPACK_POLLING=true CHOKIDAR_USEPOLLING=true next dev",
+    "prebuild": "npm run verify:production-config",
     "build": "next build",
     "start": "next start",
     "export": "next export",
@@ -17,6 +18,7 @@
     "smoke:auth": "node scripts/smoke-auth-flow.js",
     "smoke:catalog": "node scripts/smoke-catalog-flow.js",
     "smoke:cms": "node scripts/smoke-cms-flow.js",
+    "verify:production-config": "node scripts/verify-production-config.js",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "build:icons": "tsc -b src/iconify-bundle && node src/iconify-bundle/bundle-icons-react.js"
   },
