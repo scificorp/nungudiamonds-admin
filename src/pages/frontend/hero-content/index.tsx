@@ -38,6 +38,7 @@ import Icon from 'src/@core/components/icon'
 import EnhancedPreviewModal from '../../../components/hero-content/enhanced-preview-modal'
 import URLInputSection from '../../../components/hero-content/url-input-section'
 import { API_ENDPOINT, LOCAL_ADMIN_AUTHORIZATION_TOKEN } from 'src/AppConfig'
+import { isLocalAdminLoginDisabled } from 'src/configs/local-auth'
 import LoadingButton from 'src/components/common/LoadingButton'
 
 type HeroContentType = 'video' | 'image'
@@ -60,14 +61,12 @@ type ResizeHandle = 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw'
 const DRAG_ACTIVATION_THRESHOLD = 8
 const HERO_API_BASE_URL = API_ENDPOINT.replace(/\/$/, '')
 const HERO_UPLOAD_TIMEOUT_MS = 15 * 60 * 1000
-const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
-
 const getHeroAdminAccessToken = () => {
   if (typeof window === 'undefined') {
     return ''
   }
 
-  if (loginDisabled && LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
+  if (isLocalAdminLoginDisabled && LOCAL_ADMIN_AUTHORIZATION_TOKEN) {
     return LOCAL_ADMIN_AUTHORIZATION_TOKEN
   }
 

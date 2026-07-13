@@ -1,0 +1,28 @@
+provider: daytona
+target: linux
+arch: amd64
+
+daytona:
+  snapshot: daytona-large
+  workRoot: /home/daytona/crabbox
+
+sync:
+  exclude:
+    - .git
+    - .idea
+    - node_modules
+    - .next
+    - dist
+    - build
+    - coverage
+    - output
+    - evidence
+    - "*.log"
+    - ".cbx-*.id"
+    - ".env"
+    - ".env.*"
+    - ".env.local"
+    - ".env.*.local"
+
+env:
+  allow: []

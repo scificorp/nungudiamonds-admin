@@ -137,8 +137,8 @@ After setting up environment variables in AWS Amplify, update `src/AppConfig.ts`
 // src/AppConfig.ts
 
 // BEFORE (with hard-coded fallbacks)
-export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || 'd54g32sgrdd5r84gs134g8ees13ds56g'
-export const CRYPTO_JS_IV = process.env.CRYPTO_JS_IV || 'f4g536g4s3d3r8r64s2sa35jj8ki8ufg'
+export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || ''
+export const CRYPTO_JS_IV = process.env.CRYPTO_JS_IV || ''
 
 // AFTER (without fallbacks - must be set in environment)
 export const CRYPTO_JS_KEY = process.env.CRYPTO_JS_KEY || ''

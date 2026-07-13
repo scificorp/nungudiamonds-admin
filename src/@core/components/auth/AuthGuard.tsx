@@ -6,6 +6,7 @@ import { useRouter } from 'next/router'
 
 // ** Hooks Import
 import { useAuth } from 'src/hooks/useAuth'
+import { isLocalAdminLoginDisabled } from 'src/configs/local-auth'
 
 interface AuthGuardProps {
   children: ReactNode
@@ -16,11 +17,9 @@ const AuthGuard = (props: AuthGuardProps) => {
   const { children, fallback = null } = props
   const auth = useAuth()
   const router = useRouter()
-  const loginDisabled = process.env.NEXT_PUBLIC_DISABLE_ADMIN_LOGIN === 'true' && process.env.NODE_ENV !== 'production'
-
   useEffect(
     () => {
-      if (!router.isReady || loginDisabled || auth.loading) {
+      if (!router.isReady || isLocalAdminLoginDisabled || auth.loading) {
         return
       }
 
@@ -36,10 +35,10 @@ const AuthGuard = (props: AuthGuardProps) => {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [router.route, loginDisabled, auth.loading, auth.user]
+    [router.route, auth.loading, auth.user]
   )
 
-  if (loginDisabled) {
+  if (isLocalAdminLoginDisabled) {
     return <>{children}</>
   }
 

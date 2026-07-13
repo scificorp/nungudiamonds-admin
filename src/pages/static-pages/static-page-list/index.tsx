@@ -55,7 +55,16 @@ const StaticPageList = () => {
     cta_target: "",
     media_url: "",
     media_mobile_url: "",
-    settings_json: '{\\n  "steps": [\\n    {\\n      "number": "01",\\n      "title": "The Consultation",\\n      "eyebrow": "By appointment",\\n      "copy": "Every piece begins with a private conversation."\\n    }\\n  ]\\n}'
+    settings_json: JSON.stringify({
+      steps: [
+        {
+          number: "01",
+          title: "The Consultation",
+          eyebrow: "By appointment",
+          copy: "Every piece begins with a private conversation."
+        }
+      ]
+    }, null, 2)
   })
   const [called, setCalled] = useState(true)
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" });
@@ -124,7 +133,16 @@ const StaticPageList = () => {
       cta_target: "",
       media_url: "",
       media_mobile_url: "",
-      settings_json: '{\\n  "steps": [\\n    {\\n      "number": "01",\\n      "title": "The Consultation",\\n      "eyebrow": "By appointment",\\n      "copy": "Every piece begins with a private conversation."\\n    }\\n  ]\\n}'
+      settings_json: JSON.stringify({
+        steps: [
+          {
+            number: "01",
+            title: "The Consultation",
+            eyebrow: "By appointment",
+            copy: "Every piece begins with a private conversation."
+          }
+        ]
+      }, null, 2)
     })
   }
   const editOnClickHandler = async (data: any) => {
