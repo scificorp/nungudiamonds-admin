@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run build",
+      "name": "command:npm run build",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run build",
+      "duration_seconds": 21.979,
+      "output_tail": "\n> tcctech@1.0.0 build\n> rimraf dist && tsc\n\n",
+      "returncode": 0
+    }
+  ],
+  "component": "api",
+  "generated_at": "2026-07-17T04:36:11.937282+00:00",
+  "issue": "GH-10",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "local",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:rates-qa",
+      "name": "command:npm run proof:rates-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:rates-qa",
+      "duration_seconds": 0.42,
+      "output_tail": "\n> tcctech@1.0.0 proof:rates-qa\n> NODE_ENV=qa-local node ./scripts/proof-rates-qa-http.js\n\n{\n  \"scenario\": \"Rates QA HTTP proof\",\n  \"environment\": {\n    \"apiBaseUrl\": \"http://127.0.0.1:2512/api/v2\",\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\"\n  },\n  \"fixture\": {\n    \"runId\": \"1784262099700\"\n  },\n  \"workflows\": {\n    \"currency\": {\n      \"id\": 5,\n      \"addCode\": 200,\n      \"editCode\": 200,\n      \"setDefaultCode\": 200,\n      \"statusCode\": 200,\n      \"editedPersisted\": true,\n      \"ratePersisted\": true,\n      \"defaultPersisted\": true,\n      \"inactivePersisted\": true\n    },\n    \"metalRates\": {\n      \"updateCodes\": {\n        \"gold\": 200,\n        \"silver\": 200,\n        \"platinum\": 200\n      },\n      \"listCode\": 200,\n      \"listCount\": 3,\n      \"goldPersisted\": true,\n      \"silverPersisted\": true,\n      \"platinumPersisted\": true,\n      \"modifiedByPersisted\": true\n    }\n  },\n  \"unsupportedSurfaces\": {\n    \"fxRateDedicatedRoutes\": \"Admin page is intentionally read-only/disabled until dedicated backend route exists.\",\n    \"diamondQualityMatrixRoutes\": \"Admin page is intentionally read-only/disabled until dedicated backend route exists.\"\n  },\n  \"assertions\": {\n    \"currencyEditedPersisted\": true,\n    \"currencyRatePersisted\": true,\n    \"currencyDefaultPersisted\": true,\n    \"currencyInactivePersisted\": true,\n    \"metalGoldRatePersisted\": true,\n    \"metalSilverRatePersisted\": true,\n    \"metalPlatinumRatePersisted\": true,\n    \"metalModifiedByPersisted\": true,\n    \"metalDropdownReturnedRows\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "rates-api",
+  "generated_at": "2026-07-17T04:21:39.890690+00:00",
+  "issue": "GH-4",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

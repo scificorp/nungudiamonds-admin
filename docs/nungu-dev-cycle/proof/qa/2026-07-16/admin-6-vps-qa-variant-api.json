@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:admin-variant-qa",
+      "name": "command:npm run proof:admin-variant-qa",
+      "passed": false
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:admin-variant-qa",
+      "duration_seconds": 0.226,
+      "output_tail": "\n> tcctech@1.0.0 proof:admin-variant-qa\n> NODE_ENV=qa-local node ./scripts/proof-admin-variant-qa-http.js\n\nerror: invalid input syntax for type integer: \"\"\n    at /home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release/node_modules/pg/lib/client.js:545:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async ensureVariantProofSchema (/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release/scripts/proof-admin-variant-qa-http.js:192:3)\n    at async main (/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release/scripts/proof-admin-variant-qa-http.js:284:5) {\n  length: 111,\n  severity: 'ERROR',\n  code: '22P02',\n  detail: undefined,\n  hint: undefined,\n  position: '101',\n  internalPosition: undefined,\n  internalQuery: undefined,\n  where: undefined,\n  schema: undefined,\n  table: undefined,\n  column: undefined,\n  dataType: undefined,\n  constraint: undefined,\n  file: 'numutils.c',\n  line: '615',\n  routine: 'pg_strtoint32_safe'\n}\n",
+      "returncode": 1
+    }
+  ],
+  "component": "admin-variant-api",
+  "generated_at": "2026-07-16T21:34:16.095368+00:00",
+  "issue": "GH-6",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "failed"
+}

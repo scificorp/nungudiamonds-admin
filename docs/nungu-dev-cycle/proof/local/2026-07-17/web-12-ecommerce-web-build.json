@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechweb-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "NEXT_PUBLIC_REST_API_ENDPOINT=http://127.0.0.1:2512/api/v2/ npm run build",
+      "name": "command:NEXT_PUBLIC_REST_API_ENDPOINT=http://127.0.0.1:2512/api/v2/ npm run build",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "NEXT_PUBLIC_REST_API_ENDPOINT=http://127.0.0.1:2512/api/v2/ npm run build",
+      "duration_seconds": 55.989,
+      "output_tail": "\n> tcctechco@2.1.6 build\n> next build\n\ninfo  - Skipping validation of types\ninfo  - Skipping linting\ninfo  - Creating an optimized production build...\nBrowserslist: caniuse-lite is outdated. Please run:\n  npx browserslist@latest --update-db\n  Why you should do it regularly: https://github.com/browserslist/browserslist#browsers-data-updating\n> [PWA] Compile server\n> [PWA] Compile client (static)\n> [PWA] Auto register service worker with: /home/workbench/repos/nungu/ND-TCCTECH/tcctechweb-nungudiamonds-release/node_modules/next-pwa/register.js\n> [PWA] Service worker: /home/workbench/repos/nungu/ND-TCCTECH/tcctechweb-nungudiamonds-release/public/sw.js\n> [PWA]   url: /sw.js\n> [PWA]   scope: /\n> [PWA] Compile server\nBrowserslist: browsers data (caniuse-lite) is 17 months old. Please run:\n  npx update-browserslist-db@latest\n  Why you should do it regularly: https://github.com/browserslist/update-db#readme\ninfo  - Compiled successfully\ninfo  - Collecting page data...\ninfo  - Generating static pages (0/285)\ninfo  - Generating static pages (71/285)\ninfo  - Generating static pages (142/285)\ninfo  - Generating static pages (213/285)\ninfo  - Generating static pages (285/285)\ninfo  - Finalizing page optimization...\n\nRoute (pages)                                  Size     First Load JS\n\u250c \u25cf /                                          19.4 kB         370 kB\n\u251c   \u2514 css/06855e5d1acd4539.css                 3.82 kB\n\u251c   /_app                                      0 B             222 kB\n\u251c \u03bb /[slug]                                    3.2 kB          317 kB\n\u251c \u25cb /404                                       3.13 kB         310 kB\n\u251c \u25cf /accounts/recover-password                 2.4 kB          309 kB\n\u251c \u25cf /cart-page                                 6.91 kB         334 kB\n\u251c \u03bb /category/[slug]                           2.48 kB         365 kB\n\u251c \u25cf /checkout                                  4.09 kB         343 kB\n\u251c \u03bb /collections                               1.32 kB         308 kB\n\u251c \u03bb /collections/[slug]                        5.73 kB         368 kB\n\u251c \u25cf /coming-soon                               2.92 kB         309 kB\n\u251c \u03bb /confirm-order                             3.19 kB         330 kB\n\u251c \u25cf /contact-us                                4.61 kB         315 kB\n\u251c \u03bb /create-your-own                           3.11 kB         314 kB\n\u251c \u25cf /diamond-experience                        52.1 kB         362 kB\n\u251c   \u2514 css/28fbb68daf167c4c.css                 2.99 kB\n\u251c \u25cf /engagement-ring-guide                     939 B           307 kB\n\u251c \u25cf /forget-password                           1.56 kB         308 kB\n\u251c \u25cf /gift-cards                                1.06 kB         308 kB\n\u251c \u25cf /gift-set-checkout                         5.84 kB         344 kB\n\u251c \u25cf /gift-set-payment                          4.59 kB         311 kB\n\u251c \u03bb /gift-set/[slug]                           251 B           368 kB\n\u251c \u25cf /gift-set/gift-set-list                    5.19 kB         372 kB\n\u251c \u25cf /jewellery-care                            935 B           307 kB\n\u251c \u25cf /life-time-service                         936 B           307 kB\n\u251c \u25cf /location                                  3.53 kB         310 kB\n\u251c \u25cf /my-account                                1.71 kB         308 kB\n\u251c \u25cf /my-account/account-details                3.13 kB         310 kB\n\u251c \u25cf /my-account/change-password                3.63 kB         321 kB\n\u251c \u25cf /my-account/gift-set-order                 3.53 kB         329 kB\n\u251c \u03bb /my-account/gift-set-order/[order_number]  3.45 kB         329 kB\n\u251c \u25cf /my-account/my-address                     1.56 kB         333 kB\n\u251c \u25cf /my-account/orders                         3.58 kB         329 kB\n\u251c \u03bb /my-account/orders/[order_number]          1.55 kB         330 kB\n\u251c \u25cb /my-account/orders/tracking (320 ms)       1.07 kB         223 kB\n\u251c \u25cf /nungu-love-stories                        7.32 kB         314 kB\n\u251c \u25cf /order                                     1.52 kB         330 kB\n\u251c \u25cf /order-success                             1.15 kB         329 kB\n\u251c \u25cf /Others/faq                                2.91 kB         313 kB\n\u251c \u25cf /Others/terms                              3.11 kB         317 kB\n\u251c \u25cf /our-stories                               2.79 kB         329 kB\n\u251c \u03bb /our-stories/[slug]                        2.92 kB         332 kB\n\u251c \u25cf /our-stories/blog                          2.86 kB         332 kB\n\u251c \u25cf /our-stories/timeline-demo                 2.58 kB         312 kB\n\u251c \u25cf /payment                                   4.73 kB         311 kB\n\u251c \u25cf /precious-metal-guide                      939 B           307 kB\n\u251c \u25cf /privacy                                   1.72 kB         315 kB\n\u251c \u03bb /products                                  4.3 kB          386 kB\n\u251c \u03bb /products/[slug]                           554 B           447 kB\n\u251c \u03bb /products/product_1                        3.28 kB         419 kB\n\u251c \u03bb /products/product_2                        2.84 kB         313 kB\n\u251c \u03bb /products/product_3                        4.24 kB         388 kB\n\u251c \u25cf /re-valuation                              928 B           307 kB\n\u251c \u25cf /reset-password                            2.39 kB         309 kB\n\u251c \u25cf /ring-size                                 2.09 kB         309 kB\n\u251c \u25cf /search                                    4.09 kB         366 kB\n\u251c \u25cf /shops                                     3.42 kB         314 kB\n\u251c \u03bb /shops/[slug]                              7.97 kB         374 kB\n\u251c \u25cf /signin                                    2.97 kB         309 kB\n\u251c \u25cf /signup                                    2.91 kB         320 kB\n\u251c \u25cf /site-map                                  3.96 kB         310 kB\n\u251c \u25cb /test-scroll                               2.15 kB         224 kB\n\u251c \u25cf /verify-otp                                4.42 kB         311 kB\n\u2514 \u25cf /wishlist                                  6.11 kB         313 kB\n+ First Load JS shared by all                  260 kB\n  \u251c chunks/framework-4ed89e9640adfb9e.js       45.3 kB\n  \u251c chunks/main-dee6a199c577ce40.js            33.9 kB\n  \u251c chunks/pages/_app-99abb57c87fc6e95.js      140 kB\n  \u251c chunks/webpack-2d34a6493c3a4806.js         3.09 kB\n  \u2514 css/8104a41a117e7413.css                   38.3 kB\n\n\u03bb  (Server)  server-side renders at runtime (uses getInitialProps or getServerSideProps)\n\u25cb  (Static)  automatically rendered as static HTML (uses no initial props)\n\u25cf  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)\n\n",
+      "returncode": 0
+    }
+  ],
+  "component": "web",
+  "generated_at": "2026-07-17T04:32:14.009551+00:00",
+  "issue": "WEB-12",
+  "repo": {
+    "branch": "release/hero-catalog-2026-06-16",
+    "commit": "e37f96ca4b8f7c99b271b01cfdbd45b41759d54c",
+    "dirty": true,
+    "name": "tcctechweb-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechweb-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "local",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:admin-variant-qa",
+      "name": "command:npm run proof:admin-variant-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:admin-variant-qa",
+      "duration_seconds": 0.339,
+      "output_tail": "\n> tcctech@1.0.0 proof:admin-variant-qa\n> NODE_ENV=qa-local node ./scripts/proof-admin-variant-qa-http.js\n\n{\n  \"scenario\": \"Admin variant manager QA HTTP proof\",\n  \"environment\": {\n    \"apiBaseUrl\": \"http://127.0.0.1:2512/api/v2\",\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\"\n  },\n  \"fixture\": {\n    \"runId\": \"1784237683913\",\n    \"categoryId\": 4,\n    \"tagId\": 4,\n    \"parentProductId\": 5,\n    \"childProductId\": 6\n  },\n  \"responses\": {\n    \"parentCreate\": {\n      \"code\": 200,\n      \"status\": \"success\",\n      \"message\": \"success\",\n      \"data\": 5\n    },\n    \"childCreate\": {\n      \"code\": 200,\n      \"status\": \"success\",\n      \"message\": \"success\",\n      \"data\": 6\n    },\n    \"toggle\": {\n      \"code\": 200,\n      \"status\": \"success\",\n      \"message\": \"success\",\n      \"data\": null\n    }\n  },\n  \"parentVariantFromApi\": {\n    \"id\": 6,\n    \"name\": \"QA Variant CHILD 1784237683913\",\n    \"sku\": \"QA-VARIANT-CHILD-1784237683913\",\n    \"slug\": null,\n    \"sort_description\": \"QA variant proof\",\n    \"long_description\": \"QA variant proof created by scripts/proof-admin-variant-qa-http.js\",\n    \"making_charge\": \"10\",\n    \"finding_charge\": \"2\",\n    \"other_charge\": \"1\",\n    \"is_active\": \"1\",\n    \"is_featured\": \"0\",\n    \"is_trending\": \"0\",\n    \"is_parent\": \"0\",\n    \"parent_product_id\": 5,\n    \"size\": \"6\"\n  },\n  \"databaseVerification\": {\n    \"parent_is_parent\": \"1\",\n    \"parent_parent_product_id\": null,\n    \"child_is_parent\": \"0\",\n    \"child_parent_product_id\": 5,\n    \"child_size\": \"6\",\n    \"child_gender\": \"1\",\n    \"child_setting_style_type\": \"4\",\n    \"child_is_active\": \"0\",\n    \"child_category_count\": 1\n  },\n  \"assertions\": {\n    \"parentCreated\": true,\n    \"childCreated\": true,\n    \"parentMarkedAsParent\": true,\n    \"childLinkedToParent\": true,\n    \"childVariantFieldsPersisted\": true,\n    \"parentDetailsIncludesChildVariant\": true,\n    \"childCategoryLinked\": true,\n    \"childStatusToggledInactive\": true,\n    \"toggleSucceeded\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "admin-variant-api",
+  "generated_at": "2026-07-16T21:34:44.067983+00:00",
+  "issue": "GH-6",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

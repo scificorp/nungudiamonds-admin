@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:bookings-qa",
+      "name": "command:npm run proof:bookings-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:bookings-qa",
+      "duration_seconds": 0.322,
+      "output_tail": "\n> tcctech@1.0.0 proof:bookings-qa\n> NODE_ENV=qa-local node ./scripts/proof-bookings-qa-http.js\n\n{\n  \"scenario\": \"Bookings QA HTTP proof\",\n  \"environment\": {\n    \"apiBaseUrl\": \"http://127.0.0.1:2512/api/v2\",\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\",\n    \"mailSuppressed\": true\n  },\n  \"fixture\": {\n    \"runId\": \"1784261211339\",\n    \"bookingId\": 6,\n    \"bookingEmail\": \"qa-booking-1784261211339@example.test\"\n  },\n  \"responses\": {\n    \"create\": {\n      \"code\": 200,\n      \"status\": \"success\",\n      \"message\": \"success\",\n      \"data\": {\n        \"first_name\": \"QAT\",\n        \"last_name\": \"Booking 1784261211339\",\n        \"email\": \"qa-booking-1784261211339@example.test\",\n        \"phone_number\": \"0000000000\",\n        \"message\": \"QA booking proof 1784261211339\",\n        \"date\": \"2026-08-04\",\n        \"time\": \"10:30\",\n        \"occasion_type\": \"Engagement ring\",\n        \"budget_range\": \"QA budget\",\n        \"source\": \"qa-proof\",\n        \"enquirie_type\": 1,\n        \"created_date\": \"2026-07-17T04:06:51.383Z\",\n        \"created_by\": null\n      }\n    },\n    \"list\": {\n      \"code\": 200,\n      \"matchedBooking\": {\n        \"id\": 6,\n        \"first_name\": \"QAT\",\n        \"last_name\": \"Booking 1784261211339\",\n        \"email\": \"qa-booking-1784261211339@example.test\",\n        \"phone_number\": \"0000000000\",\n        \"message\": \"QA booking proof 1784261211339\",\n        \"created_date\": \"2026-07-17T04:06:51.383Z\",\n        \"date\": \"2026-08-04T00:00:00.000Z\",\n        \"time\": \"10:30:00\",\n        \"occasion_type\": \"Engagement ring\",\n        \"budget_range\": \"QA budget\",\n        \"source\": \"qa-proof\",\n        \"lead_status\": 0,\n        \"lead_status_label\": \"Needs follow-up\",\n        \"lead_notes\": \"\",\n        \"lead_handled_by\": \"\",\n        \"lead_handled_at\": \"\"\n      }\n    },\n    \"update\": {\n      \"code\": 200,\n      \"status\": \"success\",\n      \"message\": \"Record updated successfully\",\n      \"data\": {\n        \"id\": 6,\n        \"lead_status\": 1,\n        \"lead_status_label\": \"Contacted\",\n        \"lead_notes\": \"QA booking follow-up 1784261211339\",\n        \"lead_handled_by\": \"1\",\n        \"lead_handled_at\": \"2026-07-17T04:06:51.427Z\"\n      }\n    }\n  },\n  \"databaseVerification\": {\n    \"booking\": {\n      \"id\": 6,\n      \"first_name\": \"QAT\",\n      \"last_name\": \"Booking 1784261211339\",\n      \"email\": \"qa-booking-1784261211339@example.test\",\n      \"phone_number\": \"0000000000\",\n      \"message\": \"QA booking proof 1784261211339\",\n      \"date\": \"2026-08-04\",\n      \"time\": \"10:30:00\",\n      \"occasion_type\": \"Engagement ring\",\n      \"budget_range\": \"QA budget\",\n      \"source\": \"qa-proof\",\n      \"enquirie_type\": 1,\n      \"created_by\": null\n    },\n    \"tracking\": {\n      \"general_enquiry.6.notes\": \"QA booking follow-up 1784261211339\",\n      \"general_enquiry.6.status\": \"1\"\n    }\n  },\n  \"assertions\": {\n    \"bookingCreateReturnedSuccess\": true,\n    \"bookingPersisted\": true,\n    \"bookingDatePersisted\": true,\n    \"bookingTimePersisted\": true,\n    \"bookingMetadataPersisted\": true,\n    \"bookingIsGeneralEnquiry\": true,\n    \"adminListIncludesBooking\": true,\n    \"adminListIncludesAppointmentFields\": true,\n    \"followUpUpdateReturnedSuccess\": true,\n    \"followUpStatusPersisted\": true,\n    \"followUpNotesPersisted\": true,\n    \"mailSuppressedInQa\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "bookings-api",
+  "generated_at": "2026-07-17T04:06:51.492643+00:00",
+  "issue": "GH-5",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

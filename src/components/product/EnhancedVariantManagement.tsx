@@ -369,7 +369,7 @@ const EnhancedVariantManagement: React.FC<EnhancedVariantManagementProps> = ({
     setLoading(true)
     try {
       const response = await STATUS_UPDATE_PRODUCT({
-        id: variant.id,
+        id_product: variant.id,
         is_active: variant.is_active === '1' ? '0' : '1'
       })
 

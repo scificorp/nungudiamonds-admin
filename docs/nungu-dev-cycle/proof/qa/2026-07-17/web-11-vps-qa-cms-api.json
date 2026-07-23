@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:cms-qa",
+      "name": "command:npm run proof:cms-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:cms-qa",
+      "duration_seconds": 0.41,
+      "output_tail": "\n> tcctech@1.0.0 proof:cms-qa\n> NODE_ENV=qa-local node ./scripts/proof-cms-qa-http.js\n\n{\n  \"scenario\": \"CMS launch QA HTTP proof\",\n  \"environment\": {\n    \"apiBaseUrl\": \"http://127.0.0.1:2512/api/v2\",\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\"\n  },\n  \"fixture\": {\n    \"runId\": \"1784262950232\",\n    \"staticPageId\": 5,\n    \"staticPageSectionId\": 4,\n    \"slug\": \"qa-cms-1784262950232\"\n  },\n  \"responses\": {\n    \"publicPageCode\": 200,\n    \"blogsListCode\": 200\n  },\n  \"databaseVerification\": {\n    \"blog\": {\n      \"id\": 4,\n      \"is_featured_home\": \"0\",\n      \"content_type\": \"story\"\n    }\n  },\n  \"assertions\": {\n    \"blogMigrationIsIdempotent\": true,\n    \"publicStaticPageReturned\": true,\n    \"publicStaticPageHasHero\": true,\n    \"publicStaticPageHasSection\": true,\n    \"publicBlogListEndpointReturned\": true,\n    \"blogDefaultsPersisted\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "api",
+  "generated_at": "2026-07-17T04:35:50.413041+00:00",
+  "issue": "WEB-11",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

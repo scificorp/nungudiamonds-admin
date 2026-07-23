@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:diamond-multitone-qa",
+      "name": "command:npm run proof:diamond-multitone-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:diamond-multitone-qa",
+      "duration_seconds": 0.259,
+      "output_tail": "\n> tcctech@1.0.0 proof:diamond-multitone-qa\n> NODE_ENV=qa-local node ./scripts/proof-diamond-multitone-qa-db.js\n\n{\n  \"scenario\": \"Diamond multitone model QA DB proof\",\n  \"environment\": {\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\"\n  },\n  \"fixture\": {\n    \"runId\": \"1784262950239\",\n    \"productId\": 13,\n    \"diamondGroupId\": 3\n  },\n  \"modelVerification\": {\n    \"id\": 13,\n    \"metal_component_count\": \"2\",\n    \"total_metal_weight\": \"2.25\",\n    \"has_multi_tone_component\": true,\n    \"diamond_component_count\": \"1\",\n    \"diamond_shape\": 2,\n    \"diamond_color\": 4,\n    \"diamond_clarity\": 5,\n    \"diamond_cut\": 6,\n    \"diamond_cost\": \"4000.0\"\n  },\n  \"assertions\": {\n    \"multipleMetalComponentsPersisted\": true,\n    \"totalMetalWeightInspectable\": true,\n    \"multiToneComponentPersisted\": true,\n    \"diamondComponentPersisted\": true,\n    \"atomicDiamondFieldsPersisted\": true,\n    \"diamondCostInspectable\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": [],\n  \"limitation\": \"This proves persisted model compatibility. Full admin/API workflow proof remains a follow-up slice.\"\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "api",
+  "generated_at": "2026-07-17T04:35:50.277793+00:00",
+  "issue": "GH-10",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}
