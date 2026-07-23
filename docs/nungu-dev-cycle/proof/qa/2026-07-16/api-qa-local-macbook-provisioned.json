@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "issue": "GH-12",
+  "component": "api-qa-local",
+  "stage": "qa",
+  "source": "macbook-local-task-handoff",
+  "recorded_at": "2026-07-16T00:00:00Z",
+  "environment": {
+    "name": "qa-local",
+    "api_base_url": "http://127.0.0.1:2512",
+    "api_port": 2512,
+    "database": {
+      "host": "127.0.0.1",
+      "port": 55433,
+      "name": "nungu_diamond_qa",
+      "identity_check": "nungu_diamond_qa|127.0.0.1|55433",
+      "production_database": false
+    },
+    "mail_sending": "suppressed"
+  },
+  "checks": [
+    {
+      "name": "db_started",
+      "passed": true,
+      "detail": "DB started on 127.0.0.1:55433"
+    },
+    {
+      "name": "db_identity",
+      "passed": true,
+      "detail": "nungu_diamond_qa|127.0.0.1|55433"
+    },
+    {
+      "name": "bootstrap",
+      "passed": true,
+      "detail": "16 migrations registered; rerun is idempotent"
+    },
+    {
+      "name": "api_build",
+      "passed": true,
+      "detail": "TypeScript build passed under Node 22.23.1"
+    },
+    {
+      "name": "api_started",
+      "passed": true,
+      "detail": "NODE_ENV=qa-local, port 2512"
+    },
+    {
+      "name": "api_reachability",
+      "passed": true,
+      "detail": "GET http://127.0.0.1:2512/api/v2/hero-content/config returned HTTP 200"
+    },
+    {
+      "name": "production_safety",
+      "passed": true,
+      "detail": "No production DB or production credentials were used"
+    }
+  ],
+  "durable_commands": [
+    "npm run db:qa-local:start",
+    "npm run db:qa-local:bootstrap",
+    "PATH=\"/opt/homebrew/opt/node@22/bin:$PATH\" npm run dev:qa-local",
+    "npm run db:qa-local:stop"
+  ],
+  "verdict": "passed"
+}

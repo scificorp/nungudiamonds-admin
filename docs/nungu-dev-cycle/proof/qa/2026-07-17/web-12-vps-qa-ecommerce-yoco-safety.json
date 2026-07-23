@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:ecommerce-yoco-qa",
+      "name": "command:npm run proof:ecommerce-yoco-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:ecommerce-yoco-qa",
+      "duration_seconds": 0.161,
+      "output_tail": "\n> tcctech@1.0.0 proof:ecommerce-yoco-qa\n> NODE_ENV=qa-local node ./scripts/proof-ecommerce-yoco-qa.js\n\n{\n  \"scenario\": \"Ecommerce Yoco QA safety proof\",\n  \"environment\": {\n    \"nodeEnv\": \"qa-local\",\n    \"paymentSecretConfigured\": false\n  },\n  \"paymentProvider\": {\n    \"provider\": \"Yoco\",\n    \"chargeEndpointConfiguredInCode\": true,\n    \"sandboxChargeAttempted\": false,\n    \"sandboxChargeBlocker\": \"PAYMENT_METHOD_SECRET_KEY is not configured for QA-local\"\n  },\n  \"assertions\": {\n    \"hardcodedYocoSecretRemoved\": true,\n    \"qaPaymentSecretNotConfigured\": true,\n    \"paymentPathFailsClosedWithoutSecret\": true,\n    \"yocoChargeEndpointIsExplicit\": true,\n    \"sandboxChargeBlockedPendingCredentials\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "payment-api",
+  "generated_at": "2026-07-17T04:39:16.999054+00:00",
+  "issue": "WEB-12",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

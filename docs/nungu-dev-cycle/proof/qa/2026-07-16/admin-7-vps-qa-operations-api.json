@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:admin-operations-qa",
+      "name": "command:npm run proof:admin-operations-qa",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run proof:admin-operations-qa",
+      "duration_seconds": 0.38,
+      "output_tail": "\n> tcctech@1.0.0 proof:admin-operations-qa\n> NODE_ENV=qa-local node ./scripts/proof-admin-operations-qa-http.js\n\n{\n  \"scenario\": \"Admin operations CRUD QA HTTP proof\",\n  \"environment\": {\n    \"apiBaseUrl\": \"http://127.0.0.1:2512/api/v2\",\n    \"database\": \"nungu_diamond_qa@127.0.0.1:55433\"\n  },\n  \"fixture\": {\n    \"runId\": \"1784238442427\",\n    \"generalEnquiryId\": 3,\n    \"productId\": 9,\n    \"productEnquiryId\": 3\n  },\n  \"workflows\": {\n    \"generalEnquiry\": {\n      \"response\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record updated successfully\",\n        \"data\": {\n          \"id\": 3,\n          \"lead_status\": 2,\n          \"lead_status_label\": \"In progress\",\n          \"lead_notes\": \"QA follow-up 1784238442427\",\n          \"lead_handled_by\": \"1\",\n          \"lead_handled_at\": \"2026-07-16T21:47:22.482Z\"\n        }\n      },\n      \"statusPersisted\": true,\n      \"notesPersisted\": true\n    },\n    \"productEnquiry\": {\n      \"response\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record updated successfully\",\n        \"data\": null\n      },\n      \"actionPersisted\": true,\n      \"commentsPersisted\": true,\n      \"modifiedByPersisted\": true\n    },\n    \"currency\": {\n      \"label\": \"currency\",\n      \"id\": 2,\n      \"addResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"currency\": \"QA Currency 1784238442427\",\n          \"rate\": \"1.23\",\n          \"created_date\": \"2026-07-16T21:47:22.516Z\",\n          \"is_active\": \"1\",\n          \"is_deleted\": \"0\",\n          \"is_default\": \"0\",\n          \"created_by\": 1\n        }\n      },\n      \"editResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"id\": 2,\n          \"currency\": \"QA Currency Edited 1784238442427\",\n          \"rate\": \"2.34\",\n          \"created_date\": \"2026-07-16T21:47:22.516Z\",\n          \"modified_date\": \"2026-07-16T21:47:22.529Z\",\n          \"created_by\": 1,\n          \"modified_by\": 1,\n          \"is_active\": \"1\",\n          \"is_deleted\": \"0\",\n          \"is_default\": \"0\"\n        }\n      },\n      \"statusResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record updated successfully\",\n        \"data\": null\n      },\n      \"deleteResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": null\n      },\n      \"editedPersisted\": true,\n      \"inactivePersisted\": true,\n      \"deletedPersisted\": true,\n      \"modifiedByPersisted\": true\n    },\n    \"tax\": {\n      \"label\": \"tax\",\n      \"id\": 2,\n      \"addResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"name\": \"QA Tax 1784238442427\",\n          \"slug\": \"QA-Tax-1784238442427\",\n          \"rate\": \"7.5\",\n          \"created_date\": \"2026-07-16T21:47:22.553Z\",\n          \"is_active\": \"1\",\n          \"is_deleted\": \"0\",\n          \"created_by\": 1\n        }\n      },\n      \"editResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"id\": 2,\n          \"name\": \"QA Tax Edited 1784238442427\",\n          \"slug\": \"QA-Tax-Edited-1784238442427\",\n          \"rate\": 8.5,\n          \"created_date\": \"2026-07-16T21:47:22.553Z\",\n          \"modified_date\": \"2026-07-16T21:47:22.564Z\",\n          \"created_by\": 1,\n          \"modified_by\": 1,\n          \"is_active\": \"1\",\n          \"is_deleted\": \"0\"\n        }\n      },\n      \"statusResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record updated successfully\",\n        \"data\": null\n      },\n      \"deleteResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record deleted successfully\",\n        \"data\": null\n      },\n      \"editedPersisted\": true,\n      \"inactivePersisted\": true,\n      \"deletedPersisted\": true,\n      \"modifiedByPersisted\": true\n    },\n    \"clarity\": {\n      \"label\": \"clarity\",\n      \"id\": 2,\n      \"addResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"value\": \"QA1784238442427\",\n          \"slug\": \"qa-clarity-1784238442427\",\n          \"name\": \"QA Clarity 1784238442427\",\n          \"created_date\": \"2026-07-16T21:47:22.589Z\",\n          \"is_active\": \"1\",\n          \"is_deleted\": \"0\",\n          \"created_by\": 1\n        }\n      },\n      \"editResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"success\",\n        \"data\": {\n          \"id\": 2,\n          \"value\": \"QAE1784238442427\",\n          \"name\": \"QA Clarity Edited 1784238442427\",\n          \"slug\": \"qa-clarity-edited-1784238442427\",\n          \"is_active\": \"1\",\n          \"created_date\": \"2026-07-16T21:47:22.589Z\",\n          \"modified_date\": \"2026-07-16T21:47:22.601Z\",\n          \"created_by\": 1,\n          \"modified_by\": 1,\n          \"is_deleted\": \"0\"\n        }\n      },\n      \"statusResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record updated successfully\",\n        \"data\": null\n      },\n      \"deleteResponse\": {\n        \"code\": 200,\n        \"status\": \"success\",\n        \"message\": \"Record deleted successfully\",\n        \"data\": null\n      },\n      \"editedPersisted\": true,\n      \"inactivePersisted\": true,\n      \"deletedPersisted\": true,\n      \"modifiedByPersisted\": true\n    }\n  },\n  \"assertions\": {\n    \"generalEnquiryStatusPersisted\": true,\n    \"generalEnquiryNotesPersisted\": true,\n    \"productEnquiryActionPersisted\": true,\n    \"productEnquiryCommentsPersisted\": true,\n    \"productEnquiryModifiedByPersisted\": true,\n    \"currencyEditedPersisted\": true,\n    \"currencyInactivePersisted\": true,\n    \"currencyDeletedPersisted\": true,\n    \"taxEditedPersisted\": true,\n    \"taxInactivePersisted\": true,\n    \"taxDeletedPersisted\": true,\n    \"clarityEditedPersisted\": true,\n    \"clarityInactivePersisted\": true,\n    \"clarityDeletedPersisted\": true\n  },\n  \"verdict\": \"passed\",\n  \"failedAssertions\": []\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "admin-operations-api",
+  "generated_at": "2026-07-16T21:47:22.636857+00:00",
+  "issue": "GH-7",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "qa",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

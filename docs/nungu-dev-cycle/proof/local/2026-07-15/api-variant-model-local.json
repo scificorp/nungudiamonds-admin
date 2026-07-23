@@ -1,0 +1,54 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run build",
+      "name": "command:npm run build",
+      "passed": true
+    },
+    {
+      "detail": "npm run proof:variant-service",
+      "name": "command:npm run proof:variant-service",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run build",
+      "duration_seconds": 19.451,
+      "output_tail": "\n> tcctech@1.0.0 build\n> rimraf dist && tsc\n\n",
+      "returncode": 0
+    },
+    {
+      "command": "npm run proof:variant-service",
+      "duration_seconds": 5.653,
+      "output_tail": "\n> tcctech@1.0.0 proof:variant-service\n> NODE_ENV=localhero node ./scripts/proof-variant-service.js\n\nCache initialized\n{\n  \"scenario\": \"create child product variant through saveProductBasicDetails\",\n  \"assertions\": {\n    \"successResponse\": true,\n    \"parentMarkedAsParent\": true,\n    \"childVariantCreated\": true,\n    \"variantFieldsPersisted\": true,\n    \"categoryLinked\": true,\n    \"transactionCommitted\": true\n  },\n  \"calls\": {\n    \"productFindOne\": [\n      {\n        \"where\": {\n          \"is_deleted\": \"0\"\n        }\n      },\n      {\n        \"where\": {\n          \"id\": 101,\n          \"is_deleted\": \"0\"\n        },\n        \"transaction\": {}\n      }\n    ],\n    \"productUpdate\": [\n      {\n        \"payload\": {\n          \"is_parent\": \"1\",\n          \"parent_product_id\": null,\n          \"modified_by\": 99,\n          \"modified_date\": \"2026-07-15T21:31:40.699Z\"\n        },\n        \"query\": {\n          \"where\": {\n            \"id\": 101\n          },\n          \"transaction\": {}\n        }\n      }\n    ],\n    \"productCreate\": [\n      {\n        \"payload\": {\n          \"name\": \"Parent Ring Size 6\",\n          \"sku\": \"PARENT-RING-SIZE-6\",\n          \"sort_description\": \"Variant proof\",\n          \"long_description\": \"Variant proof description\",\n          \"tag\": \"7\",\n          \"making_charge\": 10,\n          \"finding_charge\": 2,\n          \"other_charge\": 1,\n          \"size\": \"6\",\n          \"length\": \"\",\n          \"gender\": \"1\",\n          \"setting_style_type\": \"4\",\n          \"is_parent\": \"0\",\n          \"parent_product_id\": 101,\n          \"is_active\": \"1\",\n          \"is_featured\": \"0\",\n          \"is_trending\": \"0\",\n          \"created_by\": 99,\n          \"created_date\": \"2026-07-15T21:31:40.699Z\"\n        },\n        \"query\": {\n          \"transaction\": {}\n        }\n      }\n    ],\n    \"productCategoryCreate\": [\n      {\n        \"payload\": {\n          \"id_product\": 202,\n          \"id_category\": 3,\n          \"id_sub_category\": null,\n          \"id_sub_sub_category\": null,\n          \"created_by\": 99,\n          \"created_date\": \"2026-07-15T21:31:40.699Z\"\n        },\n        \"query\": {\n          \"transaction\": {}\n        }\n      }\n    ],\n    \"commits\": 1,\n    \"rollbacks\": 0\n  }\n}\n",
+      "returncode": 0
+    }
+  ],
+  "component": "api",
+  "generated_at": "2026-07-15T21:31:40.753707+00:00",
+  "issue": "GH-6",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "82c95a8a20f60a0c7228f94242220edda226a93a",
+    "dirty": true,
+    "name": "tcctechapi-nungudiamonds-release",
+    "path": "/home/workbench/repos/nungu/ND-TCCTECH/tcctechapi-nungudiamonds-release"
+  },
+  "schema_version": 1,
+  "stage": "local",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}

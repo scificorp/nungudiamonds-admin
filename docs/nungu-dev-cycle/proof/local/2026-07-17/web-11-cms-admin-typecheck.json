@@ -1,0 +1,43 @@
+{
+  "artifacts": [],
+  "blockers": [],
+  "checks": [
+    {
+      "detail": ".",
+      "name": "repo_exists",
+      "passed": true
+    },
+    {
+      "detail": "dirty",
+      "name": "worktree_clean",
+      "passed": true
+    },
+    {
+      "detail": "npm run typecheck",
+      "name": "command:npm run typecheck",
+      "passed": true
+    }
+  ],
+  "commands": [
+    {
+      "command": "npm run typecheck",
+      "duration_seconds": 6.945,
+      "output_tail": "\n> tcc-technologies@1.0.0 typecheck\n> tsc --noEmit\n\n",
+      "returncode": 0
+    }
+  ],
+  "component": "admin",
+  "generated_at": "2026-07-17T04:36:32.785937+00:00",
+  "issue": "WEB-11",
+  "repo": {
+    "branch": "feature/cms-page-enrichment",
+    "commit": "4f5ddcd524ec1f79b7bdd38fdbe10ddb79cd795e",
+    "dirty": true,
+    "name": "tcctechadmin-nungudiamonds-release",
+    "path": "."
+  },
+  "schema_version": 1,
+  "stage": "local",
+  "tool": "tools/nungu-dev-cycle/capture-proof.py",
+  "verdict": "passed"
+}
