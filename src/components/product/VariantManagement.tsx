@@ -90,6 +90,7 @@ interface VariantFormState {
   name: string
   sku: string
   size: string
+  id_size: number
   making_charge: number
   finding_charge: number
   other_charge: number
@@ -110,6 +111,7 @@ const emptyForm: VariantFormState = {
   name: '',
   sku: '',
   size: '',
+  id_size: 0,
   making_charge: 0,
   finding_charge: 0,
   other_charge: 0,
@@ -139,6 +141,18 @@ const splitIds = (value: unknown) => {
 
   return []
 }
+
+const getProductIdFromResponse = (response: any) => {
+  const data = response?.data
+
+  return toNumber(
+    typeof data === 'number' || typeof data === 'string'
+      ? data
+      : data?.id || data?.findProduct?.id
+  )
+}
+
+const getSizeOptionLabel = (size: DropdownOption) => String(size.size || size.name || size.id)
 
 const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVariantsChange }) => {
   const [variants, setVariants] = useState<ProductVariant[]>([])
@@ -227,6 +241,25 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     return size ? `${parentName} - ${size}` : `${parentName} - Variant`
   }
 
+  const findSizeOption = useCallback(
+    (value: unknown) => {
+      const numericValue = toNumber(value)
+      if (numericValue) {
+        const byId = sizes.find(size => size.id === numericValue)
+        if (byId) return byId
+      }
+
+      if (typeof value === 'string' && value.trim()) {
+        const normalized = value.trim()
+
+        return sizes.find(size => getSizeOptionLabel(size) === normalized)
+      }
+
+      return undefined
+    },
+    [sizes]
+  )
+
   const openAddDialog = () => {
     const nextSku = parentProduct?.sku ? `${parentProduct.sku}-VAR${variants.length + 1}` : ''
     setForm({
@@ -248,12 +281,16 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       const detail = isSuccess(response) ? response.data?.findProduct as ProductDetail : variant as ProductDetail
       const firstMetal = detail.PMO?.[0]
       const metalToneId = splitIds(firstMetal?.metal_tone)[0] || 0
+      const sizeId = splitIds(detail.size)[0] || splitIds(variant.size)[0] || 0
+      const sizeOption = findSizeOption(sizeId || detail.size || variant.size || '')
+      const sizeLabel = sizeOption ? getSizeOptionLabel(sizeOption) : String(detail.size || variant.size || '')
 
       setForm({
         id_product: variant.id,
         name: detail.name || variant.name,
         sku: detail.sku || variant.sku,
-        size: splitIds(detail.size).join(', ') || detail.size || variant.size || '',
+        size: sizeLabel,
+        id_size: sizeOption?.id || sizeId,
         making_charge: toNumber(detail.making_charge),
         finding_charge: toNumber(detail.finding_charge),
         other_charge: toNumber(detail.other_charge),
@@ -278,7 +315,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
     if (!form.name.trim()) errors.name = 'Variant name is required'
     if (!form.sku.trim()) errors.sku = 'Variant SKU is required'
-    if (!form.size.trim()) errors.size = 'Size or option label is required'
+    if (!form.id_size) errors.size = 'Choose size or option'
     if (!parentProduct?.id) errors.parent = 'Parent product is not loaded'
     if (parentCategories.length === 0) errors.parent = 'Parent product needs a category before variants can be saved'
     if (hasPartialMetal) {
@@ -298,6 +335,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
     setSaving(true)
     try {
+      const isNewVariant = !form.id_product
       const variantResponse = await ADD_PRODUCT_BASIC_DETAILS({
         id_product: form.id_product,
         name: form.name.trim(),
@@ -320,14 +358,29 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         return
       }
 
-      const savedVariantId = form.id_product || toNumber(variantResponse.data)
+      const savedVariantId = form.id_product || getProductIdFromResponse(variantResponse)
       const hasMetal = Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
+
+      if (!savedVariantId) {
+        toast.error('Variant saved, but the product id was not returned')
+        setDialogOpen(false)
+        await loadProductAndVariants()
+        onVariantsChange?.()
+
+        return
+      }
+
+      if (isNewVariant) {
+        setForm(prev => ({ ...prev, id_product: savedVariantId }))
+        await loadProductAndVariants()
+        onVariantsChange?.()
+      }
 
       if (savedVariantId && hasMetal) {
         const metalResponse = await ADD_PRODUCT_METAL_DIAMOND_DETAILS({
           id_product: savedVariantId,
           setting_style_type: [],
-          size: [form.size.trim()],
+          size: [form.id_size],
           length: [],
           metal_data: [
             {
@@ -348,10 +401,12 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         }
       }
 
-      toast.success(form.id_product ? 'Variant updated' : 'Variant added')
+      toast.success(isNewVariant ? 'Variant added' : 'Variant updated')
       setDialogOpen(false)
-      await loadProductAndVariants()
-      onVariantsChange?.()
+      if (!isNewVariant) {
+        await loadProductAndVariants()
+        onVariantsChange?.()
+      }
     } catch (error: any) {
       toast.error(error?.data?.message || 'Variant could not be saved')
     } finally {
@@ -524,12 +579,14 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               <FormControl fullWidth error={Boolean(formErrors.size)}>
                 <InputLabel>Size / option</InputLabel>
                 <Select
-                  value={form.size}
+                  value={form.id_size || ''}
                   label='Size / option'
                   onChange={event => {
-                    const size = String(event.target.value)
+                    const sizeOption = findSizeOption(event.target.value)
+                    const size = sizeOption ? getSizeOptionLabel(sizeOption) : ''
                     setForm(prev => ({
                       ...prev,
+                      id_size: sizeOption?.id || 0,
                       size,
                       name: prev.name && prev.name !== buildVariantName(prev.size) ? prev.name : buildVariantName(size)
                     }))
@@ -539,8 +596,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                     <em>Select size</em>
                   </MenuItem>
                   {sizes.map(size => (
-                    <MenuItem key={size.id} value={size.size || size.name || String(size.id)}>
-                      {size.size || size.name || size.id}
+                    <MenuItem key={size.id} value={size.id}>
+                      {getSizeOptionLabel(size)}
                     </MenuItem>
                   ))}
                 </Select>
