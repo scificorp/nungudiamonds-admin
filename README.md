@@ -33,21 +33,8 @@ NEXT_PUBLIC_DISABLE_ADMIN_LOGIN=true
 
 ## Quality Gates
 
-Run these before handover or deployment:
-
-```sh
-npm run lint:check
-npm run typecheck
-npm run smoke:routes
-npm run smoke:auth
-npm run smoke:catalog
-npm run smoke:cms
-npm run build
-```
-
-`smoke:catalog` uses the local API, creates a temporary catalog product, verifies image/status/collection operations, and deletes the smoke product by default. Set `KEEP_SMOKE_PRODUCT=true` only when you intentionally want to inspect the created product afterwards.
-
-`smoke:auth` and `smoke:cms` are release gates for the admin-auth guard, static-page CMS, and featured content. Run the mutating API-backed smokes only against local or QA data, never against production customer records.
+Use `docs/HANDOVER_ENVIRONMENT_AND_VERIFICATION.md` for the current handover and deployment verification commands.
+API-backed smokes must run only against local or QA data, never against production customer records.
 
 ## Handover Docs
 

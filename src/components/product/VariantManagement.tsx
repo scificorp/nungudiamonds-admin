@@ -147,11 +147,7 @@ const splitIds = (value: unknown) => {
 const getProductIdFromResponse = (response: any) => {
   const data = response?.data
 
-  return toNumber(
-    typeof data === 'number' || typeof data === 'string'
-      ? data
-      : data?.id || data?.findProduct?.id
-  )
+  return toNumber(typeof data === 'number' || typeof data === 'string' ? data : data?.id || data?.findProduct?.id)
 }
 
 const getSizeOptionLabel = (size: DropdownOption) => String(size.size || size.name || size.id)
@@ -284,7 +280,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     setLoading(true)
     try {
       const response = await GET_BY_ID_PRODUCTS(variant.id)
-      const detail = isSuccess(response) ? response.data?.findProduct as ProductDetail : variant as ProductDetail
+      const detail = isSuccess(response) ? (response.data?.findProduct as ProductDetail) : (variant as ProductDetail)
       const firstMetal = detail.PMO?.[0]
       const metalToneId = splitIds(firstMetal?.metal_tone)[0] || 0
       const sizeId = splitIds(detail.size)[0] || splitIds(variant.size)[0] || 0
@@ -344,9 +340,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     setSaving(true)
     try {
       const isNewVariant = !form.id_product
-      const productCategories = isNewVariant || form.product_categories.length === 0
-        ? parentCategories
-        : form.product_categories
+      const productCategories =
+        isNewVariant || form.product_categories.length === 0 ? parentCategories : form.product_categories
       const variantResponse = await ADD_PRODUCT_BASIC_DETAILS({
         id_product: form.id_product,
         name: form.name.trim(),
@@ -478,15 +473,19 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       </Box>
 
       <Alert severity='info' sx={{ mb: 3 }}>
-        This first workflow saves variant product records, size labels, pricing, active state and one metal component. Diamond
-        component variants remain part of the atomic diamond model follow-up.
+        This first workflow saves variant product records, size labels, pricing, active state and one metal component.
+        Diamond component variants remain part of the atomic diamond model follow-up.
       </Alert>
 
       <Card>
         <CardContent>
           <Box sx={{ mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
             <Chip label={`${variants.length} variants`} color='primary' variant='outlined' />
-            <Chip label={`${variants.filter(variant => variant.is_active === '1').length} active`} color='success' variant='outlined' />
+            <Chip
+              label={`${variants.filter(variant => variant.is_active === '1').length} active`}
+              color='success'
+              variant='outlined'
+            />
             <Chip label={`Parent SKU: ${parentProduct.sku || '-'}`} variant='outlined' />
           </Box>
 
@@ -521,11 +520,11 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                       </TableCell>
                       <TableCell>{variant.size || '-'}</TableCell>
                       <TableCell align='right'>
-                        R{(
+                        {`R${(
                           toNumber(variant.making_charge) +
                           toNumber(variant.finding_charge) +
                           toNumber(variant.other_charge)
-                        ).toLocaleString()}
+                        ).toLocaleString()}`}
                       </TableCell>
                       <TableCell>
                         <Chip
@@ -612,7 +611,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>{formErrors.size || 'Use the customer-facing size or option label for this variant.'}</FormHelperText>
+                <FormHelperText>
+                  {formErrors.size || 'Use the customer-facing size or option label for this variant.'}
+                </FormHelperText>
               </FormControl>
             </Grid>
             <Grid item xs={12} md={2}>
@@ -621,7 +622,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 type='number'
                 label='Making'
                 value={form.making_charge}
-                onChange={event => setForm(prev => ({ ...prev, making_charge: Math.max(0, toNumber(event.target.value)) }))}
+                onChange={event =>
+                  setForm(prev => ({ ...prev, making_charge: Math.max(0, toNumber(event.target.value)) }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={2}>
@@ -630,7 +633,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 type='number'
                 label='Finding'
                 value={form.finding_charge}
-                onChange={event => setForm(prev => ({ ...prev, finding_charge: Math.max(0, toNumber(event.target.value)) }))}
+                onChange={event =>
+                  setForm(prev => ({ ...prev, finding_charge: Math.max(0, toNumber(event.target.value)) }))
+                }
               />
             </Grid>
             <Grid item xs={12} md={2}>
@@ -639,7 +644,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 type='number'
                 label='Other'
                 value={form.other_charge}
-                onChange={event => setForm(prev => ({ ...prev, other_charge: Math.max(0, toNumber(event.target.value)) }))}
+                onChange={event =>
+                  setForm(prev => ({ ...prev, other_charge: Math.max(0, toNumber(event.target.value)) }))
+                }
               />
             </Grid>
 
@@ -717,7 +724,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 value={form.metal_weight}
                 error={Boolean(formErrors.metal_weight)}
                 helperText={formErrors.metal_weight}
-                onChange={event => setForm(prev => ({ ...prev, metal_weight: Math.max(0, toNumber(event.target.value)) }))}
+                onChange={event =>
+                  setForm(prev => ({ ...prev, metal_weight: Math.max(0, toNumber(event.target.value)) }))
+                }
               />
             </Grid>
           </Grid>

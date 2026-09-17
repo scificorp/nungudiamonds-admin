@@ -36,6 +36,7 @@
 - Catalog walkthrough covers All Products, Quick Add Product, Collections, image/status/featured/trending toggles, and optional collection assignment.
 - `npm run smoke:catalog` creates a synthetic product against a non-production API, verifies image/status/featured/trending/collection operations, and cleans it up by default.
 - This RC restores the safer child-variant manager workflow from the proved release payload: parent/child variant context, dropdown loading, create/edit variant dialog, active toggle, inherited parent categories, and metal detail save path.
+- Later review fixes in this no-mistakes run keep the metal endpoint payload on numeric size IDs, accept numeric or object product-id responses, keep retries on the already-created child variant after a partial metal save, and preserve existing variant category row IDs during edits.
 
 ### CMS and featured content
 
@@ -48,7 +49,9 @@
 - Product and general enquiries expose lead status and staff follow-up/admin-comments fields.
 - Orders and giftset order detail pages expose status/delivery status paths needed for a staff demo.
 
-## Validation run in this worktree
+## Validation evidence in this worktree
+
+The first six entries were recorded before the later variant-manager review fixes. Re-run the verification commands before claiming the final PR head is deployment-ready.
 
 - `npm ci` completed (Node 24 warns because the app declares Node 22.x).
 - `npm run smoke:routes` passed for 61 routes.
@@ -57,6 +60,7 @@
 - `NODE_ENV=production npm run verify:production-config` passed.
 - `npm run build` passed.
 - `npm run smoke:auth` could not connect because the local API at `localhost:2511` was not running; catalog and CMS smokes were not run to avoid unsafe production mutations.
+- Documentation/lint housekeeping on 2026-09-17 formatted `src/components/product/VariantManagement.tsx` and reran changed-file ESLint with no errors.
 
 ## Suggested safe demo route
 
