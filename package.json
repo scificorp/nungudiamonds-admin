@@ -18,6 +18,7 @@
     "smoke:auth": "node scripts/smoke-auth-flow.js",
     "smoke:catalog": "node scripts/smoke-catalog-flow.js",
     "smoke:cms": "node scripts/smoke-cms-flow.js",
+    "smoke:operations": "node scripts/audit-operations-workflows.js",
     "verify:production-config": "node scripts/verify-production-config.js",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "build:icons": "tsc -b src/iconify-bundle && node src/iconify-bundle/bundle-icons-react.js"
