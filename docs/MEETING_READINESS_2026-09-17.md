@@ -14,7 +14,7 @@
 ## Sources reconstructed
 
 - GitHub `origin/main` already contains the merged CMS/blog featured-story and auth hardening work from PRs 2 and 3.
-- GitHub draft PR 9 (`Assemble proved Nungu release gate payload`) was used as evidence only; this RC selectively ports the low-risk variant-manager and operations-smoke parts rather than merging that stale release branch wholesale.
+- GitHub draft PR 9 (`Assemble proved Nungu release gate payload`) was used as evidence only; this RC selectively ports the low-risk variant-manager parts rather than merging that stale release branch wholesale.
 - Preserved local admin repositories under `/Users/unarams/Documents/repos/nungu/ND-TCCTECH` were inspected read-only. They show the earlier Phase 0/admin usability work, route/auth/catalog/CMS smoke gates, lead/status follow-up operations, and handover docs. No legacy file was edited.
 
 ## Improvements present for walkthrough
@@ -47,13 +47,11 @@
 
 - Product and general enquiries expose lead status and staff follow-up/admin-comments fields.
 - Orders and giftset order detail pages expose status/delivery status paths needed for a staff demo.
-- This RC adds `npm run smoke:operations`, a read-only source audit for orders, enquiries, role/user management, settings, and attribute operations surfaces. It deliberately skips destructive mutation proof until QA data is available.
 
 ## Validation run in this worktree
 
 - `npm ci` completed (Node 24 warns because the app declares Node 22.x).
 - `npm run smoke:routes` passed for 61 routes.
-- `npm run smoke:operations` passed as a read-only source audit.
 - `npm run typecheck` passed using the repo-installed TypeScript.
 - `npm run lint:check` passed with existing hook-dependency warnings and 0 errors.
 - `NODE_ENV=production npm run verify:production-config` passed.

@@ -57,7 +57,6 @@ npm run smoke:routes
 npm run smoke:auth
 npm run smoke:catalog
 npm run smoke:cms
-npm run smoke:operations
 npm run build
 ```
 
@@ -93,7 +92,6 @@ Last verified locally on 2026-05-15:
 - Admin `npm run typecheck`: passed.
 - Admin `npm run lint:check`: passed with 79 legacy hook dependency warnings and 0 errors.
 - Admin `npm run smoke:routes`: passed for 61 navigation routes.
-- Admin `npm run smoke:operations`: passes the read-only operations workflow surface audit when run against this tree.
 - Admin `npm run build`: passed.
 - API `npm run build`: passed.
 - API dashboard smoke returned `code: 200` from `GET /api/v2/dashboard`.
