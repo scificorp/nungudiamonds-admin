@@ -91,6 +91,7 @@ interface VariantFormState {
   sku: string
   size: string
   id_size: number
+  product_categories: ProductCategory[]
   making_charge: number
   finding_charge: number
   other_charge: number
@@ -112,6 +113,7 @@ const emptyForm: VariantFormState = {
   sku: '',
   size: '',
   id_size: 0,
+  product_categories: [],
   making_charge: 0,
   finding_charge: 0,
   other_charge: 0,
@@ -154,6 +156,17 @@ const getProductIdFromResponse = (response: any) => {
 
 const getSizeOptionLabel = (size: DropdownOption) => String(size.size || size.name || size.id)
 
+const normalizeProductCategories = (categories: ProductCategory[], preserveRowIds: boolean) => {
+  return categories
+    .filter(category => category.id_category)
+    .map(category => ({
+      id: preserveRowIds ? category.id || 0 : 0,
+      id_category: category.id_category,
+      id_sub_category: category.id_sub_category || null,
+      id_sub_sub_category: category.id_sub_sub_category || null
+    }))
+}
+
 const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVariantsChange }) => {
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [parentProduct, setParentProduct] = useState<ProductDetail | null>(null)
@@ -168,14 +181,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   const [tones, setTones] = useState<DropdownOption[]>([])
 
   const parentCategories = useMemo(() => {
-    return (parentProduct?.product_categories || [])
-      .filter(category => category.id_category)
-      .map(category => ({
-        id: 0,
-        id_category: category.id_category,
-        id_sub_category: category.id_sub_category || null,
-        id_sub_sub_category: category.id_sub_sub_category || null
-      }))
+    return normalizeProductCategories(parentProduct?.product_categories || [], false)
   }, [parentProduct])
 
   const loadDropdowns = useCallback(async () => {
@@ -291,6 +297,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         sku: detail.sku || variant.sku,
         size: sizeLabel,
         id_size: sizeOption?.id || sizeId,
+        product_categories: normalizeProductCategories(detail.product_categories || [], true),
         making_charge: toNumber(detail.making_charge),
         finding_charge: toNumber(detail.finding_charge),
         other_charge: toNumber(detail.other_charge),
@@ -312,12 +319,13 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   const validateForm = () => {
     const errors: Record<string, string> = {}
     const hasPartialMetal = Boolean(form.id_metal || form.id_karat || form.id_metal_tone || form.metal_weight)
+    const hasProductCategories = form.product_categories.length > 0 || parentCategories.length > 0
 
     if (!form.name.trim()) errors.name = 'Variant name is required'
     if (!form.sku.trim()) errors.sku = 'Variant SKU is required'
     if (!form.id_size) errors.size = 'Choose size or option'
     if (!parentProduct?.id) errors.parent = 'Parent product is not loaded'
-    if (parentCategories.length === 0) errors.parent = 'Parent product needs a category before variants can be saved'
+    if (!hasProductCategories) errors.parent = 'Parent product needs a category before variants can be saved'
     if (hasPartialMetal) {
       if (!form.id_metal) errors.id_metal = 'Choose metal'
       if (!form.id_karat) errors.id_karat = 'Choose karat'
@@ -336,6 +344,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     setSaving(true)
     try {
       const isNewVariant = !form.id_product
+      const productCategories = isNewVariant || form.product_categories.length === 0
+        ? parentCategories
+        : form.product_categories
       const variantResponse = await ADD_PRODUCT_BASIC_DETAILS({
         id_product: form.id_product,
         name: form.name.trim(),
@@ -343,7 +354,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         sort_description: parentProduct.sort_description || '',
         long_description: parentProduct.long_description || '',
         tag: splitIds(parentProduct.tag),
-        product_categories: parentCategories,
+        product_categories: productCategories,
         making_charge: form.making_charge,
         finding_charge: form.finding_charge,
         other_charge: form.other_charge,
