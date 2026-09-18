@@ -35,8 +35,8 @@
 
 - Catalog walkthrough covers All Products, Quick Add Product, Collections, image/status/featured/trending toggles, and optional collection assignment.
 - `npm run smoke:catalog` creates a synthetic product against a non-production API, verifies image/status/featured/trending/collection operations, and cleans it up by default.
-- This RC restores the safer child-variant manager workflow from the proved release payload: parent/child variant context, dropdown loading, create/edit variant dialog, active toggle, inherited parent categories, and metal detail save path.
-- Later review fixes in this no-mistakes run keep the metal endpoint payload on numeric size IDs, accept numeric or object product-id responses, keep retries on the already-created child variant after a partial metal save, and preserve existing variant category row IDs during edits.
+- This RC restores the safer child-variant manager workflow from the proved release payload: parent/child variant context, dropdown loading, create/edit variant dialog, active toggle, inherited parent categories, read-only view mode, and size/single-metal detail save path.
+- Later review fixes in this no-mistakes run keep child screens non-mutating when the real parent cannot load, preserve hidden existing-variant fields, avoid collapsing unsupported existing metal/component data, save selected sizes even without metal data, scope tones to the selected metal, accept nullable karat for non-gold metals, and keep retries on the already-created child variant after a partial details save.
 
 ### CMS and featured content
 
@@ -66,7 +66,7 @@ The first six entries were recorded before the later variant-manager review fixe
 
 1. Open `https://admin.nungudiamonds.co.za` and log in with approved admin credentials.
 2. Dashboard: explain operational queues and navigation grouping.
-3. Catalog > All Products: show search, active/featured/trending status, grouped variants, and collection context. Do not change real production products.
+3. Catalog > All Products: show search, active/featured/trending status, grouped variants, and collection context. Use product view mode for read-only walkthroughs; do not change real production products.
 4. Catalog > Quick Add Product: show the made-to-order product workflow. Only save if using a clearly synthetic QA/local record.
 5. Catalog > Collections: show curated merchandising groups and optional product assignment.
 6. Merchandising & Content > Hero Content: show hero media fields and preview/diagnostic posture without replacing live content.

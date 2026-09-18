@@ -422,12 +422,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       const savedVariantId = form.id_product || getProductIdFromResponse(variantResponse)
       const hasMetal =
         isNewVariantWorkflow &&
-        Boolean(
-          form.id_metal &&
-            (form.id_metal !== 1 || form.id_karat) &&
-            form.id_metal_tone &&
-            form.metal_weight > 0
-        )
+        Boolean(form.id_metal && (form.id_metal !== 1 || form.id_karat) && form.id_metal_tone && form.metal_weight > 0)
       const shouldSaveDetails = isNewVariantWorkflow && Boolean(form.id_size)
 
       if (!savedVariantId) {
@@ -562,7 +557,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
           {variants.length === 0 ? (
             <Alert severity='info'>
-              {readOnly ? 'No variants exist yet.' : 'No variants exist yet. Add a variant to create the first child product.'}
+              {readOnly
+                ? 'No variants exist yet.'
+                : 'No variants exist yet. Add a variant to create the first child product.'}
             </Alert>
           ) : (
             <TableContainer component={Paper} variant='outlined'>

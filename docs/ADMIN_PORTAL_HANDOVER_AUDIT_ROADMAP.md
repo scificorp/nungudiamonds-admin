@@ -8,7 +8,7 @@ Scope: `tcctechadmin-nungudiamonds` admin portal and its local API dependency in
 
 The admin portal is now checkpointed in a materially better state than the starting point for catalog operations. The latest checkpoint reframes the admin information architecture around operations, catalog operations, merchandising/content, and configuration. It also promotes the newer quick-add product workflow while keeping the legacy product workspace available.
 
-The portal is not yet handover-grade. The most important remaining work is not adding more features; it is closing stabilization gaps that are currently hidden by permissive build settings. The production build passes while TypeScript and ESLint failures are explicitly ignored. There are also visible navigation routes that return 404, broken parser-level source files, historical Git object corruption, and a large amount of legacy page UX that still feels inconsistent.
+The original audit found the portal was not yet handover-grade because stabilization gaps were hidden by permissive build settings. Current handover verification ownership has since moved to `docs/HANDOVER_ENVIRONMENT_AND_VERIFICATION.md`, with the September 2026 release-candidate status in `docs/MEETING_READINESS_2026-09-17.md`.
 
 The next phase should therefore be stabilization first, then workflow polish.
 
@@ -69,7 +69,7 @@ For this audit pass, live fallback route checks were run against the running adm
 - `eslint.ignoreDuringBuilds: true`
 - `typescript.ignoreBuildErrors: true`
 
-This means `npm run build` can pass while parser errors, hook violations, missing keys, and type errors remain. This is acceptable only as a temporary recovery bridge. It is not acceptable for client handover.
+This means `npm run build` can pass while lint errors, warnings, and type errors remain. This is acceptable only as a temporary recovery bridge. It is not acceptable for client handover.
 
 Acceptance gate:
 
@@ -77,7 +77,7 @@ Acceptance gate:
 - TypeScript validation must run independently and pass.
 - Build should no longer hide lint/type failures.
 
-### 2. Full ESLint Currently Fails
+### 2. ESLint Gate Now Passes With Warnings
 
 Command:
 
@@ -85,19 +85,7 @@ Command:
 npm exec eslint "src/**/*.{js,jsx,ts,tsx}"
 ```
 
-Result:
-
-- `154 problems`
-- `31 errors`
-- `123 warnings`
-
-Highest-impact errors:
-
-- `src/components/product/EnhancedVariantManagement.tsx`: parser error.
-- `src/data/api-types.ts`: parser error.
-- `src/pages/orders/giftset-orders-list/index.tsx`: lower-case component name triggers hook rule errors.
-- `src/pages/product/show-image-upload/index.tsx`: lower-case component name triggers hook rule errors.
-- Invoice and image upload pages have missing React `key` props in iterators.
+Current result: passes with hook-dependency warnings and 0 errors. The current verification command list is owned by `docs/HANDOVER_ENVIRONMENT_AND_VERIFICATION.md`.
 
 Acceptance gate:
 
@@ -144,7 +132,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 This disables TLS verification in Node contexts and should not exist in client/admin application code. The local admin login bypass is useful for development:
 
 ```ts
-NEXT_PUBLIC_DISABLE_ADMIN_LOGIN=true
+NEXT_PUBLIC_DISABLE_ADMIN_LOGIN = true
 ```
 
 But it must be impossible to ship accidentally in production.
@@ -171,7 +159,6 @@ Remaining gaps:
 - Quick Add needs end-to-end validation with real product creation, image association, and edit-after-create.
 - Legacy product workspace still has debug `console.log` noise and a very large form surface.
 - Product image upload pages have lint/runtime quality issues.
-- Variant management source has a parser error and should not be considered reliable until fixed.
 
 Handover target:
 
@@ -237,11 +224,8 @@ Goal: stop hidden failures from reaching handover.
 
 Tasks:
 
-- Fix parser errors in `EnhancedVariantManagement.tsx` and `api-types.ts`.
-- Fix lower-case React component names causing hook-rule failures.
-- Fix missing React keys in invoice and image upload pages.
-- Add a non-mutating lint script, for example `lint:check`.
-- Add a TypeScript check script, for example `typecheck`.
+- Maintain `npm run lint:check` and `npm run typecheck` as non-mutating quality gates.
+- Triage remaining hook-dependency warnings by risk.
 - Decide whether to remove or implement broken rates routes.
 - Remove or guard `NODE_TLS_REJECT_UNAUTHORIZED = '0'`.
 - Add production guard for `NEXT_PUBLIC_DISABLE_ADMIN_LOGIN=true`.
@@ -356,7 +340,7 @@ Exit criteria:
 
 ## Recommended Immediate Next Sprint
 
-1. Repair quality gates: parser errors, hook-rule errors, missing keys, non-mutating lint/type scripts.
+1. Keep quality gates clean of errors and reduce remaining hook-dependency warnings by risk.
 2. Fix the two broken rates routes by implementing pages or removing nav entries.
 3. Add route smoke test derived from navigation config.
 4. Harden environment handling for login bypass and TLS verification.
