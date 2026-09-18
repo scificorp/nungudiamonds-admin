@@ -202,6 +202,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     if (!productId) return
 
     setLoading(true)
+    setParentProduct(null)
+    setVariants([])
     try {
       const response = await GET_BY_ID_PRODUCTS(productId)
       if (!isSuccess(response)) {
@@ -211,15 +213,21 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       }
 
       const product = response.data?.findProduct as ProductDetail
+      if (!product?.id) {
+        toast.error('Product variants could not be loaded')
+
+        return
+      }
+
       if (product?.is_parent === '0' && product.parent_product_id) {
         const parentResponse = await GET_BY_ID_PRODUCTS(product.parent_product_id)
-        if (isSuccess(parentResponse)) {
-          const parent = parentResponse.data?.findProduct as ProductDetail
+        const parent = isSuccess(parentResponse) ? (parentResponse.data?.findProduct as ProductDetail) : null
+
+        if (parent?.id) {
           setParentProduct(parent)
           setVariants(parent?.variants || [])
         } else {
-          setParentProduct(product)
-          setVariants([])
+          toast.error(parentResponse?.message || 'Parent product could not be loaded')
         }
       } else {
         setParentProduct(product)
@@ -383,7 +391,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       }
 
       if (savedVariantId && hasMetal) {
-        const metalResponse = await ADD_PRODUCT_METAL_DIAMOND_DETAILS({
+        const metalPayload = {
           id_product: savedVariantId,
           setting_style_type: [],
           size: [form.id_size],
@@ -397,8 +405,10 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               metal_weight: form.metal_weight
             }
           ],
-          diamond_data: []
-        })
+          ...(isNewVariant ? { diamond_data: [] } : {})
+        }
+
+        const metalResponse = await ADD_PRODUCT_METAL_DIAMOND_DETAILS(metalPayload)
 
         if (!isSuccess(metalResponse)) {
           toast.error(metalResponse?.message || 'Variant saved, but metal details could not be saved')
