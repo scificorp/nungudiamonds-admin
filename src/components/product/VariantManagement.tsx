@@ -362,7 +362,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     if (!hasProductCategories) errors.parent = 'Parent product needs a category before variants can be saved'
     if (hasPartialMetal) {
       if (!form.id_metal) errors.id_metal = 'Choose metal'
-      if (!form.id_karat) errors.id_karat = 'Choose karat'
+      if (form.id_metal === 1 && !form.id_karat) errors.id_karat = 'Choose karat'
       if (!form.id_metal_tone) errors.id_metal_tone = 'Choose tone'
       if (form.metal_weight <= 0) errors.metal_weight = 'Enter weight'
     }
@@ -408,7 +408,13 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
       const savedVariantId = form.id_product || getProductIdFromResponse(variantResponse)
       const hasMetal =
-        isNewVariantWorkflow && Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
+        isNewVariantWorkflow &&
+        Boolean(
+          form.id_metal &&
+            (form.id_metal !== 1 || form.id_karat) &&
+            form.id_metal_tone &&
+            form.metal_weight > 0
+        )
 
       if (!savedVariantId) {
         toast.error('Variant saved, but the product id was not returned')
@@ -435,7 +441,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
             {
               id: form.product_metal_option_id,
               id_metal: form.id_metal,
-              id_karat: form.id_karat,
+              id_karat: form.id_metal === 1 ? form.id_karat : null,
               id_metal_tone: form.id_metal_tone,
               metal_weight: form.metal_weight
             }
@@ -631,7 +637,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               />
             </Grid>
             <Grid item xs={12} md={6}>
-              <FormControl fullWidth error={Boolean(formErrors.size)}>
+              <FormControl fullWidth error={Boolean(formErrors.size)} disabled={editingExistingVariant}>
                 <InputLabel>Size / option</InputLabel>
                 <Select
                   value={form.id_size || ''}

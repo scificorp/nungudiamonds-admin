@@ -3,7 +3,7 @@
 ## Release-candidate evidence
 
 - Repository: `scificorp/nungudiamonds-admin`
-- Base inspected: `origin/main` at `f336b832933869d9bd1f92bac7de5487cea60d95` (`Harden local admin auth release gate`)
+- Base inspected: `origin/main` at `5bd70860ffacf8ddd3cc27650a9dd27375dfdb1a` (`Add GitHub Actions CI (#11)`)
 - Release-candidate branch: `fm/nungu-admin-meeting-ready-nungudiamonds` (or the final PR head branch after no-mistakes finishes)
 - Release-candidate commit: use the PR head SHA after no-mistakes, because the pipeline may apply follow-up fixes before the PR is ready.
 - Expected production admin URL from repository docs/CORS config: `https://admin.nungudiamonds.co.za`
