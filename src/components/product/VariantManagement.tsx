@@ -89,6 +89,9 @@ interface VariantFormState {
   id_product: number
   name: string
   sku: string
+  sort_description: string
+  long_description: string
+  tag: string | number[] | null
   size: string
   id_size: number
   product_categories: ProductCategory[]
@@ -111,6 +114,9 @@ const emptyForm: VariantFormState = {
   id_product: 0,
   name: '',
   sku: '',
+  sort_description: '',
+  long_description: '',
+  tag: null,
   size: '',
   id_size: 0,
   product_categories: [],
@@ -219,8 +225,15 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         return
       }
 
-      if (product?.is_parent === '0' && product.parent_product_id) {
-        const parentResponse = await GET_BY_ID_PRODUCTS(product.parent_product_id)
+      if (product?.is_parent === '0') {
+        const parentProductId = toNumber(product.parent_product_id)
+        if (!parentProductId) {
+          toast.error('Parent product could not be loaded')
+
+          return
+        }
+
+        const parentResponse = await GET_BY_ID_PRODUCTS(parentProductId)
         const parent = isSuccess(parentResponse) ? (parentResponse.data?.findProduct as ProductDetail) : null
 
         if (parent?.id) {
@@ -288,7 +301,19 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
     setLoading(true)
     try {
       const response = await GET_BY_ID_PRODUCTS(variant.id)
-      const detail = isSuccess(response) ? (response.data?.findProduct as ProductDetail) : (variant as ProductDetail)
+      if (!isSuccess(response)) {
+        toast.error(response?.message || 'Variant detail could not be loaded')
+
+        return
+      }
+
+      const detail = response.data?.findProduct as ProductDetail
+      if (!detail?.id) {
+        toast.error('Variant detail could not be loaded')
+
+        return
+      }
+
       const firstMetal = detail.PMO?.[0]
       const metalToneId = splitIds(firstMetal?.metal_tone)[0] || 0
       const sizeId = splitIds(detail.size)[0] || splitIds(variant.size)[0] || 0
@@ -299,6 +324,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         id_product: variant.id,
         name: detail.name || variant.name,
         sku: detail.sku || variant.sku,
+        sort_description: detail.sort_description || '',
+        long_description: detail.long_description || '',
+        tag: detail.tag || null,
         size: sizeLabel,
         id_size: sizeOption?.id || sizeId,
         product_categories: normalizeProductCategories(detail.product_categories || [], true),
@@ -350,13 +378,16 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       const isNewVariant = !form.id_product
       const productCategories =
         isNewVariant || form.product_categories.length === 0 ? parentCategories : form.product_categories
+      const sortDescription = isNewVariant ? parentProduct.sort_description || '' : form.sort_description
+      const longDescription = isNewVariant ? parentProduct.long_description || '' : form.long_description
+      const tags = splitIds(isNewVariant ? parentProduct.tag : form.tag)
       const variantResponse = await ADD_PRODUCT_BASIC_DETAILS({
         id_product: form.id_product,
         name: form.name.trim(),
         sku: form.sku.trim(),
-        sort_description: parentProduct.sort_description || '',
-        long_description: parentProduct.long_description || '',
-        tag: splitIds(parentProduct.tag),
+        sort_description: sortDescription,
+        long_description: longDescription,
+        tag: tags,
         product_categories: productCategories,
         making_charge: form.making_charge,
         finding_charge: form.finding_charge,

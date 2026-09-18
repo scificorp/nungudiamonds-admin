@@ -80,4 +80,4 @@ The first six entries were recorded before the later variant-manager review fixe
 - Do not mutate real customer data, send customer communications, trigger payments, create calendar actions, or delete production master data during the meeting demo.
 - Production login credentials were not available to this worker, so the deployed walkthrough stopped at the auth gate. Confirm the hosting build/commit after merge before saying the RC is live.
 - API/storefront release candidates were not edited by this task. API-backed smokes require a compatible non-production API and safe tokens; the local API on `localhost:2511` was not running in this worktree, so auth/catalog/CMS API smokes were not executed here.
-- No GitHub CI checks are configured on the existing PRs; local gates and no-mistakes review are therefore the primary proof path.
+- GitHub Actions CI is configured for pull requests and pushes to `main` with lint, typecheck, production-config, route-smoke, and build jobs. Treat local gates, no-mistakes review, and the PR CI result together as the proof path before merge/deploy.
