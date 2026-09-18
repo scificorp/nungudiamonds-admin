@@ -54,9 +54,13 @@ Admin:
 npm run lint:check
 npm run typecheck
 npm run smoke:routes
+npm run smoke:auth
 npm run smoke:catalog
+npm run smoke:cms
 npm run build
 ```
+
+This section owns the current verification command list. Keep summaries in other docs as pointers to this section.
 
 The build runs `verify:production-config` first. For a production release, run
 the guard explicitly with `NODE_ENV=production`; it rejects the local login
@@ -83,9 +87,9 @@ curl -iL -H 'Authorization: PUBLIC_AUTHORIZATION_TOKEN' 'http://localhost:2511/a
 curl -iL -H 'Authorization: PUBLIC_AUTHORIZATION_TOKEN' 'http://localhost:2511/api/v2/product?current_page=1&per_page_rows=1'
 ```
 
-## Current Verification Evidence
+## Historical Verification Evidence
 
-Last verified locally on 2026-05-15:
+Full local baseline last verified on 2026-05-15. See `docs/MEETING_READINESS_2026-09-17.md` for the September 2026 release-candidate status.
 
 - Admin `npm run typecheck`: passed.
 - Admin `npm run lint:check`: passed with 79 legacy hook dependency warnings and 0 errors.
