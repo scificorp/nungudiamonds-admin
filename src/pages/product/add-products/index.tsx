@@ -2966,6 +2966,7 @@ return data
             <VariantManagement
               productId={parseInt(id as string)}
               onVariantsChange={() => undefined}
+              readOnly={action === 'view'}
             />
           )
         default:

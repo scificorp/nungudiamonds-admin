@@ -109,6 +109,7 @@ interface VariantFormState {
 interface VariantManagementProps {
   productId: number
   onVariantsChange?: () => void
+  readOnly?: boolean
 }
 
 const emptyForm: VariantFormState = {
@@ -170,7 +171,7 @@ const normalizeProductCategories = (categories: ProductCategory[], preserveRowId
     }))
 }
 
-const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVariantsChange }) => {
+const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVariantsChange, readOnly = false }) => {
   const [variants, setVariants] = useState<ProductVariant[]>([])
   const [parentProduct, setParentProduct] = useState<ProductDetail | null>(null)
   const [loading, setLoading] = useState(false)
@@ -292,6 +293,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   )
 
   const openAddDialog = () => {
+    if (readOnly) return
+
     const nextSku = parentProduct?.sku ? `${parentProduct.sku}-VAR${variants.length + 1}` : ''
     setEditingExistingVariant(false)
     setForm({
@@ -307,6 +310,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   }
 
   const openEditDialog = async (variant: ProductVariant) => {
+    if (readOnly) return
+
     setLoading(true)
     try {
       const response = await GET_BY_ID_PRODUCTS(variant.id)
@@ -380,6 +385,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   }
 
   const saveVariant = async () => {
+    if (readOnly) return
     if (!validateForm() || !parentProduct) return
 
     setSaving(true)
@@ -482,6 +488,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   }
 
   const toggleVariantStatus = async (variant: ProductVariant) => {
+    if (readOnly) return
+
     setLoading(true)
     try {
       const response = await STATUS_UPDATE_PRODUCT({
@@ -528,9 +536,11 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
             Manage size and metal-specific child products for {parentProduct.name}.
           </Typography>
         </Box>
-        <Button variant='contained' startIcon={<Icon icon='tabler:plus' />} onClick={openAddDialog}>
-          Add Variant
-        </Button>
+        {!readOnly && (
+          <Button variant='contained' startIcon={<Icon icon='tabler:plus' />} onClick={openAddDialog}>
+            Add Variant
+          </Button>
+        )}
       </Box>
 
       <Alert severity='info' sx={{ mb: 3 }}>
@@ -551,7 +561,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
           </Box>
 
           {variants.length === 0 ? (
-            <Alert severity='info'>No variants exist yet. Add a variant to create the first child product.</Alert>
+            <Alert severity='info'>
+              {readOnly ? 'No variants exist yet.' : 'No variants exist yet. Add a variant to create the first child product.'}
+            </Alert>
           ) : (
             <TableContainer component={Paper} variant='outlined'>
               <Table>
@@ -562,8 +574,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                     <TableCell>Size / Option</TableCell>
                     <TableCell align='right'>Price</TableCell>
                     <TableCell>Status</TableCell>
-                    <TableCell align='center'>Active</TableCell>
-                    <TableCell align='right'>Actions</TableCell>
+                    {!readOnly && <TableCell align='center'>Active</TableCell>}
+                    {!readOnly && <TableCell align='right'>Actions</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -594,20 +606,24 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                           color={variant.is_active === '1' ? 'success' : 'default'}
                         />
                       </TableCell>
-                      <TableCell align='center'>
-                        <Switch
-                          size='small'
-                          checked={variant.is_active === '1'}
-                          onChange={() => toggleVariantStatus(variant)}
-                        />
-                      </TableCell>
-                      <TableCell align='right'>
-                        <Tooltip title='Edit variant'>
-                          <IconButton size='small' onClick={() => openEditDialog(variant)}>
-                            <Icon icon='tabler:edit' fontSize={18} />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
+                      {!readOnly && (
+                        <TableCell align='center'>
+                          <Switch
+                            size='small'
+                            checked={variant.is_active === '1'}
+                            onChange={() => toggleVariantStatus(variant)}
+                          />
+                        </TableCell>
+                      )}
+                      {!readOnly && (
+                        <TableCell align='right'>
+                          <Tooltip title='Edit variant'>
+                            <IconButton size='small' onClick={() => openEditDialog(variant)}>
+                              <Icon icon='tabler:edit' fontSize={18} />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
