@@ -83,6 +83,7 @@ interface DropdownOption {
   id: number
   name?: string
   size?: string
+  id_metal?: number | string
 }
 
 interface VariantFormState {
@@ -186,6 +187,12 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   const parentCategories = useMemo(() => {
     return normalizeProductCategories(parentProduct?.product_categories || [], false)
   }, [parentProduct])
+
+  const metalTones = useMemo(() => {
+    if (!form.id_metal) return []
+
+    return tones.filter(tone => toNumber(tone.id_metal) === form.id_metal)
+  }, [form.id_metal, tones])
 
   const loadDropdowns = useCallback(async () => {
     try {
@@ -415,6 +422,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
             form.id_metal_tone &&
             form.metal_weight > 0
         )
+      const shouldSaveDetails = isNewVariantWorkflow && Boolean(form.id_size)
 
       if (!savedVariantId) {
         toast.error('Variant saved, but the product id was not returned')
@@ -431,28 +439,30 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         onVariantsChange?.()
       }
 
-      if (savedVariantId && hasMetal) {
+      if (savedVariantId && shouldSaveDetails) {
         const metalPayload = {
           id_product: savedVariantId,
           setting_style_type: [],
           size: [form.id_size],
           length: [],
-          metal_data: [
-            {
-              id: form.product_metal_option_id,
-              id_metal: form.id_metal,
-              id_karat: form.id_metal === 1 ? form.id_karat : null,
-              id_metal_tone: form.id_metal_tone,
-              metal_weight: form.metal_weight
-            }
-          ],
+          metal_data: hasMetal
+            ? [
+                {
+                  id: form.product_metal_option_id,
+                  id_metal: form.id_metal,
+                  id_karat: form.id_metal === 1 ? form.id_karat : null,
+                  id_metal_tone: form.id_metal_tone,
+                  metal_weight: form.metal_weight
+                }
+              ]
+            : [],
           ...(isNewVariantWorkflow ? { diamond_data: [] } : {})
         }
 
         const metalResponse = await ADD_PRODUCT_METAL_DIAMOND_DETAILS(metalPayload)
 
         if (!isSuccess(metalResponse)) {
-          toast.error(metalResponse?.message || 'Variant saved, but metal details could not be saved')
+          toast.error(metalResponse?.message || 'Variant saved, but variant details could not be saved')
 
           return
         }
@@ -715,7 +725,14 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 <Select
                   value={form.id_metal || ''}
                   label='Metal'
-                  onChange={event => setForm(prev => ({ ...prev, id_metal: toNumber(event.target.value) }))}
+                  onChange={event =>
+                    setForm(prev => ({
+                      ...prev,
+                      id_metal: toNumber(event.target.value),
+                      id_metal_tone: 0,
+                      id_karat: 0
+                    }))
+                  }
                 >
                   <MenuItem value=''>
                     <em>None</em>
@@ -760,7 +777,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                   <MenuItem value=''>
                     <em>None</em>
                   </MenuItem>
-                  {tones.map(tone => (
+                  {metalTones.map(tone => (
                     <MenuItem key={tone.id} value={tone.id}>
                       {tone.name || tone.id}
                     </MenuItem>

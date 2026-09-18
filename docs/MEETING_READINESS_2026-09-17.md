@@ -15,7 +15,7 @@
 
 - GitHub `origin/main` already contains the merged CMS/blog featured-story and auth hardening work from PRs 2 and 3.
 - GitHub draft PR 9 (`Assemble proved Nungu release gate payload`) was used as evidence only; this RC selectively ports the low-risk variant-manager parts rather than merging that stale release branch wholesale.
-- Preserved local admin repositories under `/Users/unarams/Documents/repos/nungu/ND-TCCTECH` were inspected read-only. They show the earlier Phase 0/admin usability work, route/auth/catalog/CMS smoke gates, lead/status follow-up operations, and handover docs. No legacy file was edited.
+- Preserved local admin repository snapshots were inspected read-only. They show the earlier Phase 0/admin usability work, route/auth/catalog/CMS smoke gates, lead/status follow-up operations, and handover docs. No legacy file was edited.
 
 ## Improvements present for walkthrough
 
