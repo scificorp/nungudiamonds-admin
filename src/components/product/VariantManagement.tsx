@@ -175,6 +175,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingExistingVariant, setEditingExistingVariant] = useState(false)
   const [form, setForm] = useState<VariantFormState>(emptyForm)
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
   const [sizes, setSizes] = useState<DropdownOption[]>([])
@@ -285,6 +286,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
   const openAddDialog = () => {
     const nextSku = parentProduct?.sku ? `${parentProduct.sku}-VAR${variants.length + 1}` : ''
+    setEditingExistingVariant(false)
     setForm({
       ...emptyForm,
       name: buildVariantName(''),
@@ -337,6 +339,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         metal_weight: 0,
         product_metal_option_id: 0
       })
+      setEditingExistingVariant(true)
       setFormErrors({})
       setDialogOpen(true)
     } catch (error) {
@@ -348,8 +351,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
   const validateForm = () => {
     const errors: Record<string, string> = {}
-    const isNewVariant = !form.id_product
-    const hasPartialMetal = isNewVariant && Boolean(form.id_metal || form.id_karat || form.id_metal_tone || form.metal_weight)
+    const hasPartialMetal =
+      !editingExistingVariant && Boolean(form.id_metal || form.id_karat || form.id_metal_tone || form.metal_weight)
     const hasProductCategories = form.product_categories.length > 0 || parentCategories.length > 0
 
     if (!form.name.trim()) errors.name = 'Variant name is required'
@@ -374,12 +377,13 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
     setSaving(true)
     try {
-      const isNewVariant = !form.id_product
+      const isNewVariantWorkflow = !editingExistingVariant
+      const isFirstNewVariantSave = isNewVariantWorkflow && !form.id_product
       const productCategories =
-        isNewVariant || form.product_categories.length === 0 ? parentCategories : form.product_categories
-      const sortDescription = isNewVariant ? parentProduct.sort_description || '' : form.sort_description
-      const longDescription = isNewVariant ? parentProduct.long_description || '' : form.long_description
-      const tags = splitIds(isNewVariant ? parentProduct.tag : form.tag)
+        isNewVariantWorkflow || form.product_categories.length === 0 ? parentCategories : form.product_categories
+      const sortDescription = isNewVariantWorkflow ? parentProduct.sort_description || '' : form.sort_description
+      const longDescription = isNewVariantWorkflow ? parentProduct.long_description || '' : form.long_description
+      const tags = splitIds(isNewVariantWorkflow ? parentProduct.tag : form.tag)
       const variantResponse = await ADD_PRODUCT_BASIC_DETAILS({
         id_product: form.id_product,
         name: form.name.trim(),
@@ -403,7 +407,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       }
 
       const savedVariantId = form.id_product || getProductIdFromResponse(variantResponse)
-      const hasMetal = isNewVariant && Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
+      const hasMetal =
+        isNewVariantWorkflow && Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
 
       if (!savedVariantId) {
         toast.error('Variant saved, but the product id was not returned')
@@ -414,7 +419,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         return
       }
 
-      if (isNewVariant) {
+      if (isFirstNewVariantSave) {
         setForm(prev => ({ ...prev, id_product: savedVariantId }))
         await loadProductAndVariants()
         onVariantsChange?.()
@@ -435,7 +440,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               metal_weight: form.metal_weight
             }
           ],
-          ...(isNewVariant ? { diamond_data: [] } : {})
+          ...(isNewVariantWorkflow ? { diamond_data: [] } : {})
         }
 
         const metalResponse = await ADD_PRODUCT_METAL_DIAMOND_DETAILS(metalPayload)
@@ -447,9 +452,9 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         }
       }
 
-      toast.success(isNewVariant ? 'Variant added' : 'Variant updated')
+      toast.success(isNewVariantWorkflow ? 'Variant added' : 'Variant updated')
       setDialogOpen(false)
-      if (!isNewVariant) {
+      if (!isFirstNewVariantSave) {
         await loadProductAndVariants()
         onVariantsChange?.()
       }
@@ -497,8 +502,6 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       </Box>
     )
   }
-
-  const isEditingExistingVariant = Boolean(form.id_product)
 
   return (
     <Box>
@@ -599,7 +602,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       </Card>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth='md' fullWidth>
-        <DialogTitle>{form.id_product ? 'Edit Variant' : 'Add Variant'}</DialogTitle>
+        <DialogTitle>{editingExistingVariant ? 'Edit Variant' : 'Add Variant'}</DialogTitle>
         <DialogContent>
           {formErrors.parent && (
             <Alert severity='warning' sx={{ mb: 3 }}>
@@ -695,13 +698,13 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
             <Grid item xs={12}>
               <Typography variant='subtitle2'>Optional metal component</Typography>
               <Typography variant='body2' color='text.secondary'>
-                {isEditingExistingVariant
+                {editingExistingVariant
                   ? 'Existing metal components are preserved when editing a variant.'
                   : 'Complete all four fields to save metal data for this variant.'}
               </Typography>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_metal)} disabled={isEditingExistingVariant}>
+              <FormControl fullWidth error={Boolean(formErrors.id_metal)} disabled={editingExistingVariant}>
                 <InputLabel>Metal</InputLabel>
                 <Select
                   value={form.id_metal || ''}
@@ -721,7 +724,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               </FormControl>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_karat)} disabled={isEditingExistingVariant}>
+              <FormControl fullWidth error={Boolean(formErrors.id_karat)} disabled={editingExistingVariant}>
                 <InputLabel>Karat</InputLabel>
                 <Select
                   value={form.id_karat || ''}
@@ -741,7 +744,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               </FormControl>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_metal_tone)} disabled={isEditingExistingVariant}>
+              <FormControl fullWidth error={Boolean(formErrors.id_metal_tone)} disabled={editingExistingVariant}>
                 <InputLabel>Tone</InputLabel>
                 <Select
                   value={form.id_metal_tone || ''}
@@ -768,7 +771,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 value={form.metal_weight}
                 error={Boolean(formErrors.metal_weight)}
                 helperText={formErrors.metal_weight}
-                disabled={isEditingExistingVariant}
+                disabled={editingExistingVariant}
                 onChange={event =>
                   setForm(prev => ({ ...prev, metal_weight: Math.max(0, toNumber(event.target.value)) }))
                 }
