@@ -314,8 +314,6 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         return
       }
 
-      const firstMetal = detail.PMO?.[0]
-      const metalToneId = splitIds(firstMetal?.metal_tone)[0] || 0
       const sizeId = splitIds(detail.size)[0] || splitIds(variant.size)[0] || 0
       const sizeOption = findSizeOption(sizeId || detail.size || variant.size || '')
       const sizeLabel = sizeOption ? getSizeOptionLabel(sizeOption) : String(detail.size || variant.size || '')
@@ -333,11 +331,11 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
         making_charge: toNumber(detail.making_charge),
         finding_charge: toNumber(detail.finding_charge),
         other_charge: toNumber(detail.other_charge),
-        id_metal: toNumber(firstMetal?.id_metal),
-        id_karat: toNumber(firstMetal?.id_karat),
-        id_metal_tone: metalToneId,
-        metal_weight: toNumber(firstMetal?.metal_weight),
-        product_metal_option_id: toNumber(firstMetal?.id)
+        id_metal: 0,
+        id_karat: 0,
+        id_metal_tone: 0,
+        metal_weight: 0,
+        product_metal_option_id: 0
       })
       setFormErrors({})
       setDialogOpen(true)
@@ -350,7 +348,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
   const validateForm = () => {
     const errors: Record<string, string> = {}
-    const hasPartialMetal = Boolean(form.id_metal || form.id_karat || form.id_metal_tone || form.metal_weight)
+    const isNewVariant = !form.id_product
+    const hasPartialMetal = isNewVariant && Boolean(form.id_metal || form.id_karat || form.id_metal_tone || form.metal_weight)
     const hasProductCategories = form.product_categories.length > 0 || parentCategories.length > 0
 
     if (!form.name.trim()) errors.name = 'Variant name is required'
@@ -404,7 +403,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       }
 
       const savedVariantId = form.id_product || getProductIdFromResponse(variantResponse)
-      const hasMetal = Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
+      const hasMetal = isNewVariant && Boolean(form.id_metal && form.id_karat && form.id_metal_tone && form.metal_weight > 0)
 
       if (!savedVariantId) {
         toast.error('Variant saved, but the product id was not returned')
@@ -498,6 +497,8 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
       </Box>
     )
   }
+
+  const isEditingExistingVariant = Boolean(form.id_product)
 
   return (
     <Box>
@@ -694,11 +695,13 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
             <Grid item xs={12}>
               <Typography variant='subtitle2'>Optional metal component</Typography>
               <Typography variant='body2' color='text.secondary'>
-                Complete all four fields to save metal data for this variant.
+                {isEditingExistingVariant
+                  ? 'Existing metal components are preserved when editing a variant.'
+                  : 'Complete all four fields to save metal data for this variant.'}
               </Typography>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_metal)}>
+              <FormControl fullWidth error={Boolean(formErrors.id_metal)} disabled={isEditingExistingVariant}>
                 <InputLabel>Metal</InputLabel>
                 <Select
                   value={form.id_metal || ''}
@@ -718,7 +721,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               </FormControl>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_karat)}>
+              <FormControl fullWidth error={Boolean(formErrors.id_karat)} disabled={isEditingExistingVariant}>
                 <InputLabel>Karat</InputLabel>
                 <Select
                   value={form.id_karat || ''}
@@ -738,7 +741,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
               </FormControl>
             </Grid>
             <Grid item xs={12} md={3}>
-              <FormControl fullWidth error={Boolean(formErrors.id_metal_tone)}>
+              <FormControl fullWidth error={Boolean(formErrors.id_metal_tone)} disabled={isEditingExistingVariant}>
                 <InputLabel>Tone</InputLabel>
                 <Select
                   value={form.id_metal_tone || ''}
@@ -765,6 +768,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
                 value={form.metal_weight}
                 error={Boolean(formErrors.metal_weight)}
                 helperText={formErrors.metal_weight}
+                disabled={isEditingExistingVariant}
                 onChange={event =>
                   setForm(prev => ({ ...prev, metal_weight: Math.max(0, toNumber(event.target.value)) }))
                 }
