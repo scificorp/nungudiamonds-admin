@@ -35,7 +35,26 @@ import { hexToRGBA } from 'src/@core/utils/hex-to-rgba'
 import StepperWrapper from 'src/@core/styles/mui/stepper'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import TccEditor from 'src/customComponents/Form-Elements/editor'
-import { Autocomplete, CardHeader, Checkbox, FormControlLabel, FormGroup, MenuItem, Paper, Radio, RadioGroup, SelectChangeEvent, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tab, Tabs } from '@mui/material'
+import {
+  Autocomplete,
+  CardHeader,
+  Checkbox,
+  FormControlLabel,
+  FormGroup,
+  MenuItem,
+  Paper,
+  Radio,
+  RadioGroup,
+  SelectChangeEvent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tab,
+  Tabs
+} from '@mui/material'
 import TccSelect from 'src/customComponents/Form-Elements/select'
 import BulkUploadZip from 'src/components/product/BulkUploadZip'
 import BulkUploadFile from 'src/components/product/BulkUploadFile'
@@ -43,7 +62,14 @@ import ImageManagement from 'src/components/product/ImageManagement'
 import VariantManagement from 'src/components/product/VariantManagement'
 import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import CustomChip from 'src/@core/components/mui/chip'
-import { ADD_PRODUCT_BASIC_DETAILS, ADD_PRODUCT_DETAILS, ADD_PRODUCT_METAL_DIAMOND_DETAILS, ADD_PRODUCT_MRTAL_DATA, EDIT_PRODUCT_DETAILS, GET_BY_ID_PRODUCTS } from 'src/services/AdminServices'
+import {
+  ADD_PRODUCT_BASIC_DETAILS,
+  ADD_PRODUCT_DETAILS,
+  ADD_PRODUCT_METAL_DIAMOND_DETAILS,
+  ADD_PRODUCT_MRTAL_DATA,
+  EDIT_PRODUCT_DETAILS,
+  GET_BY_ID_PRODUCTS
+} from 'src/services/AdminServices'
 import { useProductDetail, useProductDropdowns } from 'src/hooks/useProducts'
 import { appErrors, STONE_TYPE } from 'src/AppConstants'
 import Router, { useRouter } from 'next/router'
@@ -53,32 +79,31 @@ import { MEATL_GOLD_ID, MEATL_PLATINUM_ID, MEATL_SILVER_ID } from 'src/AppConfig
 const steps = [
   {
     icon: 'fluent-mdl2:product-release',
-    title: 'Product Basic Details',
+    title: 'Product Basic Details'
   },
   {
     icon: 'ion:diamond-outline',
-    title: 'Gold & Diamonds Details',
+    title: 'Gold & Diamonds Details'
   }
 
   // {
   //   icon: 'ion:diamond-outline',
   //   title: 'Image Upload',
   // }
-
 ]
 
 const genderData: any = [
   {
     id: 1,
-    name: "Male",
+    name: 'Male'
   },
   {
     id: 2,
-    name: "Female"
+    name: 'Female'
   },
   {
     id: 3,
-    name: "Unisex"
+    name: 'Unisex'
   }
 ]
 
@@ -113,35 +138,72 @@ const ProductAdd = () => {
   const [productId, setProductId] = useState(0)
   const [count, setCount] = useState(1)
   const [radioButtonStripe, setRadioButtonStripe] = useState('')
-  const [inputFields, setInputFields] = useState([{ category: null, subCategory: null, subSubCategory: null, categoryList: [], subCategoryList: [], subSubCategoryList: [], id: 0, isDeleted: 0 }])
-  const [inputFieldsGold, setInputFieldsGold] = useState([{ rate: '', default: '0', price: '', weight: '', metalGroup: "", id: 0, isDeleted: 0 }])
-  const [inputFieldsDiamond, setInputFieldsDiamond] = useState<any[]>([{
-    default: '0', id_diamond_group: null, diamondGroup: null, Stone_type: "", stone_mm_size: null,
-    Stone_weight: 0, stone_cut: null, stone_color: null, stone_clarity: null, stone_shape: "",
-    stone: "", stone_count: 0, stone_setting: "", rate: 0, price: 0,
-    id: 0, isDeleted: 0
-  }])
+  const [inputFields, setInputFields] = useState([
+    {
+      category: null,
+      subCategory: null,
+      subSubCategory: null,
+      categoryList: [],
+      subCategoryList: [],
+      subSubCategoryList: [],
+      id: 0,
+      isDeleted: 0
+    }
+  ])
+  const [inputFieldsGold, setInputFieldsGold] = useState([
+    { rate: '', default: '0', price: '', weight: '', metalGroup: '', id: 0, isDeleted: 0 }
+  ])
+  const [inputFieldsDiamond, setInputFieldsDiamond] = useState<any[]>([
+    {
+      default: '0',
+      id_diamond_group: null,
+      diamondGroup: null,
+      Stone_type: '',
+      stone_mm_size: null,
+      Stone_weight: 0,
+      stone_cut: null,
+      stone_color: null,
+      stone_clarity: null,
+      stone_shape: '',
+      stone: '',
+      stone_count: 0,
+      stone_setting: '',
+      rate: 0,
+      price: 0,
+      id: 0,
+      isDeleted: 0
+    }
+  ])
 
-  const [inputFieldGoldMetal, setInputFieldGoldMetal] = useState<{ karat: null, id_karat: null, tone: any[], price: '', rate: 0, id: 0, metal_weight: null, metal_tone: [] }[]>([])
-  const [inputFieldSilverMetal, setInputFieldSilverMetal] = useState([{ tone: [{ id: null, name: "" }], price: '', rate: 0, id: 0, metal_tone: [], metal_weight: null }])
-  const [inputFieldPlatinumMetal, setInputFieldPlatinumMetal] = useState([{ tone: [{ id: null, name: "" }], price: '', rate: 0, id: 0, metal_tone: [], metal_weight: null }])
+  const [inputFieldGoldMetal, setInputFieldGoldMetal] = useState<
+    { karat: null; id_karat: null; tone: any[]; price: ''; rate: 0; id: 0; metal_weight: null; metal_tone: [] }[]
+  >([])
+  const [inputFieldSilverMetal, setInputFieldSilverMetal] = useState([
+    { tone: [{ id: null, name: '' }], price: '', rate: 0, id: 0, metal_tone: [], metal_weight: null }
+  ])
+  const [inputFieldPlatinumMetal, setInputFieldPlatinumMetal] = useState([
+    { tone: [{ id: null, name: '' }], price: '', rate: 0, id: 0, metal_tone: [], metal_weight: null }
+  ])
   const [productName, setProductName] = useState('')
   const [productSKU, setProductSKU] = useState<string>('')
   const [productSortDes, setProductSortDes] = useState('')
   const [productLongDes, setProductLongDes] = useState('')
   const [keywordsList, setKeywordsList] = useState([])
-  const [keyword, setKeyword] = useState<{ id: null, name: "" }[]>([])
-  const [gender, setGender] = useState<{ id: null, name: "" }[]>([])
+  const [keyword, setKeyword] = useState<{ id: null; name: '' }[]>([])
+  const [gender, setGender] = useState<{ id: null; name: '' }[]>([])
   const [settingTypeList, setSettingTypeList] = useState([])
-  const [settingType, setSettingType] = useState<{ id: null, name: "" }[]>([])
+  const [settingType, setSettingType] = useState<{ id: null; name: '' }[]>([])
   const [itemSizeList, setItemSizeList] = useState([])
-  const [itemSize, setItemSize] = useState<{ id: null, size: "" }[]>([])
+  const [itemSize, setItemSize] = useState<{ id: null; size: '' }[]>([])
   const [itemLengthList, setItemLengthList] = useState([])
-  const [itemLength, setItemLength] = useState<{ id: null, length: "" }[]>([])
+  const [itemLength, setItemLength] = useState<{ id: null; length: '' }[]>([])
   const [metalGroupList, setMetalGroupList] = useState([])
   const [diamondGroupList, setDiamondGroupList] = useState([])
   const [diamondGroupsWithDetails, setDiamondGroupsWithDetails] = useState<any[]>([])
-  const [stoneTypeList, setStoneTypeList] = useState([{ id: 1, name: "center" }, { id: 2, name: "side" }])
+  const [stoneTypeList, setStoneTypeList] = useState([
+    { id: 1, name: 'center' },
+    { id: 2, name: 'side' }
+  ])
   const [metalToneList, setMetalToneList] = useState([])
   const [silverToneList, setSilverToneList] = useState([])
   const [paltinumToneList, setPaltinumToneList] = useState([])
@@ -153,7 +215,7 @@ const ProductAdd = () => {
   const [stoneClarity, setStoneClarity] = useState([])
   const [stoneCuts, setStoneCuts] = useState([])
   const [metalKaratList, setMetalKaratList] = useState([])
-  const [stoneMMSize, setStoneMMSize] = useState([]);
+  const [stoneMMSize, setStoneMMSize] = useState([])
   const [activeStep, setActiveStep] = useState<number>(0)
   const [checkedSize, setCheckedSize] = useState<boolean>(false)
   const [checkedLength, setCheckedLength] = useState<boolean>(false)
@@ -164,13 +226,13 @@ const ProductAdd = () => {
   const [category, setCategory] = useState<any>()
   const productSizeLenghtFilter: any = categorysList.find((t: any) => t.id === inputFields[0].category)
 
-  const [isDisabled, setIsDisabled] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
+  const [isDisabled, setIsDisabled] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState(0)
 
-  const router = useRouter();
-  const { id, action } = router.query;
-  const { viewid } = router.query;
+  const router = useRouter()
+  const { id, action } = router.query
+  const { viewid } = router.query
   const queryClient = useQueryClient()
 
   const productDetailId = id ? parseInt(id as string) : null
@@ -178,23 +240,21 @@ const ProductAdd = () => {
   const { data: dropDownData, isLoading: isDropDownLoading } = useProductDropdowns()
 
   const handleChecked = (id: any) => (e: any) => {
-    const { checked } = e.target;
-    setChecked((values) => ({
+    const { checked } = e.target
+    setChecked(values => ({
       ...values,
       [id]: checked
-    }));
+    }))
   }
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setActiveTab(newValue);
+    setActiveTab(newValue)
   }
 
   const handleBulkUploadSuccess = () => {
-    Router.push({ pathname: "/product/all-products" })
+    Router.push({ pathname: '/product/all-products' })
   }
 
-
-  
   useEffect(() => {
     if (productDetailId != undefined) {
       setProductId(productDetailId)
@@ -211,159 +271,166 @@ const ProductAdd = () => {
     console.log('[ProductEdit] metalGroupList', metalGroupList)
   }, [checked, inputFieldGoldMetal, inputFieldSilverMetal, inputFieldPlatinumMetal, metalGroupList, productDetailId])
 
-  const getByIdProductData = useCallback((dropDownData: any, productDetailIdStr: string) => {
-    if (!productDetail?.findProduct) {
-      toast.error('Product data not found')
-      
-return
-    }
+  const getByIdProductData = useCallback(
+    (dropDownData: any, productDetailIdStr: string) => {
+      if (!productDetail?.findProduct) {
+        toast.error('Product data not found')
 
-    const product = productDetail.findProduct
-    console.log('[ProductEdit] productDetailId', productDetailIdStr)
-    console.log('[ProductEdit] product PMO', product.PMO)
-    console.log('[ProductEdit] dropdown metal_list', dropDownData.metal_list)
-    console.log('[ProductEdit] dropdown metal_tone', dropDownData.metal_tone)
-    console.log('[ProductEdit] dropdown metal_karat', dropDownData.metal_karat)
+        return
+      }
 
-    setProductId(product.id)
-    setProductName(product.name)
-    setProductSKU(product.sku)
-    setProductSortDes(product.sort_description)
-    setProductLongDes(product.long_description)
-    setFindingCharge(product.finding_charge)
-    setMarketingCharge(product.making_charge)
-    setOtherCharge(product.other_charge)
+      const product = productDetail.findProduct
+      console.log('[ProductEdit] productDetailId', productDetailIdStr)
+      console.log('[ProductEdit] product PMO', product.PMO)
+      console.log('[ProductEdit] dropdown metal_list', dropDownData.metal_list)
+      console.log('[ProductEdit] dropdown metal_tone', dropDownData.metal_tone)
+      console.log('[ProductEdit] dropdown metal_karat', dropDownData.metal_karat)
 
-        const tags = dropDownData.keyWords?.filter((t: any) => {
-          if ((product.tag || []).indexOf(parseInt(t.id)) >= 0) return t;
-        });
-        setKeyword(tags)
+      setProductId(product.id)
+      setProductName(product.name)
+      setProductSKU(product.sku)
+      setProductSortDes(product.sort_description)
+      setProductLongDes(product.long_description)
+      setFindingCharge(product.finding_charge)
+      setMarketingCharge(product.making_charge)
+      setOtherCharge(product.other_charge)
 
-        const genderDatas: any = genderData?.filter((t: any) => {
-          if ((product.gender || []).indexOf(parseInt(t.id)) >= 0) return t;
-        });
-        setGender(genderDatas)
+      const tags = dropDownData.keyWords?.filter((t: any) => {
+        if ((product.tag || []).indexOf(parseInt(t.id)) >= 0) return t
+      })
+      setKeyword(tags)
 
-        const setting_style_type = dropDownData.setting_type_list?.filter((t: any) => {
-          if ((product.setting_style_type || []).indexOf(parseInt(t.id)) >= 0) return t;
-        });
+      const genderDatas: any = genderData?.filter((t: any) => {
+        if ((product.gender || []).indexOf(parseInt(t.id)) >= 0) return t
+      })
+      setGender(genderDatas)
 
-        setSettingType(setting_style_type)
+      const setting_style_type = dropDownData.setting_type_list?.filter((t: any) => {
+        if ((product.setting_style_type || []).indexOf(parseInt(t.id)) >= 0) return t
+      })
 
-        const item_size = dropDownData.item_size?.filter((t: any) => {
-          if ((product.size || []).indexOf(parseInt(t.id)) >= 0) return t;
-        })
+      setSettingType(setting_style_type)
 
-        setItemSize(item_size)
+      const item_size = dropDownData.item_size?.filter((t: any) => {
+        if ((product.size || []).indexOf(parseInt(t.id)) >= 0) return t
+      })
 
-        const item_length = dropDownData.item_length?.filter((t: any) => {
-          if ((product.length as number[] || []).indexOf(parseInt(t.id)) >= 0) return t;
-        })
-        setItemLength(item_length)
+      setItemSize(item_size)
 
-        // Safely access product categories
-        const productCategories = product.product_categories || []
-        const categoryData = productCategories.length > 0
+      const item_length = dropDownData.item_length?.filter((t: any) => {
+        if (((product.length as number[]) || []).indexOf(parseInt(t.id)) >= 0) return t
+      })
+      setItemLength(item_length)
+
+      // Safely access product categories
+      const productCategories = product.product_categories || []
+      const categoryData =
+        productCategories.length > 0
           ? dropDownData.categoryList.find((t: any) => t.id == parseInt(productCategories[0].id_category))
           : null
 
-        if (categoryData) {
-          setCategory(categoryData)
-          if (categoryData.id_size && categoryData.id_size.length > 0) {
-            const sizeList: any = []
-            for (const list of categoryData.id_size) {
-              const sizeData: any = dropDownData.item_size.find((t: any) => t.id == parseInt(list))
-              if (sizeData) {
-                sizeList.push({ id: sizeData.id, size: sizeData.size })
-              }
+      if (categoryData) {
+        setCategory(categoryData)
+        if (categoryData.id_size && categoryData.id_size.length > 0) {
+          const sizeList: any = []
+          for (const list of categoryData.id_size) {
+            const sizeData: any = dropDownData.item_size.find((t: any) => t.id == parseInt(list))
+            if (sizeData) {
+              sizeList.push({ id: sizeData.id, size: sizeData.size })
             }
-
-            setItemSizeList(sizeList)
           }
-          if (categoryData.id_length && categoryData.id_length.length > 0) {
-            const lengthList: any = []
-            for (const list of categoryData.id_length) {
-              const lengthData: any = dropDownData.item_length.find((t: any) => t.id == parseInt(list))
-              if (lengthData) {
-                lengthList.push({ id: lengthData.id, length: lengthData.length })
-              }
+
+          setItemSizeList(sizeList)
+        }
+        if (categoryData.id_length && categoryData.id_length.length > 0) {
+          const lengthList: any = []
+          for (const list of categoryData.id_length) {
+            const lengthData: any = dropDownData.item_length.find((t: any) => t.id == parseInt(list))
+            if (lengthData) {
+              lengthList.push({ id: lengthData.id, length: lengthData.length })
             }
-            setItemLengthList(lengthList)
           }
+          setItemLengthList(lengthList)
         }
+      }
 
-        if (productCategories.length > 0) {
-          const arrCategories: any[] = []
-          productCategories.map((value: any) => {
-            const categoryList = dropDownData.categoryList
-            let subCategoryList = []
-            let subSubCategoryList = []
-            if (value.id_sub_sub_category) {
-              subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
-              subSubCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_sub_category))
-            } else {
-              subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
-            }
+      if (productCategories.length > 0) {
+        const arrCategories: any[] = []
+        productCategories.map((value: any) => {
+          const categoryList = dropDownData.categoryList
+          let subCategoryList = []
+          let subSubCategoryList = []
+          if (value.id_sub_sub_category) {
+            subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
+            subSubCategoryList = categoryList.filter(
+              (t: any) => parseInt(t.parent_id) === parseInt(value.id_sub_category)
+            )
+          } else {
+            subCategoryList = categoryList.filter((t: any) => parseInt(t.parent_id) === parseInt(value.id_category))
+          }
 
-            const data = {
-              category: value.id_category,
-              subCategory: value.id_sub_category,
-              subSubCategory: value.id_sub_sub_category,
-              categoryList: categoryList,
-              subCategoryList: subCategoryList,
-              subSubCategoryList: subSubCategoryList,
-              id: value.id,
-              isDeleted: 0
-            }
-            arrCategories.push(data)
-          })
-          setInputFields(arrCategories)
-        }
+          const data = {
+            category: value.id_category,
+            subCategory: value.id_sub_category,
+            subSubCategory: value.id_sub_sub_category,
+            categoryList: categoryList,
+            subCategoryList: subCategoryList,
+            subSubCategoryList: subSubCategoryList,
+            id: value.id,
+            isDeleted: 0
+          }
+          arrCategories.push(data)
+        })
+        setInputFields(arrCategories)
+      }
 
-        //Gold Calculations
+      //Gold Calculations
 
-        const metalList = dropDownData.metal_list;
-        const goldMetalRate = metalList.filter((m: any) => parseInt(m.id) === 1)[0].metal_rate;
-        let arrMetalKarat: any[] = []
-        const metalKarat = dropDownData.metal_karat || []
-        const metalTone = dropDownData.metal_tone as number[] || []
-        let checkedValues = {}
+      const metalList = dropDownData.metal_list
+      const goldMetalRate = metalList.filter((m: any) => parseInt(m.id) === 1)[0].metal_rate
+      let arrMetalKarat: any[] = []
+      const metalKarat = dropDownData.metal_karat || []
+      const metalTone = (dropDownData.metal_tone as number[]) || []
+      let checkedValues = {}
 
-        // Safely access PMO (Product Metal Options)
-        const productMetalOptions = product.PMO || []
-        console.log('[ProductEdit] PMO raw', productMetalOptions)
-        const hasGoldOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 1)
-        const hasSilverOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 2)
-        const hasPlatinumOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 3)
-        console.log('[ProductEdit] PMO flags', { hasGoldOptions, hasSilverOptions, hasPlatinumOptions })
+      // Safely access PMO (Product Metal Options)
+      const productMetalOptions = product.PMO || []
+      console.log('[ProductEdit] PMO raw', productMetalOptions)
+      const hasGoldOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 1)
+      const hasSilverOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 2)
+      const hasPlatinumOptions = productMetalOptions.some((t: any) => parseInt(t.id_metal) === 3)
+      console.log('[ProductEdit] PMO flags', { hasGoldOptions, hasSilverOptions, hasPlatinumOptions })
 
-        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 1 && t.id_karat !== null).map((value: any) => {
-
+      productMetalOptions
+        .filter((t: any) => parseInt(t.id_metal) === 1 && t.id_karat !== null)
+        .map((value: any) => {
           // Handle metal_tone data - it can be a string (pipe-separated) or array
-          let id_metal_tone: string[] = [];
+          let id_metal_tone: string[] = []
           if (value.metal_tone) {
             if (typeof value.metal_tone === 'string') {
-              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone];
+              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone]
             } else if (Array.isArray(value.metal_tone)) {
-              id_metal_tone = value.metal_tone.map(String);
+              id_metal_tone = value.metal_tone.map(String)
             }
           }
 
-          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
-            return parseInt(t)
-          }).filter(num => !isNaN(num)); // Filter out invalid numbers
+          const idMetalTonesNumber = id_metal_tone
+            .map((t: any) => {
+              return parseInt(t)
+            })
+            .filter(num => !isNaN(num)) // Filter out invalid numbers
 
           const selectedMetalTones = metalTone?.filter((r: any) => {
-            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r;
-          });
+            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r
+          })
 
-          const karatData = metalKarat.filter((x: any) => parseInt(x.id) === parseInt(value.id_karat));
+          const karatData = metalKarat.filter((x: any) => parseInt(x.id) === parseInt(value.id_karat))
           if (karatData.length === 0) {
-            return; 
+            return
           }
-          const karatValue = karatData[0].name;
+          const karatValue = karatData[0].name
 
-          const rate = ((parseFloat(goldMetalRate) / 31.104) * ((parseInt(karatValue) / 24))).toFixed(2)
+          const rate = ((parseFloat(goldMetalRate) / 31.104) * (parseInt(karatValue) / 24)).toFixed(2)
           const data = {
             karat: karatValue,
             id_karat: value.id_karat,
@@ -375,44 +442,43 @@ return
             metal_tone: metalTone
           }
           arrMetalKarat.push(data)
-
         })
 
-        const selectedKarats = arrMetalKarat.map((t: any) => parseInt(t.id_karat));
-        const arrNotExitsKarats = metalKarat.filter((x: any) => selectedKarats.indexOf(parseInt(x.id)) === -1);
-        arrNotExitsKarats.map((value: any) => {
-          const rate = ((parseFloat(goldMetalRate) / 31.104) * ((parseInt(value.name) / 24))).toFixed(2)
-          const data = {
-            karat: value.name,
-            id_karat: value.id,
-            tone: [],
-            price: '',
-            rate: rate,
-            id: 0,
-            metal_weight: '',
-            metal_tone: metalTone
-          }
-          arrMetalKarat.push(data)
-        });
-
-
-        console.log('[ProductEdit] gold options', arrMetalKarat)
-        if (arrMetalKarat.length > 0) {
-          setInputFieldGoldMetal(arrMetalKarat)
+      const selectedKarats = arrMetalKarat.map((t: any) => parseInt(t.id_karat))
+      const arrNotExitsKarats = metalKarat.filter((x: any) => selectedKarats.indexOf(parseInt(x.id)) === -1)
+      arrNotExitsKarats.map((value: any) => {
+        const rate = ((parseFloat(goldMetalRate) / 31.104) * (parseInt(value.name) / 24)).toFixed(2)
+        const data = {
+          karat: value.name,
+          id_karat: value.id,
+          tone: [],
+          price: '',
+          rate: rate,
+          id: 0,
+          metal_weight: '',
+          metal_tone: metalTone
         }
-        if (hasGoldOptions) {
-          checkedValues = {
-            ...checkedValues,
-            [1]: true
-          }
+        arrMetalKarat.push(data)
+      })
+
+      console.log('[ProductEdit] gold options', arrMetalKarat)
+      if (arrMetalKarat.length > 0) {
+        setInputFieldGoldMetal(arrMetalKarat)
+      }
+      if (hasGoldOptions) {
+        checkedValues = {
+          ...checkedValues,
+          [1]: true
         }
+      }
 
+      //Silver Metal
 
-        //Silver Metal
-
-        arrMetalKarat = []
-        const silverRate = metalList.filter((m: any) => parseInt(m.id) === 2)[0].metal_rate;
-        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 2).map((value: any) => {
+      arrMetalKarat = []
+      const silverRate = metalList.filter((m: any) => parseInt(m.id) === 2)[0].metal_rate
+      productMetalOptions
+        .filter((t: any) => parseInt(t.id_metal) === 2)
+        .map((value: any) => {
           // Handle metal_tone data - it can be a string (pipe-separated) or array
           let id_metal_tone: string[] = []
           if (value.metal_tone) {
@@ -423,9 +489,11 @@ return
             }
           }
 
-          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
-            return parseInt(t)
-          }).filter(num => !isNaN(num))
+          const idMetalTonesNumber = id_metal_tone
+            .map((t: any) => {
+              return parseInt(t)
+            })
+            .filter(num => !isNaN(num))
           const selectedMetalTones = metalTone?.filter((r: any) => {
             if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r
           })
@@ -442,39 +510,42 @@ return
           }
           arrMetalKarat.push(data)
         })
-        console.log('[ProductEdit] silver options', arrMetalKarat)
-        if (arrMetalKarat.length > 0) {
-          setInputFieldSilverMetal(arrMetalKarat)
+      console.log('[ProductEdit] silver options', arrMetalKarat)
+      if (arrMetalKarat.length > 0) {
+        setInputFieldSilverMetal(arrMetalKarat)
+      }
+      if (hasSilverOptions) {
+        checkedValues = {
+          ...checkedValues,
+          [2]: true
         }
-        if (hasSilverOptions) {
-          checkedValues = {
-            ...checkedValues,
-            [2]: true
-          }
-        }
+      }
 
-        //Platinum
-        arrMetalKarat = []
-        const platinumRate = metalList.filter((m: any) => parseInt(m.id) === 3)[0].metal_rate;
-        productMetalOptions.filter((t: any) => parseInt(t.id_metal) === 3).map((value: any) => {
-
+      //Platinum
+      arrMetalKarat = []
+      const platinumRate = metalList.filter((m: any) => parseInt(m.id) === 3)[0].metal_rate
+      productMetalOptions
+        .filter((t: any) => parseInt(t.id_metal) === 3)
+        .map((value: any) => {
           // Handle metal_tone data - it can be a string (pipe-separated) or array
-          let id_metal_tone: string[] = [];
+          let id_metal_tone: string[] = []
           if (value.metal_tone) {
             if (typeof value.metal_tone === 'string') {
-              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone];
+              id_metal_tone = value.metal_tone.includes('|') ? value.metal_tone.split('|') : [value.metal_tone]
             } else if (Array.isArray(value.metal_tone)) {
-              id_metal_tone = value.metal_tone.map(String);
+              id_metal_tone = value.metal_tone.map(String)
             }
           }
 
-          const idMetalTonesNumber = id_metal_tone.map((t: any) => {
-            return parseInt(t)
-          }).filter(num => !isNaN(num)); // Filter out invalid numbers
+          const idMetalTonesNumber = id_metal_tone
+            .map((t: any) => {
+              return parseInt(t)
+            })
+            .filter(num => !isNaN(num)) // Filter out invalid numbers
 
           const selectedMetalTones = metalTone?.filter((r: any) => {
-            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r;
-          });
+            if (idMetalTonesNumber.indexOf(parseInt(r.id)) >= 0) return r
+          })
 
           const data = {
             karat: '',
@@ -488,60 +559,60 @@ return
           }
           arrMetalKarat.push(data)
         })
-        console.log('[ProductEdit] platinum options', arrMetalKarat)
-        if (arrMetalKarat.length > 0) {
-          setInputFieldPlatinumMetal(arrMetalKarat)
+      console.log('[ProductEdit] platinum options', arrMetalKarat)
+      if (arrMetalKarat.length > 0) {
+        setInputFieldPlatinumMetal(arrMetalKarat)
+      }
+      if (hasPlatinumOptions) {
+        checkedValues = {
+          ...checkedValues,
+          [3]: true
         }
-        if (hasPlatinumOptions) {
-          checkedValues = {
-            ...checkedValues,
-            [3]: true
-          }
-        }
-        setChecked(checkedValues)
+      }
+      setChecked(checkedValues)
 
-        // Safely access PDO (Product Diamond Options)
-        const productDiamondOptions = product.PDO || []
-        const product_diamond = productDiamondOptions.map((value: any) => {
-          // Safely access diamond rate data
-          const rate = value.rate || {}
-          const diamondRate = dropDownData.diamond_master.filter((t: any) =>
+      // Safely access PDO (Product Diamond Options)
+      const productDiamondOptions = product.PDO || []
+      const product_diamond = productDiamondOptions.map((value: any) => {
+        // Safely access diamond rate data
+        const rate = value.rate || {}
+        const diamondRate = dropDownData.diamond_master.filter(
+          (t: any) =>
             t.id_cuts == rate.id_cuts &&
             t.id_clarity == rate.id_clarity &&
             t.id_stone == rate.id_stone &&
             t.id_shape == rate.id_shape &&
             t.id_mm_size == rate.id_mm_size &&
             t.id_color == rate.id_color
+        )
 
-          )
+        const selectedRate = diamondRate.length > 0 ? diamondRate.map((t: any) => t.rate)[0] : ''
+        const data = {
+          // default: value.is_default,
+          id_diamond_group: value.id_diamond_group,
+          diamondGroup: value.id_diamond_group,
+          stone: rate.id_stone,
+          Stone_type: value.id_type,
+          Stone_weight: value.weight,
+          stone_cut: rate.id_cuts,
+          stone_color: rate.id_color,
+          stone_mm_size: rate.id_mm_size,
+          stone_clarity: rate.id_clarity,
+          stone_shape: rate.id_shape,
+          stone_count: value.count,
+          stone_setting: value.id_setting,
+          rate: selectedRate,
+          price: '',
+          id: value.id,
+          isDeleted: 0
+        }
 
-
-          const selectedRate = diamondRate.length > 0 ? diamondRate.map((t: any) => t.rate)[0] : ""
-          const data = {
-            // default: value.is_default,
-            id_diamond_group: value.id_diamond_group,
-            diamondGroup: value.id_diamond_group,
-            stone: rate.id_stone,
-            Stone_type: value.id_type,
-            Stone_weight: value.weight,
-            stone_cut: rate.id_cuts,
-            stone_color: rate.id_color,
-            stone_mm_size: rate.id_mm_size,
-            stone_clarity: rate.id_clarity,
-            stone_shape: rate.id_shape,
-            stone_count: value.count,
-            stone_setting: value.id_setting,
-            rate: selectedRate,
-            price: "",
-            id: value.id,
-            isDeleted: 0
-          }
-
-
-          return data
-        })
-        setInputFieldsDiamond(product_diamond)
-  }, [productDetail?.findProduct])
+        return data
+      })
+      setInputFieldsDiamond(product_diamond)
+    },
+    [productDetail?.findProduct]
+  )
 
   useEffect(() => {
     if (dropDownData && productDetailId) {
@@ -563,7 +634,9 @@ return
       setStoneSettingList(dropDownData.stone_setting || [])
       setMetalToneList((dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_GOLD_ID))
       const silverTones = (dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_SILVER_ID)
-      const platinumTones = (dropDownData.metal_tone || []).filter((m: any) => parseInt(m.id_metal) === MEATL_PLATINUM_ID)
+      const platinumTones = (dropDownData.metal_tone || []).filter(
+        (m: any) => parseInt(m.id_metal) === MEATL_PLATINUM_ID
+      )
       setSilverToneList(silverTones)
       setPaltinumToneList(platinumTones)
       setStoneShapeList(dropDownData.stone_shape || [])
@@ -581,9 +654,11 @@ return
           const gold = {
             karat: value.name,
             id_karat: value.id,
-            tone: [{ id: null, name: "" }],
+            tone: [{ id: null, name: '' }],
             price: '',
-            rate: (((dropDownData.metal_list?.[0]?.metal_rate || 0) / 31.104) * (Number(value.name) / 24)).toFixed(2), id: 0, metal_tone: dropDownData.metal_tone || []
+            rate: (((dropDownData.metal_list?.[0]?.metal_rate || 0) / 31.104) * (Number(value.name) / 24)).toFixed(2),
+            id: 0,
+            metal_tone: dropDownData.metal_tone || []
           }
 
           return gold
@@ -595,7 +670,7 @@ return
 
         setInputFieldSilverMetal([
           {
-            tone: [{ id: null, name: "" }],
+            tone: [{ id: null, name: '' }],
             price: '',
             rate: silverRate,
             id: 0,
@@ -606,7 +681,7 @@ return
 
         setInputFieldPlatinumMetal([
           {
-            tone: [{ id: null, name: "" }],
+            tone: [{ id: null, name: '' }],
             price: '',
             rate: platinumRate,
             id: 0,
@@ -618,7 +693,7 @@ return
     }
   }, [dropDownData, productDetailId, productDetail?.findProduct])
 
-   // const addProductDetails
+  // const addProductDetails
   //   const payload = {
   //     "id_product": 0,
   //     "name": productName,
@@ -656,52 +731,50 @@ return
   // }
   const addProductBasicDetails = async () => {
     const payload = {
-      "id_product": 0,
-      "name": productName,
-      "sku": productSKU,
-      "sort_description": productSortDes,
-      "long_description": productLongDes,
-      "tag": keyword.map((id) => id.id)[0] != null ? keyword.map((id) => id.id) : null,
-      "product_categories": inputFields.map((value) => {
-        let data = {};
+      id_product: 0,
+      name: productName,
+      sku: productSKU,
+      sort_description: productSortDes,
+      long_description: productLongDes,
+      tag: keyword.map(id => id.id)[0] != null ? keyword.map(id => id.id) : null,
+      product_categories: inputFields.map(value => {
+        let data = {}
         if (value.subCategory != null && value.subSubCategory != null) {
           data = {
-            "id": value.id,
-            "id_category": value.category,
-            "id_sub_category": value.subCategory,
-            "id_sub_sub_category": value.subSubCategory
+            id: value.id,
+            id_category: value.category,
+            id_sub_category: value.subCategory,
+            id_sub_sub_category: value.subSubCategory
           }
         } else if (value.subCategory == null) {
           data = {
-            "id": value.id,
-            "id_category": value.category,
+            id: value.id,
+            id_category: value.category
           }
         } else {
           if (value.subSubCategory == null) {
             data = {
-              "id": value.id,
-              "id_category": value.category,
-              "id_sub_category": value.subCategory,
+              id: value.id,
+              id_category: value.category,
+              id_sub_category: value.subCategory
             }
           }
         }
 
         return data
       }),
-      "making_charge": marketingCharge,
-      "finding_charge": findingCharge,
-      "other_charge": otherCharge
+      making_charge: marketingCharge,
+      finding_charge: findingCharge,
+      other_charge: otherCharge
     }
 
     try {
-      const data = await ADD_PRODUCT_BASIC_DETAILS(payload);
-      if (data.code === 200 || data.code === "200") {
+      const data = await ADD_PRODUCT_BASIC_DETAILS(payload)
+      if (data.code === 200 || data.code === '200') {
         setProductId(data.data)
         addProductMetalDiamoundDetails(data.data)
-
       } else {
-
-        return toast.error(data.message);
+        return toast.error(data.message)
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
@@ -711,346 +784,339 @@ return
   const addProductMetalDiamoundDetails = async (data: any) => {
     let payload = {}
 
-    if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked] === true) {
+    if (
+      checked['1' as keyof typeof checked] === true &&
+      checked['2' as keyof typeof checked] === true &&
+      checked['3' as keyof typeof checked] === true
+    ) {
       // if (settingType.map((id) => id.id)[0] == null) {
       payload = {
-        "id_product": data,
-        "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-        "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-        "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-        "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+        id_product: data,
+        settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+        size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+        length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+        product_Gold_metal_options: inputFieldGoldMetal.map(value => {
+          const data = {
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_karat: value.id_karat,
+            id_metal: checked['1' as keyof typeof checked] === true && 1
+          }
 
-          const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_karat": value.id_karat,
-            "id_metal": checked['1' as keyof typeof checked] === true && 1
-          }
-          
-return data
+          return data
         }),
-        "product_silver_options": inputFieldSilverMetal.map((value) => {
+        product_silver_options: inputFieldSilverMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['2' as keyof typeof checked] === true && 2
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['2' as keyof typeof checked] === true && 2
           }
-          
-return data
+
+          return data
         }),
 
-        "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+        product_platinum_options: inputFieldPlatinumMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['3' as keyof typeof checked] === true && 3
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['3' as keyof typeof checked] === true && 3
           }
-          
-return data
+
+          return data
         }),
-        "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+        product_diamond_options: inputFieldsDiamond.map((value: any) => {
           const data = {
-            "id": value.id,
-            "id_type": value.Stone_type,
-            "id_setting": value.stone_setting,
-            "weight": value.Stone_weight,
-            "count": value.stone_count,
-            "is_default": value.default,
-            "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-            "id_shape": value.stone_shape,
-            "id_mm_size": value.stone_mm_size,
-            "id_color": value.stone_color,
-            "id_clarity": value.stone_clarity,
-            "id_cuts": value.stone_cut
+            id: value.id,
+            id_type: value.Stone_type,
+            id_setting: value.stone_setting,
+            weight: value.Stone_weight,
+            count: value.stone_count,
+            is_default: value.default,
+            id_diamond_group: value.id_diamond_group,
+            id_stone: value.stone,
+            id_shape: value.stone_shape,
+            id_mm_size: value.stone_mm_size,
+            id_color: value.stone_color,
+            id_clarity: value.stone_clarity,
+            id_cuts: value.stone_cut
           }
-          
-return data
+
+          return data
         })
-
       }
-
     } else if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked]) {
       payload = {
-        "id_product": data,
-        "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-        "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-        "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-        "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+        id_product: data,
+        settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+        size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+        length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+        product_Gold_metal_options: inputFieldGoldMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_karat": value.id_karat,
-            "id_metal": checked['1' as keyof typeof checked] === true && 1
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_karat: value.id_karat,
+            id_metal: checked['1' as keyof typeof checked] === true && 1
           }
-          
-return data
+
+          return data
         }),
-        "product_silver_options": inputFieldSilverMetal.map((value) => {
+        product_silver_options: inputFieldSilverMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['2' as keyof typeof checked] === true && 2
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['2' as keyof typeof checked] === true && 2
           }
-          
-return data
+
+          return data
         }),
-        "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+        product_diamond_options: inputFieldsDiamond.map((value: any) => {
           const data = {
-            "id": value.id,
-            "id_type": value.Stone_type,
-            "id_setting": value.stone_setting,
-            "weight": value.Stone_weight,
-            "count": value.stone_count,
-            "is_default": value.default,
-            "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-            "id_shape": value.stone_shape,
-            "id_mm_size": value.stone_mm_size,
-            "id_color": value.stone_color,
-            "id_clarity": value.stone_clarity,
-            "id_cuts": value.stone_cut
+            id: value.id,
+            id_type: value.Stone_type,
+            id_setting: value.stone_setting,
+            weight: value.Stone_weight,
+            count: value.stone_count,
+            is_default: value.default,
+            id_diamond_group: value.id_diamond_group,
+            id_stone: value.stone,
+            id_shape: value.stone_shape,
+            id_mm_size: value.stone_mm_size,
+            id_color: value.stone_color,
+            id_clarity: value.stone_clarity,
+            id_cuts: value.stone_cut
           }
-          
-return data
+
+          return data
         })
       }
     } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
       payload = {
-        "id_product": data,
-        "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-        "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-        "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-        "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+        id_product: data,
+        settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+        size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+        length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+        product_Gold_metal_options: inputFieldGoldMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_karat": value.id_karat,
-            "id_metal": checked['1' as keyof typeof checked] === true && 1
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_karat: value.id_karat,
+            id_metal: checked['1' as keyof typeof checked] === true && 1
           }
-          
-return data
+
+          return data
         }),
 
-        "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+        product_platinum_options: inputFieldPlatinumMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['3' as keyof typeof checked] === true && 3
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['3' as keyof typeof checked] === true && 3
           }
-          
-return data
+
+          return data
         }),
-        "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+        product_diamond_options: inputFieldsDiamond.map((value: any) => {
           const data = {
-            "id": value.id,
-            "id_type": value.Stone_type,
-            "id_setting": value.stone_setting,
-            "weight": value.Stone_weight,
-            "count": value.stone_count,
-            "is_default": value.default,
-            "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-            "id_shape": value.stone_shape,
-            "id_mm_size": value.stone_mm_size,
-            "id_color": value.stone_color,
-            "id_clarity": value.stone_clarity,
-            "id_cuts": value.stone_cut
+            id: value.id,
+            id_type: value.Stone_type,
+            id_setting: value.stone_setting,
+            weight: value.Stone_weight,
+            count: value.stone_count,
+            is_default: value.default,
+            id_diamond_group: value.id_diamond_group,
+            id_stone: value.stone,
+            id_shape: value.stone_shape,
+            id_mm_size: value.stone_mm_size,
+            id_color: value.stone_color,
+            id_clarity: value.stone_clarity,
+            id_cuts: value.stone_cut
           }
-          
-return data
+
+          return data
         })
       }
     } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
       payload = {
-        "id_product": data,
-        "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-        "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-        "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+        id_product: data,
+        settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+        size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+        length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-        "product_silver_options": inputFieldSilverMetal.map((value) => {
+        product_silver_options: inputFieldSilverMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['2' as keyof typeof checked] === true && 2
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['2' as keyof typeof checked] === true && 2
           }
-          
-return data
+
+          return data
         }),
 
-        "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+        product_platinum_options: inputFieldPlatinumMetal.map(value => {
           const data = {
-            "id": value.id,
-            "metal_weight": value.metal_weight,
-            "id_metal_tone": value.tone.map((t: any) => t.id),
-            "id_metal": checked['3' as keyof typeof checked] === true && 3
+            id: value.id,
+            metal_weight: value.metal_weight,
+            id_metal_tone: value.tone.map((t: any) => t.id),
+            id_metal: checked['3' as keyof typeof checked] === true && 3
           }
-          
-return data
+
+          return data
         }),
-        "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+        product_diamond_options: inputFieldsDiamond.map((value: any) => {
           const data = {
-            "id": value.id,
-            "id_type": value.Stone_type,
-            "id_setting": value.stone_setting,
-            "weight": value.Stone_weight,
-            "count": value.stone_count,
-            "is_default": value.default,
-            "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-            "id_shape": value.stone_shape,
-            "id_mm_size": value.stone_mm_size,
-            "id_color": value.stone_color,
-            "id_clarity": value.stone_clarity,
-            "id_cuts": value.stone_cut
+            id: value.id,
+            id_type: value.Stone_type,
+            id_setting: value.stone_setting,
+            weight: value.Stone_weight,
+            count: value.stone_count,
+            is_default: value.default,
+            id_diamond_group: value.id_diamond_group,
+            id_stone: value.stone,
+            id_shape: value.stone_shape,
+            id_mm_size: value.stone_mm_size,
+            id_color: value.stone_color,
+            id_clarity: value.stone_clarity,
+            id_cuts: value.stone_cut
           }
-          
-return data
+
+          return data
         })
       }
     } else {
       if (checked['1' as keyof typeof checked] === true) {
-
         payload = {
-          "id_product": data,
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          id_product: data,
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone && value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone && value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
             }
-            
-return data
-          }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-            const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
-            }
-            
-return data
-          })
 
+            return data
+          }),
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
+            const data = {
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
+            }
+
+            return data
+          })
         }
       }
 
       if (checked['2' as keyof typeof checked] === true) {
         payload = {
-          "id_product": data,
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+          id_product: data,
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
-            }
-            
-return data
-          }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-            const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
-            }
-            
-return data
-          })
-        }
-      }
-      if (checked['3' as keyof typeof checked] === true) {
-
-        payload = {
-          "id_product": data,
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
-            const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
 
             return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       }
+      if (checked['3' as keyof typeof checked] === true) {
+        payload = {
+          id_product: data,
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
+            const data = {
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
+            }
+
+            return data
+          }),
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
+            const data = {
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
+            }
+
+            return data
+          })
+        }
+      }
     }
 
     try {
-      const data = await ADD_PRODUCT_MRTAL_DATA(payload);
-      if (data.code === 200 || data.code === "200") {
+      const data = await ADD_PRODUCT_MRTAL_DATA(payload)
+      if (data.code === 200 || data.code === '200') {
         setActiveStep(prevActiveStep => prevActiveStep + 1)
         if (activeStep === steps.length - 1) {
           return toast.success('Form Submitted')
         }
       } else {
-
-        return toast.error(data.message);
-
+        return toast.error(data.message)
       }
     } catch (e: any) {
       toast.error(e?.data?.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
@@ -1061,828 +1127,813 @@ return data
     try {
       // Validate required fields
       if (!productName || !productSKU || !productSortDes || !productLongDes) {
-        return toast.error("Please fill all required product details");
+        return toast.error('Please fill all required product details')
       }
 
       // Validate categories
       if (!inputFields || inputFields.length === 0 || !inputFields[0].category) {
-        return toast.error("Please select at least one category");
+        return toast.error('Please select at least one category')
       }
 
       // Validate diamond options if any are present
       if (inputFieldsDiamond && inputFieldsDiamond.length > 0) {
-        const hasDiamondOptions = inputFieldsDiamond.some(option =>
-          option.stone || option.stone_shape || option.Stone_type || option.stone_setting);
+        const hasDiamondOptions = inputFieldsDiamond.some(
+          option => option.stone || option.stone_shape || option.Stone_type || option.stone_setting
+        )
 
         if (hasDiamondOptions) {
-          const invalidDiamondOptions = inputFieldsDiamond.filter(option =>
-            !option.stone || !option.stone_shape);
+          const invalidDiamondOptions = inputFieldsDiamond.filter(option => !option.stone || !option.stone_shape)
 
           if (invalidDiamondOptions.length > 0) {
-            return toast.error("Please complete all diamond details or remove incomplete ones");
+            return toast.error('Please complete all diamond details or remove incomplete ones')
           }
         }
       }
 
       const payload1 = {
-        "id_product": productId,
-        "name": productName,
-        "sku": productSKU,
-        "sort_description": productSortDes,
-        "long_description": productLongDes,
-        "tag": keyword.map((id) => id.id)[0] != null ? keyword.map((id) => id.id) : null,
-        "gender": gender.map((id) => id.id)[0] == null ? false : gender.map((id) => id.id),
-        "product_categories": inputFields.map((value) => {
-          let data = {};
+        id_product: productId,
+        name: productName,
+        sku: productSKU,
+        sort_description: productSortDes,
+        long_description: productLongDes,
+        tag: keyword.map(id => id.id)[0] != null ? keyword.map(id => id.id) : null,
+        gender: gender.map(id => id.id)[0] == null ? false : gender.map(id => id.id),
+        product_categories: inputFields.map(value => {
+          let data = {}
           if (value.subCategory != null && value.subSubCategory != null) {
             data = {
-              "id": value.id,
-              "id_category": value.category,
-              "id_sub_category": value.subCategory,
-              "id_sub_sub_category": value.subSubCategory
+              id: value.id,
+              id_category: value.category,
+              id_sub_category: value.subCategory,
+              id_sub_sub_category: value.subSubCategory
             }
           } else if (value.subCategory == null) {
             data = {
-              "id": value.id,
-              "id_category": value.category,
+              id: value.id,
+              id_category: value.category
             }
           } else {
             if (value.subSubCategory == null) {
               data = {
-                "id": value.id,
-                "id_category": value.category,
-                "id_sub_category": value.subCategory,
+                id: value.id,
+                id_category: value.category,
+                id_sub_category: value.subCategory
               }
             }
           }
 
           return data
         }),
-        "making_charge": marketingCharge,
-        "finding_charge": findingCharge,
-        "other_charge": otherCharge
+        making_charge: marketingCharge,
+        finding_charge: findingCharge,
+        other_charge: otherCharge
       }
 
       let payload = {}
 
-      if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked] === true) {
+      if (
+        checked['1' as keyof typeof checked] === true &&
+        checked['2' as keyof typeof checked] === true &&
+        checked['3' as keyof typeof checked] === true
+      ) {
         // if (settingType.map((id) => id.id)[0] == null) {
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
+            const data = {
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
+            }
 
-            const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
-            }
-            
-return data
+            return data
           }),
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
-          }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
-            const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
-            }
-            
-return data
+            return data
           }),
 
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
+          }),
+
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
+            const data = {
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
+            }
+
+            return data
           })
-
         }
-
       } else if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked]) {
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
             }
-            
-return data
+
+            return data
           }),
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
             }
-            
-return data
+
+            return data
           }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
+
+            return data
           }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else {
         if (checked['1' as keyof typeof checked] === true) {
-
           payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-            "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+            product_Gold_metal_options: inputFieldGoldMetal.map(value => {
               const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone && value.tone.map((t: any) => t.id),
-                "id_karat": value.id_karat,
-                "id_metal": checked['1' as keyof typeof checked] === true && 1
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone && value.tone.map((t: any) => t.id),
+                id_karat: value.id_karat,
+                id_metal: checked['1' as keyof typeof checked] === true && 1
               }
-              
-return data
-            }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-              const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
-              }
-              
-return data
-            })
 
+              return data
+            }),
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
+              const data = {
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
+              }
+
+              return data
+            })
           }
         }
 
         if (checked['2' as keyof typeof checked] === true) {
           payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-            "product_silver_options": inputFieldSilverMetal.map((value) => {
+            product_silver_options: inputFieldSilverMetal.map(value => {
               const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone.map((t: any) => t.id),
-                "id_metal": checked['2' as keyof typeof checked] === true && 2
-              }
-              
-return data
-            }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-              const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
-              }
-              
-return data
-            })
-          }
-        }
-        if (checked['3' as keyof typeof checked] === true) {
-
-          payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-
-            "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
-              const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone.map((t: any) => t.id),
-                "id_metal": checked['3' as keyof typeof checked] === true && 3
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone.map((t: any) => t.id),
+                id_metal: checked['2' as keyof typeof checked] === true && 2
               }
 
               return data
             }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
               const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
               }
-              
-return data
+
+              return data
             })
           }
         }
+        if (checked['3' as keyof typeof checked] === true) {
+          payload = {
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
+            product_platinum_options: inputFieldPlatinumMetal.map(value => {
+              const data = {
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone.map((t: any) => t.id),
+                id_metal: checked['3' as keyof typeof checked] === true && 3
+              }
+
+              return data
+            }),
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
+              const data = {
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
+              }
+
+              return data
+            })
+          }
+        }
       }
 
       const finalPayload = {
-        ...payload1, ...payload
+        ...payload1,
+        ...payload
       }
 
       setIsSaving(true)
-      const data = await ADD_PRODUCT_DETAILS(finalPayload);
+      const data = await ADD_PRODUCT_DETAILS(finalPayload)
       setIsSaving(false)
-      if (data.code === 200 || data.code === "200") {
+      if (data.code === 200 || data.code === '200') {
         queryClient.invalidateQueries(['productList'])
         toast.success(data.message)
-        Router.push({ pathname: "/product/all-products" })
+        Router.push({ pathname: '/product/all-products' })
       } else {
-
-        toast.error(data.message);
+        toast.error(data.message)
       }
-
-    }
-    catch (e: any) {
+    } catch (e: any) {
       setIsSaving(false)
-      toast.error(e.data.message);
+      toast.error(e.data.message)
     }
   }
-
 
   const editProductDetails = async () => {
     try {
       // Validate required fields
       if (!productName || !productSKU || !productSortDes || !productLongDes) {
-        return toast.error("Please fill all required product details");
+        return toast.error('Please fill all required product details')
       }
 
       // Validate categories
       if (!inputFields || inputFields.length === 0 || !inputFields[0].category) {
-        return toast.error("Please select at least one category");
+        return toast.error('Please select at least one category')
       }
 
       // Validate diamond options if any are present
       if (inputFieldsDiamond && inputFieldsDiamond.length > 0) {
-        const hasDiamondOptions = inputFieldsDiamond.some(option =>
-          option.stone || option.stone_shape || option.Stone_type || option.stone_setting);
+        const hasDiamondOptions = inputFieldsDiamond.some(
+          option => option.stone || option.stone_shape || option.Stone_type || option.stone_setting
+        )
 
         if (hasDiamondOptions) {
-          const invalidDiamondOptions = inputFieldsDiamond.filter(option =>
-            !option.stone || !option.stone_shape);
+          const invalidDiamondOptions = inputFieldsDiamond.filter(option => !option.stone || !option.stone_shape)
 
           if (invalidDiamondOptions.length > 0) {
-            return toast.error("Please complete all diamond details or remove incomplete ones");
+            return toast.error('Please complete all diamond details or remove incomplete ones')
           }
         }
       }
 
       const payload1 = {
-        "id_product": productId,
-        "name": productName,
-        "sku": productSKU,
-        "sort_description": productSortDes,
-        "long_description": productLongDes,
-        "tag": keyword.map((id) => id.id)[0] != null ? keyword.map((id) => id.id) : null,
-        "gender": gender.map((id) => id.id)[0] == null ? false : gender.map((id) => id.id),
-        "product_categories": inputFields.map((value) => {
-          let data = {};
+        id_product: productId,
+        name: productName,
+        sku: productSKU,
+        sort_description: productSortDes,
+        long_description: productLongDes,
+        tag: keyword.map(id => id.id)[0] != null ? keyword.map(id => id.id) : null,
+        gender: gender.map(id => id.id)[0] == null ? false : gender.map(id => id.id),
+        product_categories: inputFields.map(value => {
+          let data = {}
           if (value.subCategory != null && value.subSubCategory != null) {
             data = {
-              "id": value.id,
-              "id_category": value.category,
-              "id_sub_category": value.subCategory,
-              "id_sub_sub_category": value.subSubCategory
+              id: value.id,
+              id_category: value.category,
+              id_sub_category: value.subCategory,
+              id_sub_sub_category: value.subSubCategory
             }
           } else if (value.subCategory == null) {
             data = {
-              "id": value.id,
-              "id_category": value.category,
+              id: value.id,
+              id_category: value.category
             }
           } else {
             if (value.subSubCategory == null) {
               data = {
-                "id": value.id,
-                "id_category": value.category,
-                "id_sub_category": value.subCategory,
+                id: value.id,
+                id_category: value.category,
+                id_sub_category: value.subCategory
               }
             }
           }
 
           return data
         }),
-        "making_charge": marketingCharge,
-        "finding_charge": findingCharge,
-        "other_charge": otherCharge
+        making_charge: marketingCharge,
+        finding_charge: findingCharge,
+        other_charge: otherCharge
       }
 
       let payload = {}
 
-      if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked] === true) {
+      if (
+        checked['1' as keyof typeof checked] === true &&
+        checked['2' as keyof typeof checked] === true &&
+        checked['3' as keyof typeof checked] === true
+      ) {
         // if (settingType.map((id) => id.id)[0] == null) {
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
+            const data = {
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
+            }
 
-            const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
-            }
-            
-return data
+            return data
           }),
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
+
+            return data
           }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
-
         }
-
       } else if (checked['1' as keyof typeof checked] === true && checked['2' as keyof typeof checked]) {
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
             }
-            
-return data
+
+            return data
           }),
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else if (checked['1' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-          "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+          product_Gold_metal_options: inputFieldGoldMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_karat": value.id_karat,
-              "id_metal": checked['1' as keyof typeof checked] === true && 1
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_karat: value.id_karat,
+              id_metal: checked['1' as keyof typeof checked] === true && 1
             }
-            
-return data
+
+            return data
           }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else if (checked['2' as keyof typeof checked] === true && checked['3' as keyof typeof checked]) {
-
         payload = {
-          "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-          "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-          "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+          settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+          size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+          length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-          "product_silver_options": inputFieldSilverMetal.map((value) => {
+          product_silver_options: inputFieldSilverMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['2' as keyof typeof checked] === true && 2
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['2' as keyof typeof checked] === true && 2
             }
-            
-return data
+
+            return data
           }),
 
-          "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
+          product_platinum_options: inputFieldPlatinumMetal.map(value => {
             const data = {
-              "id": value.id,
-              "metal_weight": value.metal_weight,
-              "id_metal_tone": value.tone.map((t: any) => t.id),
-              "id_metal": checked['3' as keyof typeof checked] === true && 3
+              id: value.id,
+              metal_weight: value.metal_weight,
+              id_metal_tone: value.tone.map((t: any) => t.id),
+              id_metal: checked['3' as keyof typeof checked] === true && 3
             }
-            
-return data
+
+            return data
           }),
-          "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+          product_diamond_options: inputFieldsDiamond.map((value: any) => {
             const data = {
-              "id": value.id,
-              "id_type": value.Stone_type,
-              "id_setting": value.stone_setting,
-              "weight": value.Stone_weight,
-              "count": value.stone_count,
-              "is_default": value.default,
-              "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-              "id_shape": value.stone_shape,
-              "id_mm_size": value.stone_mm_size,
-              "id_color": value.stone_color,
-              "id_clarity": value.stone_clarity,
-              "id_cuts": value.stone_cut
+              id: value.id,
+              id_type: value.Stone_type,
+              id_setting: value.stone_setting,
+              weight: value.Stone_weight,
+              count: value.stone_count,
+              is_default: value.default,
+              id_diamond_group: value.id_diamond_group,
+              id_stone: value.stone,
+              id_shape: value.stone_shape,
+              id_mm_size: value.stone_mm_size,
+              id_color: value.stone_color,
+              id_clarity: value.stone_clarity,
+              id_cuts: value.stone_cut
             }
-            
-return data
+
+            return data
           })
         }
       } else {
         if (checked['1' as keyof typeof checked] === true) {
-
           payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-            "product_Gold_metal_options": inputFieldGoldMetal.map((value) => {
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
+            product_Gold_metal_options: inputFieldGoldMetal.map(value => {
               const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone && value.tone.map((t: any) => t.id),
-                "id_karat": value.id_karat,
-                "id_metal": checked['1' as keyof typeof checked] === true && 1
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone && value.tone.map((t: any) => t.id),
+                id_karat: value.id_karat,
+                id_metal: checked['1' as keyof typeof checked] === true && 1
               }
-              
-return data
-            }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-              const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
-              }
-              
-return data
-            })
 
+              return data
+            }),
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
+              const data = {
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
+              }
+
+              return data
+            })
           }
         }
 
         if (checked['2' as keyof typeof checked] === true) {
           payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
-            "product_silver_options": inputFieldSilverMetal.map((value) => {
+            product_silver_options: inputFieldSilverMetal.map(value => {
               const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone.map((t: any) => t.id),
-                "id_metal": checked['2' as keyof typeof checked] === true && 2
-              }
-              
-return data
-            }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
-              const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
-              }
-              
-return data
-            })
-          }
-        }
-        if (checked['3' as keyof typeof checked] === true) {
-
-          payload = {
-            "settingStyleType": settingType.map((id) => id.id)[0] == null ? false : settingType.map((id) => id.id),
-            "size": itemSize.map((value) => value.id)[0] == null ? false : itemSize.map((value) => value.id),
-            "length": itemLength.map((value) => value.id)[0] == null ? false : itemLength.map((value) => value.id),
-
-            "product_platinum_options": inputFieldPlatinumMetal.map((value) => {
-              const data = {
-                "id": value.id,
-                "metal_weight": value.metal_weight,
-                "id_metal_tone": value.tone.map((t: any) => t.id),
-                "id_metal": checked['3' as keyof typeof checked] === true && 3
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone.map((t: any) => t.id),
+                id_metal: checked['2' as keyof typeof checked] === true && 2
               }
 
               return data
             }),
-            "product_diamond_options": inputFieldsDiamond.map((value: any) => {
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
               const data = {
-                "id": value.id,
-                "id_type": value.Stone_type,
-                "id_setting": value.stone_setting,
-                "weight": value.Stone_weight,
-                "count": value.stone_count,
-                "is_default": value.default,
-                "id_diamond_group": value.id_diamond_group,
-            "id_stone": value.stone,
-                "id_shape": value.stone_shape,
-                "id_mm_size": value.stone_mm_size,
-                "id_color": value.stone_color,
-                "id_clarity": value.stone_clarity,
-                "id_cuts": value.stone_cut
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
               }
-              
-return data
+
+              return data
             })
           }
         }
+        if (checked['3' as keyof typeof checked] === true) {
+          payload = {
+            settingStyleType: settingType.map(id => id.id)[0] == null ? false : settingType.map(id => id.id),
+            size: itemSize.map(value => value.id)[0] == null ? false : itemSize.map(value => value.id),
+            length: itemLength.map(value => value.id)[0] == null ? false : itemLength.map(value => value.id),
 
+            product_platinum_options: inputFieldPlatinumMetal.map(value => {
+              const data = {
+                id: value.id,
+                metal_weight: value.metal_weight,
+                id_metal_tone: value.tone.map((t: any) => t.id),
+                id_metal: checked['3' as keyof typeof checked] === true && 3
+              }
+
+              return data
+            }),
+            product_diamond_options: inputFieldsDiamond.map((value: any) => {
+              const data = {
+                id: value.id,
+                id_type: value.Stone_type,
+                id_setting: value.stone_setting,
+                weight: value.Stone_weight,
+                count: value.stone_count,
+                is_default: value.default,
+                id_diamond_group: value.id_diamond_group,
+                id_stone: value.stone,
+                id_shape: value.stone_shape,
+                id_mm_size: value.stone_mm_size,
+                id_color: value.stone_color,
+                id_clarity: value.stone_clarity,
+                id_cuts: value.stone_cut
+              }
+
+              return data
+            })
+          }
+        }
       }
 
       const finalPayload = {
-        ...payload1, ...payload
+        ...payload1,
+        ...payload
       }
 
       setIsSaving(true)
-      const data = await EDIT_PRODUCT_DETAILS(finalPayload);
+      const data = await EDIT_PRODUCT_DETAILS(finalPayload)
       setIsSaving(false)
-      if (data.code === 200 || data.code === "200") {
+      if (data.code === 200 || data.code === '200') {
         queryClient.invalidateQueries(['productDetail', productId])
         queryClient.invalidateQueries(['productList'])
         toast.success(data.message)
-        Router.push({ pathname: "/product/all-products" })
+        Router.push({ pathname: '/product/all-products' })
       } else {
-
-        toast.error(data.message);
+        toast.error(data.message)
       }
-
-    }
-    catch (e: any) {
+    } catch (e: any) {
       setIsSaving(false)
-      toast.error(e.data.message);
+      toast.error(e.data.message)
     }
   }
 
@@ -1891,14 +1942,13 @@ return data
   }
   const handleNext = () => {
     if (productSizeLenghtFilter == null) {
-      toast.error("please select category")
+      toast.error('please select category')
     } else {
       setActiveStep(prevActiveStep => prevActiveStep + 1)
       if (activeStep === steps.length - 1) {
         toast.success('Form Submitted')
       }
     }
-
   }
 
   const handleReset = () => {
@@ -1908,35 +1958,31 @@ return data
     setProductLongDes('')
     setMarketingCharge(0)
     setCategorysList([])
-    setKeyword([{ id: null, name: "" }])
-    setGender([{ id: null, name: "" }])
-    inputFields.map((value) => value.category = null)
-    inputFields.map((value) => value.subCategory = null)
-    inputFields.map((value) => value.subSubCategory = null)
-    setSettingType([{ id: null, name: "" }])
-    setItemLength([{ id: null, length: "" }])
-    setItemSize([{ id: null, size: "" }])
-    inputFieldsGold.map((value) => value.metalGroup = "")
-    inputFieldsGold.map((value) => value.weight = "")
-    inputFieldsDiamond.map((value) => {
+    setKeyword([{ id: null, name: '' }])
+    setGender([{ id: null, name: '' }])
+    inputFields.map(value => (value.category = null))
+    inputFields.map(value => (value.subCategory = null))
+    inputFields.map(value => (value.subSubCategory = null))
+    setSettingType([{ id: null, name: '' }])
+    setItemLength([{ id: null, length: '' }])
+    setItemSize([{ id: null, size: '' }])
+    inputFieldsGold.map(value => (value.metalGroup = ''))
+    inputFieldsGold.map(value => (value.weight = ''))
+    inputFieldsDiamond.map(value => {
       value.diamondGroup = null
       value.Stone_type = null
       value.Stone_weight = 0
       value.stone_setting = null
       value.stone_count = 0
-      value.default = '0',
-        value.stone = null,
-        value.stone_color = null,
-        value.stone_clarity = null,
-        value.stone_mm_size = null,
-        value.stone_shape = null
+      ;(value.default = '0'),
+        (value.stone = null),
+        (value.stone_color = null),
+        (value.stone_clarity = null),
+        (value.stone_mm_size = null),
+        (value.stone_shape = null)
     })
-    inputFieldGoldMetal.map((value) => {
-      value.id = 0,
-        value.id_karat = null,
-        value.karat = null,
-        value.metal_weight = null,
-        value.tone = []
+    inputFieldGoldMetal.map(value => {
+      ;(value.id = 0), (value.id_karat = null), (value.karat = null), (value.metal_weight = null), (value.tone = [])
     })
 
     setFindingCharge(0)
@@ -1949,14 +1995,23 @@ return data
   // Handle repited
   const addFields = () => {
     const categoryData = categorysList.filter((t: any) => t.parent_id === null)
-    const newfield = { category: null, subCategory: null, subSubCategory: null, categoryList: categoryData, subCategoryList: [], subSubCategoryList: [], id: 0, isDeleted: 0 }
+    const newfield = {
+      category: null,
+      subCategory: null,
+      subSubCategory: null,
+      categoryList: categoryData,
+      subCategoryList: [],
+      subSubCategoryList: [],
+      id: 0,
+      isDeleted: 0
+    }
     const data = [...inputFields, newfield]
     setInputFields(data)
     setCount(data.length)
   }
 
   const addGoldSettingFields = () => {
-    const newfield = { rate: '', default: '0', price: '', weight: '', metalGroup: "", id: 0, isDeleted: 0 }
+    const newfield = { rate: '', default: '0', price: '', weight: '', metalGroup: '', id: 0, isDeleted: 0 }
     const data = [...inputFieldsGold, newfield]
     setInputFieldsGold(data)
     setCount(data.length)
@@ -1967,15 +2022,15 @@ return data
       default: '0',
       id_diamond_group: null,
       diamondGroup: null,
-      Stone_type: "",
+      Stone_type: '',
       Stone_weight: 0,
       stone_cut: null,
       stone_color: null,
       stone_clarity: null,
-      stone_shape: "",
-      stone: "",
+      stone_shape: '',
+      stone: '',
       stone_count: 0,
-      stone_setting: "",
+      stone_setting: '',
       rate: 0,
       price: 0,
       stone_mm_size: null,
@@ -1988,14 +2043,12 @@ return data
   }
 
   const removeFields = (index: any) => {
-
     const data = [...inputFields]
     data.splice(index, 1)
     setInputFields(data)
   }
 
   const removeGoldSettingFields = (index: any) => {
-
     const data = [...inputFieldsGold]
     data.splice(index, 1)
     setInputFieldsGold(data)
@@ -2011,11 +2064,10 @@ return data
     setRadioButtonStripe((event.target as HTMLInputElement).value)
   }
 
-
   const handleChangeMetalDefaultValue = (event: ChangeEvent<HTMLInputElement>) => {
     inputFieldsGold.map((input, index) => {
       const data = [...inputFieldsGold]
-      data[index].default = (event.target as HTMLInputElement).value === index.toString() ? "1" : "0"
+      data[index].default = (event.target as HTMLInputElement).value === index.toString() ? '1' : '0'
       setInputFieldsGold(data)
     })
   }
@@ -2023,7 +2075,7 @@ return data
   const handleChangeDiamoundDefaultValue = (event: ChangeEvent<HTMLInputElement>) => {
     inputFieldsDiamond.map((input, index) => {
       const data = [...inputFieldsDiamond]
-      data[index].default = (event.target as HTMLInputElement).value === index.toString() ? "1" : "0"
+      data[index].default = (event.target as HTMLInputElement).value === index.toString() ? '1' : '0'
       setInputFieldsDiamond(data)
     })
   }
@@ -2037,12 +2089,10 @@ return data
   }, [action])
 
   const getStepContent = (step: number) => {
-
     switch (step) {
       case 0:
         return (
           <Fragment>
-
             {/* <Grid item xs={12} sm={12}>
               <RadioGroup row value={radioButtonStripe} name='simple-radio' onChange={handleRadioChangeStripe} aria-label='simple-radio'>
                 <FormControlLabel value='checked' control={<Radio />} label='Fixed Stone' />
@@ -2051,7 +2101,6 @@ return data
               </RadioGroup>
             </Grid> */}
             <Grid item xs={12} sm={6}>
-
               <TccInput
                 InputProps={isDisabled}
                 fullWidth
@@ -2088,7 +2137,7 @@ return data
                 InputProps={isDisabled}
                 multiline
                 fullWidth
-                label=" Product Long Description"
+                label=' Product Long Description'
                 value={productLongDes}
                 row={4}
                 onChange={(e: any) => setProductLongDes(e.target.value)}
@@ -2120,7 +2169,6 @@ return data
                 options={genderData}
                 value={gender}
                 onChange={(event, newItem) => {
-
                   setGender(newItem)
                 }}
                 filterSelectedOptions
@@ -2134,27 +2182,22 @@ return data
             {inputFields.map((input, index) => {
               return (
                 <Fragment key={`category-group-${index}`}>
-                  <Grid item xs={12} sm={4} key={"CAT_" + index}>
+                  <Grid item xs={12} sm={4} key={'CAT_' + index}>
                     <TccSelect
                       InputProps={isDisabled}
                       sx={{ mb: 4 }}
                       fullWidth
-                      inputLabel="Category"
+                      inputLabel='Category'
                       label='Category'
                       value={input.category || ''}
                       id='controlled-select'
                       title='category_name'
                       onChange={(e: any) => {
-
                         const data = [...inputFields]
                         data[index].category = e.target.value
-                        const subCategoryData = categorysList.filter((t: any) =>
-                          t.parent_id === e.target.value
-                        )
+                        const subCategoryData = categorysList.filter((t: any) => t.parent_id === e.target.value)
                         if (index === 0) {
-                          const CategoryData: any = categorysList.filter((t: any) =>
-                            t.id === e.target.value
-                          )
+                          const CategoryData: any = categorysList.filter((t: any) => t.id === e.target.value)
                           setCategory(CategoryData[0])
 
                           const sizeList: any = []
@@ -2181,18 +2224,16 @@ return data
                         data[index].subSubCategory = null
                         data[index].subSubCategoryList = []
                         setInputFields(data)
-                      }
-                      }
+                      }}
                       Options={categorysList.filter((t: any) => t.parent_id == null)}
-
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4} key={"SUBCAT_" + index}>
+                  <Grid item xs={12} sm={4} key={'SUBCAT_' + index}>
                     <TccSelect
                       InputProps={isDisabled}
                       sx={{ mb: 4 }}
                       fullWidth
-                      inputLabel="Sub Category"
+                      inputLabel='Sub Category'
                       label='Sub Category'
                       value={input.subCategory || ''}
                       id='controlled-select'
@@ -2200,9 +2241,7 @@ return data
                       onChange={(e: any) => {
                         const data = [...inputFields]
                         data[index].subCategory = e.target.value
-                        const subSubCategoryData = categorysList.filter((t: any) =>
-                          t.parent_id === e.target.value
-                        )
+                        const subSubCategoryData = categorysList.filter((t: any) => t.parent_id === e.target.value)
                         data[index].subSubCategory = null
                         data[index].subSubCategoryList = subSubCategoryData
                         setInputFields(data)
@@ -2210,12 +2249,12 @@ return data
                       Options={input.subCategoryList}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={3} key={"SUBSUBCAT_" + index}>
+                  <Grid item xs={12} sm={3} key={'SUBSUBCAT_' + index}>
                     <TccSelect
                       InputProps={isDisabled}
                       sx={{ mb: 4 }}
                       fullWidth
-                      inputLabel="Sub Sub Category"
+                      inputLabel='Sub Sub Category'
                       label='Sub Sub Category'
                       value={input.subSubCategory || ''}
                       id='controlled-select'
@@ -2229,24 +2268,23 @@ return data
                     />
                   </Grid>
                   <Grid item xs={12} sm={1}>
-
-                    <Button fullWidth
-                      variant='outlined'
-                      color='secondary' onClick={() => removeFields(index)}>
+                    <Button fullWidth variant='outlined' color='secondary' onClick={() => removeFields(index)}>
                       Delete
                     </Button>
                   </Grid>
-
                 </Fragment>
               )
-            })
-            }
-            <Grid item xs={12} sm={12} sx={{ display: "flex", justifyContent: "end" }}>
-              {action === "view" ? <></> : <Button variant='contained' onClick={addFields}>
-                Add
-              </Button>}
+            })}
+            <Grid item xs={12} sm={12} sx={{ display: 'flex', justifyContent: 'end' }}>
+              {action === 'view' ? (
+                <></>
+              ) : (
+                <Button variant='contained' onClick={addFields}>
+                  Add
+                </Button>
+              )}
             </Grid>
-            <Grid item xs={12} sm={12} sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Grid item xs={12} sm={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
               <TccInput
                 InputProps={isDisabled}
                 type='number'
@@ -2272,16 +2310,14 @@ return data
                 onChange={(e: any) => setOtherCharge(e.target.value)}
               />
             </Grid>
-
-          </Fragment >
+          </Fragment>
         )
       case 1:
-
         return (
           <>
-            <Fragment key={"SET_" + step}>
+            <Fragment key={'SET_' + step}>
               <Grid item xs={12} sm={6}>
-                {category && category.is_setting_style === "1" ?
+                {category && category.is_setting_style === '1' ? (
                   <Autocomplete
                     readOnly={isDisabled}
                     fullWidth
@@ -2297,7 +2333,9 @@ return data
                     getOptionLabel={(option: any) => option.name}
                     renderInput={(params: any) => <TextField {...params} label='Setting Type' />}
                   />
-                  : <></>}
+                ) : (
+                  <></>
+                )}
               </Grid>
               <Grid item xs={12} sm={6}>
                 {/* <FormControlLabel
@@ -2308,7 +2346,7 @@ return data
                 label='Length'
                 control={<Checkbox checked={checkedLength} onChange={(e) => setCheckedLength(e.target.checked)} name='Length' />}
               /> */}
-                {category && category.is_size === "1" ?
+                {category && category.is_size === '1' ? (
                   <Autocomplete
                     readOnly={isDisabled}
                     fullWidth
@@ -2324,8 +2362,10 @@ return data
                     getOptionLabel={(option: any) => option.size}
                     renderInput={(params: any) => <TextField {...params} label='Select size' />}
                   />
-                  : <></>}
-                {category && category.is_length === "1" ?
+                ) : (
+                  <></>
+                )}
+                {category && category.is_length === '1' ? (
                   <Autocomplete
                     sx={{ mt: 5 }}
                     readOnly={isDisabled}
@@ -2342,8 +2382,9 @@ return data
                     getOptionLabel={(option: any) => option.length}
                     renderInput={(params: any) => <TextField {...params} label='Select Length' />}
                   />
-                  : <></>}
-
+                ) : (
+                  <></>
+                )}
               </Grid>
               <Grid item sm={12}>
                 <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
@@ -2351,254 +2392,279 @@ return data
                 </Typography>
                 <FormGroup row>
                   {metalGroupList.map(({ id, name }) => (
-                    <div key={"ID_" + id}>
+                    <div key={'ID_' + id}>
                       <FormControlLabel
                         label={name}
-                        control={<Checkbox disabled={action == "view" ? true : false} checked={checked[id]} onChange={handleChecked(id)} name={name} />}
+                        control={
+                          <Checkbox
+                            disabled={action == 'view' ? true : false}
+                            checked={checked[id]}
+                            onChange={handleChecked(id)}
+                            name={name}
+                          />
+                        }
                       />
                     </div>
-
                   ))}
                 </FormGroup>
               </Grid>
               <Grid item xs={12} sm={12}>
-                {checked['1' as keyof typeof checked] === true && <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
-                  <Table stickyHeader aria-label='sticky table'>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align='center'>Metal Karat</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 270 }}>Metal Tone</TableCell>
-                        <TableCell align='center'>Metal Weight</TableCell>
-                        <TableCell align='center'> Rate</TableCell>
-                        <TableCell align='center'>Price</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {inputFieldGoldMetal.map((input, index) => {
-                        return (
-                          <TableRow key={"GOLD_" + index}>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Metal Karat'
-                                value={`${input.karat}KT`}
-                                placeholder=''
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <Autocomplete
-                                readOnly={isDisabled}
-                                fullWidth
-                                multiple
-                                options={metalToneList}
-                                value={input.tone}
-                                onChange={(event, newItem) => {
-                                  const data = [...inputFieldGoldMetal]
-                                  data[index].tone = newItem as any[]
-                                  setInputFieldGoldMetal(data)
-                                }}
-                                filterSelectedOptions
-                                size='small'
-                                id='autocomplete-multiple-outlined'
-                                getOptionLabel={(option: any) => option.name}
-                                renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                InputProps={isDisabled}
-                                fullWidth
-                                type='number'
-                                label='Metal Weight'
-                                value={input.metal_weight}
-                                placeholder=''
-                                onChange={(e: any) => {
-                                  const data = [...inputFieldGoldMetal]
-                                  data[index].metal_weight = e.target.value
-                                  setInputFieldGoldMetal(data)
-                                }}
-                              />
+                {checked['1' as keyof typeof checked] === true && (
+                  <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
+                    <Table stickyHeader aria-label='sticky table'>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align='center'>Metal Karat</TableCell>
+                          <TableCell align='center' sx={{ minWidth: 270 }}>
+                            Metal Tone
+                          </TableCell>
+                          <TableCell align='center'>Metal Weight</TableCell>
+                          <TableCell align='center'> Rate</TableCell>
+                          <TableCell align='center'>Price</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {inputFieldGoldMetal.map((input, index) => {
+                          return (
+                            <TableRow key={'GOLD_' + index}>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Metal Karat'
+                                  value={`${input.karat}KT`}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <Autocomplete
+                                  readOnly={isDisabled}
+                                  fullWidth
+                                  multiple
+                                  options={metalToneList}
+                                  value={input.tone}
+                                  onChange={(event, newItem) => {
+                                    const data = [...inputFieldGoldMetal]
+                                    data[index].tone = newItem as any[]
+                                    setInputFieldGoldMetal(data)
+                                  }}
+                                  filterSelectedOptions
+                                  size='small'
+                                  id='autocomplete-multiple-outlined'
+                                  getOptionLabel={(option: any) => option.name}
+                                  renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  InputProps={isDisabled}
+                                  fullWidth
+                                  type='number'
+                                  label='Metal Weight'
+                                  value={input.metal_weight}
+                                  placeholder=''
+                                  onChange={(e: any) => {
+                                    const data = [...inputFieldGoldMetal]
+                                    data[index].metal_weight = e.target.value
+                                    setInputFieldGoldMetal(data)
+                                  }}
+                                />
+                              </TableCell>
 
-                            </TableCell>
-
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Rate'
-                                value={input.rate}
-                                placeholder=''
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='number'
-                                label='Price'
-                                value={`${(parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate).toFixed(2)}`}
-                                placeholder=''
-                              />
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer>}
-                {checked['2' as keyof typeof checked] === true ? <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
-                  <Table stickyHeader aria-label='sticky table' sx={{ mt: 6 }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align='center' sx={{ minWidth: 270 }}>Metal Tone</TableCell>
-                        <TableCell align='center'>Metal Weight</TableCell>
-                        <TableCell align='center'> Rate</TableCell>
-                        <TableCell align='center'>Price</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {inputFieldSilverMetal.map((input, index) => {
-                        return (
-                          <TableRow key={"SIL_" + index}>
-
-                            <TableCell>
-                              <Autocomplete
-                                readOnly={isDisabled}
-                                fullWidth
-                                multiple
-                                options={silverToneList}
-                                value={input.tone}
-                                onChange={(event, newItem) => {
-                                  const data = [...inputFieldSilverMetal]
-                                  data[index].tone = newItem
-                                  setInputFieldSilverMetal(data)
-                                }}
-                                filterSelectedOptions
-                                size='small'
-                                id='autocomplete-multiple-outlined'
-                                getOptionLabel={(option: any) => option.name}
-                                renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                InputProps={isDisabled}
-                                fullWidth
-                                type='text'
-                                label='Metal Weight'
-                                value={input.metal_weight}
-                                placeholder=''
-                                onChange={(event: any) => {
-                                  const data = [...inputFieldSilverMetal]
-                                  data[index].metal_weight = event.target.value
-                                  setInputFieldSilverMetal(data)
-                                }}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Rate'
-                                value={input.rate}
-                                placeholder=''
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Price'
-                                value={`${(parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate).toFixed(2)}`}
-                                placeholder=''
-                              />
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer> : ""}
-                {checked['3' as keyof typeof checked] === true ? <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
-                  <Table stickyHeader aria-label='sticky table' sx={{ mt: 6 }}>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell align='center' sx={{ minWidth: 270 }}>Metal Tone</TableCell>
-                        <TableCell align='center'>Metal Weight</TableCell>
-                        <TableCell align='center'> Rate</TableCell>
-                        <TableCell align='center'>Price</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {inputFieldPlatinumMetal.map((input, index) => {
-                        return (
-                          <TableRow key={"PLT_" + index}>
-
-                            <TableCell>
-                              <Autocomplete
-                                readOnly={isDisabled}
-                                fullWidth
-                                multiple
-                                options={paltinumToneList}
-                                value={input.tone}
-                                onChange={(event, newItem) => {
-                                  const data = [...inputFieldPlatinumMetal]
-                                  data[index].tone = newItem
-                                  setInputFieldPlatinumMetal(data)
-                                }}
-                                filterSelectedOptions
-                                size='small'
-                                id='autocomplete-multiple-outlined'
-                                getOptionLabel={(option: any) => option.name}
-                                renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                InputProps={isDisabled}
-                                fullWidth
-                                type='text'
-                                label='Metal Weight'
-                                value={input.metal_weight}
-                                onChange={(event: any) => {
-                                  const data = [...inputFieldPlatinumMetal]
-                                  data[index].metal_weight = event.target.value
-                                  setInputFieldPlatinumMetal(data)
-                                }}
-                                placeholder=''
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Rate'
-                                value={input.rate}
-                                placeholder=''
-                              />
-                            </TableCell>
-                            <TableCell>
-                              <TccInput
-                                fullWidth
-                                disabled
-                                type='text'
-                                label='Price'
-                                value={`${(parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate).toFixed(2)}`}
-                                placeholder=''
-                              />
-                            </TableCell>
-                          </TableRow>
-                        )
-                      })}
-                    </TableBody>
-                  </Table>
-                </TableContainer> : ""}
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Rate'
+                                  value={input.rate}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='number'
+                                  label='Price'
+                                  value={`${(
+                                    parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate
+                                  ).toFixed(2)}`}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+                {checked['2' as keyof typeof checked] === true ? (
+                  <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
+                    <Table stickyHeader aria-label='sticky table' sx={{ mt: 6 }}>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align='center' sx={{ minWidth: 270 }}>
+                            Metal Tone
+                          </TableCell>
+                          <TableCell align='center'>Metal Weight</TableCell>
+                          <TableCell align='center'> Rate</TableCell>
+                          <TableCell align='center'>Price</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {inputFieldSilverMetal.map((input, index) => {
+                          return (
+                            <TableRow key={'SIL_' + index}>
+                              <TableCell>
+                                <Autocomplete
+                                  readOnly={isDisabled}
+                                  fullWidth
+                                  multiple
+                                  options={silverToneList}
+                                  value={input.tone}
+                                  onChange={(event, newItem) => {
+                                    const data = [...inputFieldSilverMetal]
+                                    data[index].tone = newItem
+                                    setInputFieldSilverMetal(data)
+                                  }}
+                                  filterSelectedOptions
+                                  size='small'
+                                  id='autocomplete-multiple-outlined'
+                                  getOptionLabel={(option: any) => option.name}
+                                  renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  InputProps={isDisabled}
+                                  fullWidth
+                                  type='text'
+                                  label='Metal Weight'
+                                  value={input.metal_weight}
+                                  placeholder=''
+                                  onChange={(event: any) => {
+                                    const data = [...inputFieldSilverMetal]
+                                    data[index].metal_weight = event.target.value
+                                    setInputFieldSilverMetal(data)
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Rate'
+                                  value={input.rate}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Price'
+                                  value={`${(
+                                    parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate
+                                  ).toFixed(2)}`}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  ''
+                )}
+                {checked['3' as keyof typeof checked] === true ? (
+                  <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
+                    <Table stickyHeader aria-label='sticky table' sx={{ mt: 6 }}>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align='center' sx={{ minWidth: 270 }}>
+                            Metal Tone
+                          </TableCell>
+                          <TableCell align='center'>Metal Weight</TableCell>
+                          <TableCell align='center'> Rate</TableCell>
+                          <TableCell align='center'>Price</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {inputFieldPlatinumMetal.map((input, index) => {
+                          return (
+                            <TableRow key={'PLT_' + index}>
+                              <TableCell>
+                                <Autocomplete
+                                  readOnly={isDisabled}
+                                  fullWidth
+                                  multiple
+                                  options={paltinumToneList}
+                                  value={input.tone}
+                                  onChange={(event, newItem) => {
+                                    const data = [...inputFieldPlatinumMetal]
+                                    data[index].tone = newItem
+                                    setInputFieldPlatinumMetal(data)
+                                  }}
+                                  filterSelectedOptions
+                                  size='small'
+                                  id='autocomplete-multiple-outlined'
+                                  getOptionLabel={(option: any) => option.name}
+                                  renderInput={(params: any) => <TextField {...params} label='Metal Tone' />}
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  InputProps={isDisabled}
+                                  fullWidth
+                                  type='text'
+                                  label='Metal Weight'
+                                  value={input.metal_weight}
+                                  onChange={(event: any) => {
+                                    const data = [...inputFieldPlatinumMetal]
+                                    data[index].metal_weight = event.target.value
+                                    setInputFieldPlatinumMetal(data)
+                                  }}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Rate'
+                                  value={input.rate}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                              <TableCell>
+                                <TccInput
+                                  fullWidth
+                                  disabled
+                                  type='text'
+                                  label='Price'
+                                  value={`${(
+                                    parseFloat(input.metal_weight === null ? '0.00' : input.metal_weight) * input.rate
+                                  ).toFixed(2)}`}
+                                  placeholder=''
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  ''
+                )}
                 {/* <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
                 <Table stickyHeader aria-label='sticky table'>
                   <TableHead>
@@ -2684,61 +2750,78 @@ return data
                 </Table>
               </TableContainer> */}
               </Grid>
-              <Grid item xs={12} sm={12} sx={{ display: "flex", justifyContent: "space-between" }}>
+              <Grid item xs={12} sm={12} sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
                   Diamonds Details
                 </Typography>
-                {action === "view" ? <></> : <Button sx={{ mt: 8 }} variant='contained' onClick={addDiamondSettingFields}>
-                  Add Diamond Details
-                </Button>}
+                {action === 'view' ? (
+                  <></>
+                ) : (
+                  <Button sx={{ mt: 8 }} variant='contained' onClick={addDiamondSettingFields}>
+                    Add Diamond Details
+                  </Button>
+                )}
               </Grid>
               <Grid item xs={12} sm={12}>
                 <TableContainer component={Paper} sx={{ maxHeight: 350 }}>
                   <Table stickyHeader aria-label='sticky table'>
                     <TableHead>
                       <TableRow>
-                        <TableCell align='center' sx={{ minWidth: 250 }}>Diamond Group</TableCell>
+                        <TableCell align='center' sx={{ minWidth: 250 }}>
+                          Diamond Group
+                        </TableCell>
                         <TableCell align='center'>stone Type</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 200 }}>Stone Setting</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 170 }}>Stone Weight</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 170 }}>Stone Pieces/count</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 170 }}>Stone Rate</TableCell>
-                        <TableCell align='center' sx={{ minWidth: 170 }}>Stone price</TableCell>
+                        <TableCell align='center' sx={{ minWidth: 200 }}>
+                          Stone Setting
+                        </TableCell>
+                        <TableCell align='center' sx={{ minWidth: 170 }}>
+                          Stone Weight
+                        </TableCell>
+                        <TableCell align='center' sx={{ minWidth: 170 }}>
+                          Stone Pieces/count
+                        </TableCell>
+                        <TableCell align='center' sx={{ minWidth: 170 }}>
+                          Stone Rate
+                        </TableCell>
+                        <TableCell align='center' sx={{ minWidth: 170 }}>
+                          Stone price
+                        </TableCell>
                         <TableCell align='center'>Delete </TableCell>
-
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {inputFieldsDiamond.map((input, index) => {
                         return (
-                          <TableRow key={"DIA_" + index}>
+                          <TableRow key={'DIA_' + index}>
                             <TableCell>
                               <TccSelect
                                 InputProps={isDisabled}
                                 fullWidth
                                 size='small'
-                                inputLabel="Diamond Group"
+                                inputLabel='Diamond Group'
                                 label='Diamond Group'
                                 value={input.id_diamond_group}
                                 id='controlled-select'
                                 title='display_name'
                                 onChange={(e: any) => {
-                                  const data = [...inputFieldsDiamond];
-                                  const selectedGroup = diamondGroupsWithDetails.find((group: any) => group.id === e.target.value);
+                                  const data = [...inputFieldsDiamond]
+                                  const selectedGroup = diamondGroupsWithDetails.find(
+                                    (group: any) => group.id === e.target.value
+                                  )
 
                                   if (selectedGroup) {
-                                    data[index].id_diamond_group = selectedGroup.id;
-                                    data[index].diamondGroup = selectedGroup.id;
-                                    data[index].stone = selectedGroup.id_stone;
-                                    data[index].stone_shape = selectedGroup.id_shape;
-                                    data[index].stone_mm_size = selectedGroup.id_mm_size;
-                                    data[index].stone_color = selectedGroup.id_color;
-                                    data[index].stone_clarity = selectedGroup.id_clarity;
-                                    data[index].stone_cut = selectedGroup.id_cuts;
-                                    data[index].rate = selectedGroup.rate;
+                                    data[index].id_diamond_group = selectedGroup.id
+                                    data[index].diamondGroup = selectedGroup.id
+                                    data[index].stone = selectedGroup.id_stone
+                                    data[index].stone_shape = selectedGroup.id_shape
+                                    data[index].stone_mm_size = selectedGroup.id_mm_size
+                                    data[index].stone_color = selectedGroup.id_color
+                                    data[index].stone_clarity = selectedGroup.id_clarity
+                                    data[index].stone_cut = selectedGroup.id_cuts
+                                    data[index].rate = selectedGroup.rate
                                   }
 
-                                  setInputFieldsDiamond(data);
+                                  setInputFieldsDiamond(data)
                                 }}
                                 Options={diamondGroupsWithDetails}
                               />
@@ -2748,7 +2831,7 @@ return data
                                 InputProps={isDisabled}
                                 fullWidth
                                 size='small'
-                                inputLabel="stone Type"
+                                inputLabel='stone Type'
                                 label='stone Type'
                                 value={input.Stone_type}
                                 id='controlled-select'
@@ -2766,7 +2849,7 @@ return data
                                 InputProps={isDisabled}
                                 fullWidth
                                 size='small'
-                                inputLabel="Stone Setting"
+                                inputLabel='Stone Setting'
                                 label='Stone Setting'
                                 value={input.stone_setting}
                                 id='controlled-select'
@@ -2830,26 +2913,27 @@ return data
                               />
                             </TableCell>
                             <TableCell>
-                              <Button variant='outlined' color='error'
-                                onClick={() => removeDiamondSettingFields(index)}>
+                              <Button
+                                variant='outlined'
+                                color='error'
+                                onClick={() => removeDiamondSettingFields(index)}
+                              >
                                 Delete
                               </Button>
                             </TableCell>
                           </TableRow>
                         )
                       })}
-
                     </TableBody>
                   </Table>
                 </TableContainer>
               </Grid>
-            </Fragment >
+            </Fragment>
           </>
         )
       default:
         return 'Unknown Step'
     }
-
   }
 
   const renderContent = () => {
@@ -2870,7 +2954,7 @@ return data
           <Grid container spacing={5}>
             <Grid item xs={12}>
               <Typography variant='body2' sx={{ fontWeight: 600, color: 'text.primary' }}>
-                {activeStep === 2 ? "" : steps[activeStep].title}
+                {activeStep === 2 ? '' : steps[activeStep].title}
               </Typography>
               <Typography variant='caption' component='p'>
                 {/* {steps[activeStep].subtitle} */}
@@ -2887,21 +2971,39 @@ return data
               >
                 Back
               </Button>
-              {activeStep === steps.length - 1 && action == "view" ? <></> : <Button 
-                size='large' 
-                variant='contained' 
-                disabled={isSaving}
-                onClick={activeStep === 0 ?
-                  handleNext : activeStep === 1 ? id == undefined && productId == 0 ? addProductDetails : editProductDetails : handleNext}>
-                {isSaving ? (
-                  <>
-                    <Icon icon="eos-icons:loading" className="spin" style={{ animation: 'spin 1s linear infinite', marginRight: 8 }} />
-                    Saving...
-                  </>
-                ) : (
-                  activeStep === steps.length - 1 ? 'Submit' : 'Next'
-                )}
-              </Button>}
+              {activeStep === steps.length - 1 && action == 'view' ? (
+                <></>
+              ) : (
+                <Button
+                  size='large'
+                  variant='contained'
+                  disabled={isSaving}
+                  onClick={
+                    activeStep === 0
+                      ? handleNext
+                      : activeStep === 1
+                      ? id == undefined && productId == 0
+                        ? addProductDetails
+                        : editProductDetails
+                      : handleNext
+                  }
+                >
+                  {isSaving ? (
+                    <>
+                      <Icon
+                        icon='eos-icons:loading'
+                        className='spin'
+                        style={{ animation: 'spin 1s linear infinite', marginRight: 8 }}
+                      />
+                      Saving...
+                    </>
+                  ) : activeStep === steps.length - 1 ? (
+                    'Submit'
+                  ) : (
+                    'Next'
+                  )}
+                </Button>
+              )}
             </Grid>
           </Grid>
         </form>
@@ -2919,12 +3021,16 @@ return data
           return (
             <>
               <StepperWrapper>
-                <Stepper activeStep={activeStep} sx={{ display: 'flex', justifyContent: "start" }} connector={<Icon icon='tabler:chevron-right' />}>
+                <Stepper
+                  activeStep={activeStep}
+                  sx={{ display: 'flex', justifyContent: 'start' }}
+                  connector={<Icon icon='tabler:chevron-right' />}
+                >
                   {steps.map((step, index) => {
                     const RenderAvatar = activeStep >= index ? CustomAvatar : Avatar
 
                     return (
-                      <Step key={"THE_" + index}>
+                      <Step key={'THE_' + index}>
                         <StepLabel StepIconComponent={StepperCustomDot}>
                           <div className='step-label'>
                             <RenderAvatar
@@ -2934,7 +3040,9 @@ return data
                               {...(activeStep >= index && { color: 'primary' })}
                               sx={{
                                 ...(activeStep === index && { boxShadow: theme => theme.shadows[3] }),
-                                ...(activeStep > index && { color: theme => hexToRGBA(theme.palette.primary.main, 0.4) })
+                                ...(activeStep > index && {
+                                  color: theme => hexToRGBA(theme.palette.primary.main, 0.4)
+                                })
                               }}
                             >
                               <Icon icon={step.icon} />
@@ -2955,17 +3063,13 @@ return data
           )
         case 1:
           // Image Management tab
-          return (
-            <ImageManagement
-              productId={parseInt(id as string)}
-              onImagesChange={() => undefined}
-            />
-          )
+          return <ImageManagement productId={parseInt(id as string)} onImagesChange={() => undefined} />
         case 2:
           return (
             <VariantManagement
               productId={parseInt(id as string)}
               onVariantsChange={() => undefined}
+              readOnly={action === 'view'}
             />
           )
         default:
@@ -2978,12 +3082,16 @@ return data
           return (
             <>
               <StepperWrapper>
-                <Stepper activeStep={activeStep} sx={{ display: 'flex', justifyContent: "start" }} connector={<Icon icon='tabler:chevron-right' />}>
+                <Stepper
+                  activeStep={activeStep}
+                  sx={{ display: 'flex', justifyContent: 'start' }}
+                  connector={<Icon icon='tabler:chevron-right' />}
+                >
                   {steps.map((step, index) => {
                     const RenderAvatar = activeStep >= index ? CustomAvatar : Avatar
 
                     return (
-                      <Step key={"THE_" + index}>
+                      <Step key={'THE_' + index}>
                         <StepLabel StepIconComponent={StepperCustomDot}>
                           <div className='step-label'>
                             <RenderAvatar
@@ -2993,7 +3101,9 @@ return data
                               {...(activeStep >= index && { color: 'primary' })}
                               sx={{
                                 ...(activeStep === index && { boxShadow: theme => theme.shadows[3] }),
-                                ...(activeStep > index && { color: theme => hexToRGBA(theme.palette.primary.main, 0.4) })
+                                ...(activeStep > index && {
+                                  color: theme => hexToRGBA(theme.palette.primary.main, 0.4)
+                                })
                               }}
                             >
                               <Icon icon={step.icon} />
@@ -3053,8 +3163,8 @@ return data
       {id && productName && (
         <Box sx={{ mb: 4 }}>
           <Typography
-            variant="h4"
-            component="h1"
+            variant='h4'
+            component='h1'
             sx={{
               fontWeight: 600,
               color: '#c6a55a', // Gold color from design system
@@ -3069,47 +3179,51 @@ return data
       <Card>
         <CardContent>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs value={activeTab} onChange={handleTabChange} aria-label="product addition tabs">
+            <Tabs value={activeTab} onChange={handleTabChange} aria-label='product addition tabs'>
               {[
                 // Single Product tab - always shown
                 <Tab
-                  key="single-product"
-                  label="Single Product"
+                  key='single-product'
+                  label='Single Product'
                   icon={<Icon icon='fluent-mdl2:product-release' />}
-                  iconPosition="start"
+                  iconPosition='start'
                 />,
 
                 // Bulk upload tabs - only when adding new products
-                ...(!id ? [
-                  <Tab
-                    key="bulk-zip"
-                    label="Bulk Upload - ZIP Files"
-                    icon={<Icon icon='tabler:upload' />}
-                    iconPosition="start"
-                  />,
-                  <Tab
-                    key="bulk-file"
-                    label="Bulk Upload - File Import"
-                    icon={<Icon icon='tabler:file-import' />}
-                    iconPosition="start"
-                  />
-                ] : []),
+                ...(!id
+                  ? [
+                      <Tab
+                        key='bulk-zip'
+                        label='Bulk Upload - ZIP Files'
+                        icon={<Icon icon='tabler:upload' />}
+                        iconPosition='start'
+                      />,
+                      <Tab
+                        key='bulk-file'
+                        label='Bulk Upload - File Import'
+                        icon={<Icon icon='tabler:file-import' />}
+                        iconPosition='start'
+                      />
+                    ]
+                  : []),
 
                 // Management tabs - only when editing existing product
-                ...(id ? [
-                  <Tab
-                    key="image-management"
-                    label="Image Management"
-                    icon={<Icon icon='tabler:photo' />}
-                    iconPosition="start"
-                  />,
-                  <Tab
-                    key="variant-management"
-                    label="Variant Management"
-                    icon={<Icon icon='tabler:versions' />}
-                    iconPosition="start"
-                  />
-                ] : [])
+                ...(id
+                  ? [
+                      <Tab
+                        key='image-management'
+                        label='Image Management'
+                        icon={<Icon icon='tabler:photo' />}
+                        iconPosition='start'
+                      />,
+                      <Tab
+                        key='variant-management'
+                        label='Variant Management'
+                        icon={<Icon icon='tabler:versions' />}
+                        iconPosition='start'
+                      />
+                    ]
+                  : [])
               ]}
             </Tabs>
           </Box>
@@ -3119,7 +3233,5 @@ return data
     </>
   )
 }
-
-
 
 export default ProductAdd

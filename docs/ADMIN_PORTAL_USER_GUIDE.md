@@ -32,6 +32,7 @@ Use `Catalog > All Products` for routine catalog operations:
 - Toggle featured products for landing-page merchandising.
 - Toggle trending products where campaign merchandising requires it.
 - Assign products to collections when they belong to a campaign or curated range.
+- Use the Variants tab in edit mode to add size and single-metal child variants. View mode keeps variant controls read-only.
 
 Collections are optional merchandising groups. A product does not need to belong to a collection.
 
