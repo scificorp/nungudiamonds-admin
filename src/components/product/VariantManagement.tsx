@@ -357,7 +357,7 @@ const VariantManagement: React.FC<VariantManagementProps> = ({ productId, onVari
 
     if (!form.name.trim()) errors.name = 'Variant name is required'
     if (!form.sku.trim()) errors.sku = 'Variant SKU is required'
-    if (!form.id_size) errors.size = 'Choose size or option'
+    if (!editingExistingVariant && !form.id_size) errors.size = 'Choose size or option'
     if (!parentProduct?.id) errors.parent = 'Parent product is not loaded'
     if (!hasProductCategories) errors.parent = 'Parent product needs a category before variants can be saved'
     if (hasPartialMetal) {
