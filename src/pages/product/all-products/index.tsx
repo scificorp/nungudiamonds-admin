@@ -14,11 +14,17 @@ import { useProducts, useUpdateProductStatus, useUpdateProductFeature, useUpdate
 import AdminPageHeader from 'src/components/common/AdminPageHeader'
 import { productHasVariants } from 'src/utils/permissionResilience'
 
+type ProductForDeletion = {
+  id: number
+  variant_count?: number
+  child_variants?: unknown[]
+}
+
 const ProductList = () => {
   const [searchFilter, setSearchFilter] = useState('')
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
   const [showModel, setShowModel] = useState(false)
-  const [selectedProduct, setSelectedProduct] = useState<any>(null)
+  const [selectedProduct, setSelectedProduct] = useState<ProductForDeletion | null>(null)
   const [useEnhancedView, setUseEnhancedView] = useState(true)
   const [localProducts, setLocalProducts] = useState<any[]>([])
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -104,7 +110,7 @@ const ProductList = () => {
     })
   }
 
-  const deleteOnclickHandler = (data: any) => {
+  const deleteOnclickHandler = (data: ProductForDeletion) => {
     setSelectedProduct(data)
     setShowModel(true)
   }
@@ -134,12 +140,8 @@ const ProductList = () => {
     viewOnClickHandler({ id: productId })
   }
 
-  const handleDeleteProduct = (product: any) => {
-    const productToDelete = typeof product === 'number'
-      ? localProducts.find(item => item.id === product) || { id: product }
-      : product
-
-    deleteOnclickHandler(productToDelete)
+  const handleDeleteProduct = (product: ProductForDeletion) => {
+    deleteOnclickHandler(product)
   }
 
   const handleImageUpload = (productId: number) => {
