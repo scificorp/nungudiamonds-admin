@@ -4,6 +4,7 @@ import { API_ENDPOINT, LOCAL_ADMIN_AUTHORIZATION_TOKEN, PUBLIC_AUTHORIZATION_TOK
 import { isLocalAdminLoginDisabled } from '../configs/local-auth'
 import { appConstant } from '../AppConstants'
 import Router from 'next/router'
+import { isExpiredCredentialResponse } from 'src/utils/permissionResilience'
 
 const publicReadPatterns = [
   '/hero-content/config',
@@ -137,29 +138,32 @@ export const serviceMaker = async <T = any>(
     }
 
     if (!isValidResponse(result)) {
-      throw appConstant.INVALID_RESPONSE
+      throw new APIError({
+        data: result.data || {
+          status: 'error',
+          code: 500,
+          message: appConstant.INVALID_RESPONSE,
+          data: null
+        }
+      })
     }
 
     return result.data
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { code?: number | string; message?: string }; status?: number }; message?: string }
-    const errorCode = err instanceof Error && err.message === 'Network Error' ? 'Network Error' :
-                      error?.response?.data?.code ?? error?.response?.status
+    const error = err as { response?: { data?: { code?: number | string; message?: string; status?: string; data?: null }; status?: number }; message?: string; data?: { code?: number | string; message?: string; status?: string; data?: null } }
+    const response = error.response || (error.data ? { data: error.data } : undefined)
 
-    if (errorCode == 401 || errorCode == '401') {
+    if (isExpiredCredentialResponse(response)) {
       if (isLocalAdminLoginDisabled) {
         console.warn('Unauthorized response ignored while admin login disabled.')
       } else {
         localStorageUtils.removeAcessToken()
         localStorageUtils.removeUserInfo()
         Router.push('/login')
-        if (typeof window !== 'undefined') {
-          window.location.reload()
-        }
       }
     }
     throw new APIError({
-      data: error.response?.data || {
+      data: response?.data || {
         status: 'error',
         code: 500,
         message: 'Something went wrong',

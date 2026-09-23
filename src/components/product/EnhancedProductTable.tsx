@@ -56,7 +56,7 @@ interface EnhancedProductTableProps {
   products: ProductWithVariants[]
   onEdit: (productId: number) => void
   onView: (productId: number) => void
-  onDelete: (productId: number) => void
+  onDelete: (product: ProductWithVariants | ProductVariant) => void
   onImageUpload: (productId: number) => void
   onStatusChange: (checked: boolean, product: ProductWithVariants) => void
   onFeaturedChange: (checked: boolean, product: ProductWithVariants) => void
@@ -165,7 +165,7 @@ const EnhancedProductTable: React.FC<EnhancedProductTableProps> = ({
             </IconButton>
           </Tooltip>
           <Tooltip title="Delete">
-            <IconButton size="small" onClick={() => onDelete(variant.id)} color="error">
+            <IconButton size="small" onClick={() => onDelete(variant)} color="error">
               <Icon icon="tabler:trash" fontSize={16} />
             </IconButton>
           </Tooltip>
@@ -295,7 +295,7 @@ const EnhancedProductTable: React.FC<EnhancedProductTableProps> = ({
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
-                      <IconButton size="small" onClick={() => onDelete(product.id)} color="error">
+                      <IconButton size="small" onClick={() => onDelete(product)} color="error">
                         <Icon icon="tabler:trash" fontSize={16} />
                       </IconButton>
                     </Tooltip>

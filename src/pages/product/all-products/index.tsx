@@ -12,12 +12,13 @@ import Router from 'next/router'
 import { Icon } from '@iconify/react'
 import { useProducts, useUpdateProductStatus, useUpdateProductFeature, useUpdateProductTrending, useDeleteProduct } from 'src/hooks/useProducts'
 import AdminPageHeader from 'src/components/common/AdminPageHeader'
+import { productHasVariants } from 'src/utils/permissionResilience'
 
 const ProductList = () => {
   const [searchFilter, setSearchFilter] = useState('')
   const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
   const [showModel, setShowModel] = useState(false)
-  const [productId, setProductId] = useState<number>()
+  const [selectedProduct, setSelectedProduct] = useState<any>(null)
   const [useEnhancedView, setUseEnhancedView] = useState(true)
   const [localProducts, setLocalProducts] = useState<any[]>([])
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -104,15 +105,21 @@ const ProductList = () => {
   }
 
   const deleteOnclickHandler = (data: any) => {
-    setProductId(data.id)
-    setShowModel(!showModel)
+    setSelectedProduct(data)
+    setShowModel(true)
   }
 
   const deleteProductApi = async () => {
-    if (productId) {
-      deleteMutation.mutate({ id: productId })
-      setShowModel(!showModel)
+    if (selectedProduct?.id) {
+      deleteMutation.mutate({ id: selectedProduct.id })
+      setSelectedProduct(null)
+      setShowModel(false)
     }
+  }
+
+  const closeDeleteConfirmation = (show: boolean) => {
+    setShowModel(show)
+    if (!show) setSelectedProduct(null)
   }
 
   const imagesUploadOnClick = (data: any) => {
@@ -127,8 +134,12 @@ const ProductList = () => {
     viewOnClickHandler({ id: productId })
   }
 
-  const handleDeleteProduct = (productId: number) => {
-    deleteOnclickHandler({ id: productId })
+  const handleDeleteProduct = (product: any) => {
+    const productToDelete = typeof product === 'number'
+      ? localProducts.find(item => item.id === product) || { id: product }
+      : product
+
+    deleteOnclickHandler(productToDelete)
   }
 
   const handleImageUpload = (productId: number) => {
@@ -322,7 +333,17 @@ const ProductList = () => {
           )}
         </Card>
       </Grid>
-      <DeleteDataModel showModel={showModel} toggle={(show: any) => setShowModel(show)} onClick={deleteProductApi} />
+      <DeleteDataModel
+        showModel={showModel}
+        toggle={closeDeleteConfirmation}
+        onClick={deleteProductApi}
+        title={productHasVariants(selectedProduct) ? 'Delete parent product and variants?' : 'Are you Sure?'}
+        description={
+          productHasVariants(selectedProduct)
+            ? `Deleting this parent product will also delete ${selectedProduct?.variant_count || selectedProduct?.child_variants?.length || 'its'} variant${(selectedProduct?.variant_count || selectedProduct?.child_variants?.length) === 1 ? '' : 's'}. Are you sure you want to continue?`
+            : 'Are you sure you would like to delete this item?'
+        }
+      />
     </Grid>
   )
 }
