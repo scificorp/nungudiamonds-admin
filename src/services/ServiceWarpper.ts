@@ -92,9 +92,7 @@ export const serviceMaker = async <T = any>(
   config: AxiosRequestConfig = {}
 ): Promise<T> => {
   const params: ServiceParams =
-    typeof paramsOrUrl === 'string'
-      ? { url: paramsOrUrl, method: method || '', data, config }
-      : paramsOrUrl
+    typeof paramsOrUrl === 'string' ? { url: paramsOrUrl, method: method || '', data, config } : paramsOrUrl
 
   const { url, method: resolvedMethod, data: resolvedData = {}, config: resolvedConfig = {} } = params
 
@@ -150,7 +148,11 @@ export const serviceMaker = async <T = any>(
 
     return result.data
   } catch (err: unknown) {
-    const error = err as { response?: { data?: { code?: number | string; message?: string; status?: string; data?: null }; status?: number }; message?: string; data?: { code?: number | string; message?: string; status?: string; data?: null } }
+    const error = err as {
+      response?: { data?: { code?: number | string; message?: string; status?: string; data?: null }; status?: number }
+      message?: string
+      data?: { code?: number | string; message?: string; status?: string; data?: null }
+    }
     const response = error.response || (error.data ? { data: error.data } : undefined)
 
     if (isExpiredCredentialResponse(response)) {

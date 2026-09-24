@@ -53,6 +53,7 @@ Admin:
 ```sh
 npm run lint:check
 npm run typecheck
+npm run test:permission-resilience
 npm run smoke:routes
 npm run smoke:auth
 npm run smoke:catalog

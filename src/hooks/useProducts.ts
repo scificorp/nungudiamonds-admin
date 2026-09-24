@@ -44,8 +44,8 @@ export const useProducts = (
           ...product,
           collections: product.product_collections?.map((pc: any) => pc.collection).filter(Boolean) || []
         }))
-        
-return { ...data.data, result }
+
+        return { ...data.data, result }
       }
       throw new Error(data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
     },
@@ -86,8 +86,8 @@ export const useProductCollections = (productId: number) => {
       if (data.code === 200) {
         return data.data?.collections || []
       }
-      
-return []
+
+      return []
     },
     {
       staleTime: 5 * 60 * 1000,

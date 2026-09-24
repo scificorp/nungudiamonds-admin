@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-var-requires */
 const assert = require('node:assert/strict')
 const {
   getDropdownLookupErrorMessage,

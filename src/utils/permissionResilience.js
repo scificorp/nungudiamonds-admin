@@ -6,8 +6,7 @@ const getResponseBody = response => response?.data || {}
 
 const hasCode = (value, expected) => normalizeCode(value) === String(expected)
 
-const containsRolePermissionMessage = value =>
-  toString(value).toLowerCase().includes('role api permission not found')
+const containsRolePermissionMessage = value => toString(value).toLowerCase().includes('role api permission not found')
 
 const isLegacyMissingRoleApiPermission = response => {
   const body = getResponseBody(response)
