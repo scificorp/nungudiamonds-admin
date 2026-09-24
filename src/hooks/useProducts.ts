@@ -15,6 +15,7 @@ import {
 import { ICommonPagination } from 'src/data/interface'
 import { toast } from 'react-hot-toast'
 import { appErrors } from 'src/AppConstants'
+import { getDropdownLookupErrorMessage } from 'src/utils/permissionResilience'
 
 const PRODUCT_LIST_KEY = 'productList'
 const PRODUCT_DETAIL_KEY = 'productDetail'
@@ -43,8 +44,8 @@ export const useProducts = (
           ...product,
           collections: product.product_collections?.map((pc: any) => pc.collection).filter(Boolean) || []
         }))
-        
-return { ...data.data, result }
+
+        return { ...data.data, result }
       }
       throw new Error(data.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)
     },
@@ -85,8 +86,8 @@ export const useProductCollections = (productId: number) => {
       if (data.code === 200) {
         return data.data?.collections || []
       }
-      
-return []
+
+      return []
     },
     {
       staleTime: 5 * 60 * 1000,
@@ -226,19 +227,30 @@ export const useProductDropdowns = () => {
   return useQuery(
     PRODUCT_DROPDOWNS_KEY,
     async () => {
-      const [dropdownsData, diamondGroupsData] = await Promise.all([
+      const [dropdownsResult, diamondGroupsResult] = await Promise.allSettled([
         ADD_PRODUCT_DROPDOWN_LIST(),
         GET_DIAMOND_GROUP_MASTER_WITH_DETAILS()
       ])
 
+      if (dropdownsResult.status === 'rejected') {
+        throw dropdownsResult.reason
+      }
+
+      const dropdownsData = dropdownsResult.value
+
       if (dropdownsData.code === 200 || dropdownsData.code === '200') {
-        const diamondGroupsWithDetails = diamondGroupsData.code === 200 || diamondGroupsData.code === '200'
-          ? diamondGroupsData.data
-          : []
+        const diamondGroupsData = diamondGroupsResult.status === 'fulfilled' ? diamondGroupsResult.value : null
+        const hasDiamondGroups = diamondGroupsData?.code === 200 || diamondGroupsData?.code === '200'
 
         return {
           ...dropdownsData.data,
-          diamond_groups_with_details: diamondGroupsWithDetails
+          diamond_groups_with_details: hasDiamondGroups ? diamondGroupsData?.data : [],
+          diamond_groups_with_details_error: hasDiamondGroups
+            ? null
+            : getDropdownLookupErrorMessage(
+                diamondGroupsResult.status === 'rejected' ? diamondGroupsResult.reason : diamondGroupsData,
+                'Diamond group details'
+              )
         }
       }
       throw new Error(dropdownsData.message || appErrors.UNKNOWN_ERROR_TRY_AGAIN)

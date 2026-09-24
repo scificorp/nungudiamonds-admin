@@ -53,6 +53,7 @@ Admin:
 ```sh
 npm run lint:check
 npm run typecheck
+npm run test:permission-resilience
 npm run smoke:routes
 npm run smoke:auth
 npm run smoke:catalog
@@ -61,6 +62,10 @@ npm run build
 ```
 
 This section owns the current verification command list. Keep summaries in other docs as pointers to this section.
+
+### Cross-repository permission dependency
+
+This admin change is the client-side resilience half. The production `role_api_permissions` entry and the API correction to return HTTP 403 for denied routes are tracked separately in `nungu-api-role-permission`; deploy that API/database change before treating production permission failures as fully corrected.
 
 The build runs `verify:production-config` first. For a production release, run
 the guard explicitly with `NODE_ENV=production`; it rejects the local login

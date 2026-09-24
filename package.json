@@ -14,6 +14,7 @@
     "lint": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint:check": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "typecheck": "tsc --noEmit",
+    "test:permission-resilience": "node scripts/test-permission-resilience.js",
     "smoke:routes": "node scripts/check-admin-routes.js",
     "smoke:auth": "node scripts/smoke-auth-flow.js",
     "smoke:catalog": "node scripts/smoke-catalog-flow.js",

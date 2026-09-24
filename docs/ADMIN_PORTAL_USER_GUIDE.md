@@ -33,6 +33,8 @@ Use `Catalog > All Products` for routine catalog operations:
 - Toggle trending products where campaign merchandising requires it.
 - Assign products to collections when they belong to a campaign or curated range.
 - Use the Variants tab in edit mode to add size and single-metal child variants. View mode keeps variant controls read-only.
+- When deleting a parent product with variants, review the confirmation carefully: deleting the parent also deletes its variants.
+- If a product lookup is denied by the API, the workspace keeps the current session and shows an inline warning; contact an administrator to correct the product API permission.
 
 Collections are optional merchandising groups. A product does not need to belong to a collection.
 

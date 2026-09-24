@@ -10,24 +10,37 @@ import { createPagination } from 'src/utils/sharedFunction'
 import DeleteDataModel from 'src/customComponents/delete-model'
 import Router from 'next/router'
 import { Icon } from '@iconify/react'
-import { useProducts, useUpdateProductStatus, useUpdateProductFeature, useUpdateProductTrending, useDeleteProduct } from 'src/hooks/useProducts'
+import {
+  useProducts,
+  useUpdateProductStatus,
+  useUpdateProductFeature,
+  useUpdateProductTrending,
+  useDeleteProduct
+} from 'src/hooks/useProducts'
 import AdminPageHeader from 'src/components/common/AdminPageHeader'
+import { productHasVariants } from 'src/utils/permissionResilience'
+
+type ProductForDeletion = {
+  id: number
+  variant_count?: number
+  child_variants?: unknown[]
+}
 
 const ProductList = () => {
   const [searchFilter, setSearchFilter] = useState('')
-  const [pagination, setPagination] = useState({ ...createPagination(), search_text: "" })
+  const [pagination, setPagination] = useState({ ...createPagination(), search_text: '' })
   const [showModel, setShowModel] = useState(false)
-  const [productId, setProductId] = useState<number>()
+  const [selectedProduct, setSelectedProduct] = useState<ProductForDeletion | null>(null)
   const [useEnhancedView, setUseEnhancedView] = useState(true)
   const [localProducts, setLocalProducts] = useState<any[]>([])
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const editOnClickHandler = (data: any) => {
-    Router.push({ pathname: "/product/add-products/", query: { id: data.id } })
+    Router.push({ pathname: '/product/add-products/', query: { id: data.id } })
   }
 
   const viewOnClickHandler = (data: any) => {
-    Router.push({ pathname: "/product/add-products/", query: { id: data.id, action: "view" } })
+    Router.push({ pathname: '/product/add-products/', query: { id: data.id, action: 'view' } })
   }
 
   const { data: productsData, isLoading, isFetching, refetch } = useProducts(pagination, useEnhancedView)
@@ -77,8 +90,8 @@ const ProductList = () => {
   const handleChangeSortBy = (orderSort: any) => {
     setPagination(prev => ({
       ...prev,
-      sort_by: orderSort == undefined ? "id" : orderSort.map((t: any) => t.field),
-      order_by: orderSort == undefined ? "DESC" : orderSort.map((t: any) => t.sort)
+      sort_by: orderSort == undefined ? 'id' : orderSort.map((t: any) => t.field),
+      order_by: orderSort == undefined ? 'DESC' : orderSort.map((t: any) => t.sort)
     }))
   }
 
@@ -103,20 +116,26 @@ const ProductList = () => {
     })
   }
 
-  const deleteOnclickHandler = (data: any) => {
-    setProductId(data.id)
-    setShowModel(!showModel)
+  const deleteOnclickHandler = (data: ProductForDeletion) => {
+    setSelectedProduct(data)
+    setShowModel(true)
   }
 
   const deleteProductApi = async () => {
-    if (productId) {
-      deleteMutation.mutate({ id: productId })
-      setShowModel(!showModel)
+    if (selectedProduct?.id) {
+      deleteMutation.mutate({ id: selectedProduct.id })
+      setSelectedProduct(null)
+      setShowModel(false)
     }
   }
 
+  const closeDeleteConfirmation = (show: boolean) => {
+    setShowModel(show)
+    if (!show) setSelectedProduct(null)
+  }
+
   const imagesUploadOnClick = (data: any) => {
-    Router.push({ pathname: "/product/image-upload", query: { id: data.id } })
+    Router.push({ pathname: '/product/image-upload', query: { id: data.id } })
   }
 
   const handleEditProduct = (productId: number) => {
@@ -127,8 +146,8 @@ const ProductList = () => {
     viewOnClickHandler({ id: productId })
   }
 
-  const handleDeleteProduct = (productId: number) => {
-    deleteOnclickHandler({ id: productId })
+  const handleDeleteProduct = (product: ProductForDeletion) => {
+    deleteOnclickHandler(product)
   }
 
   const handleImageUpload = (productId: number) => {
@@ -172,7 +191,7 @@ const ProductList = () => {
     },
     {
       flex: 1,
-      value: "is_active",
+      value: 'is_active',
       headerName: 'Status',
       field: 'is_active',
       switch: 'switch',
@@ -180,7 +199,7 @@ const ProductList = () => {
     },
     {
       flex: 1,
-      value: "is_featured",
+      value: 'is_featured',
       headerName: 'featured',
       field: 'is_featured',
       switch: 'switch',
@@ -188,7 +207,7 @@ const ProductList = () => {
     },
     {
       flex: 1,
-      value: "is_trending",
+      value: 'is_trending',
       headerName: 'trending',
       field: 'is_trending',
       switch: 'switch',
@@ -206,8 +225,8 @@ const ProductList = () => {
       imageUpload: 'imageUpload',
       imageUploadOnClick: imagesUploadOnClick,
       editOnClick: editOnClickHandler,
-      viewOnClick: viewOnClickHandler,
-    },
+      viewOnClick: viewOnClickHandler
+    }
   ]
 
   const isLoadingOrFetching = isLoading || isFetching
@@ -218,55 +237,55 @@ const ProductList = () => {
         <Card>
           <Box sx={{ px: 6, pt: 6, pb: 4 }}>
             <AdminPageHeader
-            title='All Products'
-            subtitle='Browse and update products, variants, and publish status.'
-            searchValue={searchFilter}
-            onSearchChange={setSearchFilter}
-            actions={
-              <>
-                <Button
-                  variant='outlined'
-                  onClick={() => {
-                    setUseEnhancedView(!useEnhancedView)
-                  }}
-                  startIcon={<Icon fontSize='1.125rem' icon={useEnhancedView ? 'tabler:list' : 'tabler:hierarchy'} />}
-                  sx={{
-                    borderColor: '#666',
-                    color: '#666',
-                    '&:hover': {
-                      borderColor: '#333',
-                      backgroundColor: '#f5f5f5'
-                    }
-                  }}
-                >
-                  {useEnhancedView ? 'List View' : 'Grouped View'}
-                </Button>
-                <Button
-                  variant='outlined'
-                  onClick={() => Router.push('/collections/assign-products')}
-                  startIcon={<Icon fontSize='1.125rem' icon='tabler:link' />}
-                  sx={{
-                    borderColor: '#c6a55a',
-                    color: '#c6a55a',
-                    '&:hover': {
-                      borderColor: '#b8944d',
-                      backgroundColor: '#c6a55a',
-                      color: 'white'
-                    }
-                  }}
-                >
-                  Manage Collections
-                </Button>
-                <Button
-                  variant='contained'
-                  color='primary'
-                  onClick={() => Router.push('/product/simplified-add')}
-                  startIcon={<Icon fontSize='1.125rem' icon='tabler:plus' />}
-                >
-                  Quick Add Product
-                </Button>
-              </>
-            }
+              title='All Products'
+              subtitle='Browse and update products, variants, and publish status.'
+              searchValue={searchFilter}
+              onSearchChange={setSearchFilter}
+              actions={
+                <>
+                  <Button
+                    variant='outlined'
+                    onClick={() => {
+                      setUseEnhancedView(!useEnhancedView)
+                    }}
+                    startIcon={<Icon fontSize='1.125rem' icon={useEnhancedView ? 'tabler:list' : 'tabler:hierarchy'} />}
+                    sx={{
+                      borderColor: '#666',
+                      color: '#666',
+                      '&:hover': {
+                        borderColor: '#333',
+                        backgroundColor: '#f5f5f5'
+                      }
+                    }}
+                  >
+                    {useEnhancedView ? 'List View' : 'Grouped View'}
+                  </Button>
+                  <Button
+                    variant='outlined'
+                    onClick={() => Router.push('/collections/assign-products')}
+                    startIcon={<Icon fontSize='1.125rem' icon='tabler:link' />}
+                    sx={{
+                      borderColor: '#c6a55a',
+                      color: '#c6a55a',
+                      '&:hover': {
+                        borderColor: '#b8944d',
+                        backgroundColor: '#c6a55a',
+                        color: 'white'
+                      }
+                    }}
+                  >
+                    Manage Collections
+                  </Button>
+                  <Button
+                    variant='contained'
+                    color='primary'
+                    onClick={() => Router.push('/product/simplified-add')}
+                    startIcon={<Icon fontSize='1.125rem' icon='tabler:plus' />}
+                  >
+                    Quick Add Product
+                  </Button>
+                </>
+              }
             />
           </Box>
           <Divider />
@@ -284,12 +303,12 @@ const ProductList = () => {
                 isLoading={isLoadingOrFetching}
               />
               <TablePagination
-                component="div"
+                component='div'
                 count={pagination.total_items}
                 page={pagination.current_page - 1}
                 onPageChange={(event, newPage) => handleOnPageChange(newPage)}
                 rowsPerPage={pagination.per_page_rows}
-                onRowsPerPageChange={(event) => handleChangePerPageRows(parseInt(event.target.value, 10))}
+                onRowsPerPageChange={event => handleChangePerPageRows(parseInt(event.target.value, 10))}
                 rowsPerPageOptions={[5, 10, 25, 50]}
               />
             </>
@@ -306,7 +325,7 @@ const ProductList = () => {
               onSortModelChange={handleChangeSortBy}
               page={pagination.current_page - 1}
               onPageChange={handleOnPageChange}
-              paginationMode="server"
+              paginationMode='server'
               disableSelectionOnClick
               loading={isLoadingOrFetching}
               sx={{
@@ -322,7 +341,21 @@ const ProductList = () => {
           )}
         </Card>
       </Grid>
-      <DeleteDataModel showModel={showModel} toggle={(show: any) => setShowModel(show)} onClick={deleteProductApi} />
+      <DeleteDataModel
+        showModel={showModel}
+        toggle={closeDeleteConfirmation}
+        onClick={deleteProductApi}
+        title={productHasVariants(selectedProduct) ? 'Delete parent product and variants?' : 'Are you Sure?'}
+        description={
+          productHasVariants(selectedProduct)
+            ? `Deleting this parent product will also delete ${
+                selectedProduct?.variant_count || selectedProduct?.child_variants?.length || 'its'
+              } variant${
+                (selectedProduct?.variant_count || selectedProduct?.child_variants?.length) === 1 ? '' : 's'
+              }. Are you sure you want to continue?`
+            : 'Are you sure you would like to delete this item?'
+        }
+      />
     </Grid>
   )
 }

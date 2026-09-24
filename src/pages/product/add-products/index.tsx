@@ -36,6 +36,7 @@ import StepperWrapper from 'src/@core/styles/mui/stepper'
 import TccInput from 'src/customComponents/Form-Elements/inputField'
 import TccEditor from 'src/customComponents/Form-Elements/editor'
 import {
+  Alert,
   Autocomplete,
   CardHeader,
   Checkbox,
@@ -71,6 +72,7 @@ import {
   GET_BY_ID_PRODUCTS
 } from 'src/services/AdminServices'
 import { useProductDetail, useProductDropdowns } from 'src/hooks/useProducts'
+import { getDropdownLookupErrorMessage } from 'src/utils/permissionResilience'
 import { appErrors, STONE_TYPE } from 'src/AppConstants'
 import Router, { useRouter } from 'next/router'
 
@@ -237,7 +239,10 @@ const ProductAdd = () => {
 
   const productDetailId = id ? parseInt(id as string) : null
   const { data: productDetail, isLoading: isProductLoading } = useProductDetail(productDetailId)
-  const { data: dropDownData, isLoading: isDropDownLoading } = useProductDropdowns()
+  const { data: dropDownData, isLoading: isDropDownLoading, error: dropDownError } = useProductDropdowns()
+  const dropDownErrorMessage = dropDownError
+    ? getDropdownLookupErrorMessage(dropDownError, 'Product dropdown data')
+    : null
 
   const handleChecked = (id: any) => (e: any) => {
     const { checked } = e.target
@@ -3174,6 +3179,14 @@ const ProductAdd = () => {
             Editing: {productName}
           </Typography>
         </Box>
+      )}
+
+      {(dropDownData?.diamond_groups_with_details_error || dropDownError) && (
+        <Alert severity='warning' sx={{ mb: 4 }}>
+          {dropDownData?.diamond_groups_with_details_error ||
+            dropDownErrorMessage ||
+            'Product dropdown data could not be loaded. Refresh the page or ask an administrator to check product API permissions.'}
+        </Alert>
       )}
 
       <Card>
