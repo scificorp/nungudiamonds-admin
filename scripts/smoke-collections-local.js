@@ -6,12 +6,13 @@ const { randomBytes } = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
 
-const TASK = 'NUNGU-COLLECTIONS-001'
-const NETWORK = 'nungu-collections-local'
-const DB_CONTAINER = process.env.NUNGU_COLLECTIONS_DB_CONTAINER || 'nungu-collections-local-db'
-const DB_NAME = process.env.NUNGU_COLLECTIONS_DB_NAME || 'nungu_collections_task'
+const TASK = 'NUNGU-COLLECTIONS-FIX-001'
+const DB_NAME = process.env.NUNGU_COLLECTIONS_DB_NAME || 'nungu_collections_fix_task'
+const DB_PORT = process.env.NUNGU_COLLECTIONS_DB_PORT || '55439'
+const PGDATA = process.env.NUNGU_COLLECTIONS_PGDATA || path.resolve(__dirname, '../../support/postgres/data')
 const API_URL = process.env.NUNGU_COLLECTIONS_API_URL || 'http://127.0.0.1:2511/api/v2'
 const API_ENV_FILE = process.env.NUNGU_COLLECTIONS_API_ENV_FILE || path.resolve(__dirname, '../../api/environment/env.localcollections')
+const API_MIGRATION_UP = path.resolve(__dirname, '../../api/database-migrations/20261107-product-collections-active-unique.up.sql')
 
 const schemaSql = `
 CREATE TABLE IF NOT EXISTS app_users (
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS product_collections (
   id SERIAL PRIMARY KEY, id_product INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   id_collection INTEGER NOT NULL REFERENCES collections(id) ON DELETE CASCADE, is_deleted VARCHAR(1) NOT NULL DEFAULT '0',
   created_by INTEGER NOT NULL, created_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  modified_by INTEGER, modified_date TIMESTAMP, UNIQUE (id_product, id_collection, is_deleted)
+  modified_by INTEGER, modified_date TIMESTAMP, CONSTRAINT unique_product_collection UNIQUE (id_product, id_collection, is_deleted)
 );
 CREATE INDEX IF NOT EXISTS idx_product_collections_active ON product_collections(id_product, id_collection) WHERE is_deleted = '0';
 CREATE TABLE IF NOT EXISTS product_metal_options (
@@ -84,11 +85,12 @@ function validateApiTarget(value) {
 }
 
 function preflight() {
-  // This must stay before docker/psql/fetch calls: invalid targets cause no request.
+  // This must stay before filesystem, PostgreSQL, or API calls: invalid targets cause no request.
   const api = validateApiTarget(API_URL)
-  assert(DB_CONTAINER === 'nungu-collections-local-db', 'Preflight rejected unexpected database container')
-  assert(DB_NAME === 'nungu_collections_task', 'Preflight rejected unexpected database name')
+  assert(DB_NAME === 'nungu_collections_fix_task' && DB_PORT === '55439', 'Preflight rejected unexpected synthetic database target')
+  assert(path.resolve(PGDATA) === path.resolve(__dirname, '../../support/postgres/data'), 'Preflight rejected unexpected PostgreSQL data directory')
   assert(path.resolve(API_ENV_FILE) === path.resolve(__dirname, '../../api/environment/env.localcollections'), 'Preflight rejected unexpected API environment file')
+  assert(path.resolve(API_MIGRATION_UP) === path.resolve(__dirname, '../../api/database-migrations/20261107-product-collections-active-unique.up.sql'), 'Preflight rejected unexpected API migration')
   return api
 }
 
@@ -108,58 +110,37 @@ function selfTest() {
   console.log('PASS preflight: remote, LAN, wrong-port, and query targets rejected before any request; loopback target accepted')
 }
 
-function dockerJson(args) {
-  const output = execFileSync('docker', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
-  return JSON.parse(output)
-}
-
-function containerInspect(name) {
-  const rows = dockerJson(['inspect', name])
-  assert(Array.isArray(rows) && rows.length === 1, `Isolation check failed: ${name} missing`)
-  const c = rows[0]
-  assert(c.State?.Running === true, `Isolation check failed: ${name} is not running`)
-  assert(c.Config?.Labels?.['openbot.task'] === TASK, `Isolation check failed: ${name} is not task-labelled`)
-  assert(c.Config?.Labels?.['openbot.synthetic'] === 'true', `Isolation check failed: ${name} is not synthetic-labelled`)
-  return c
-}
-
-function envMap(container) {
-  return Object.fromEntries((container.Config.Env || []).map(pair => {
-    const at = pair.indexOf('=')
-    return [pair.slice(0, at), pair.slice(at + 1)]
-  }))
-}
-
 function assertIsolation() {
-  const db = containerInspect(DB_CONTAINER)
-  assert(db.Config.Labels['openbot.role'] === 'database', 'Isolation check failed: database role label missing')
-  assert(db.Config.Image.startsWith('postgres:'), 'Isolation check failed: database image is not PostgreSQL')
-  assert(db.NetworkSettings.Networks?.bridge, 'Isolation check failed: database is not on local Docker bridge')
-  const dbBinding = db.HostConfig.PortBindings?.['5432/tcp']?.[0]
-  assert(dbBinding?.HostIp === '127.0.0.1' && dbBinding?.HostPort === '55439', 'Isolation check failed: database is not bound only to loopback')
-  assert((db.HostConfig.Tmpfs || {})['/var/lib/postgresql/data'], 'Isolation check failed: database storage is not disposable tmpfs')
-  assert(envMap(db).POSTGRES_DB === DB_NAME, 'Isolation check failed: database name mismatch')
-
+  assert(fs.existsSync(path.join(PGDATA, 'PG_VERSION')), 'Isolation check failed: task-owned PostgreSQL cluster is missing')
+  execFileSync('pg_ctl', ['-D', PGDATA, 'status'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   const apiEnv = Object.fromEntries(fs.readFileSync(API_ENV_FILE, 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#')).map(line => {
     const at = line.indexOf('=')
     return [line.slice(0, at), line.slice(at + 1)]
   }))
   assert(apiEnv.NODE_ENV === 'localcollections', 'Isolation check failed: API environment is not local')
-  assert(apiEnv.DB_HOST === '127.0.0.1' && apiEnv.DB_PORT === '55439' && apiEnv.DB_NAME === DB_NAME, 'Isolation check failed: API database target mismatch')
+  assert(apiEnv.DB_HOST === '127.0.0.1' && apiEnv.DB_PORT === DB_PORT && apiEnv.DB_NAME === DB_NAME, 'Isolation check failed: API database target mismatch')
   assert(apiEnv.MAIL_SUPPRESS_SEND === 'true', 'Isolation check failed: mail suppression is off')
   assert(apiEnv.MAIL_HOST === '127.0.0.1' && apiEnv.MAIL_PORT === '1', 'Isolation check failed: SMTP target is not a local sink')
   assert(apiEnv.S3_BUCKET_NAME === 'disabled-local-only' && apiEnv.S3_ACCESS_KEY_ID === 'disabled-local-only' && apiEnv.S3_SECRET_ACCESS_KEY === 'disabled-local-only', 'Isolation check failed: object-storage credentials are not inert')
   assert(apiEnv.PAYMENT_METHOD_SECRET_KEY === 'disabled-local-only', 'Isolation check failed: payment integration is not inert')
   assert(apiEnv.LOCAL_ADMIN_AUTHORIZATION_TOKEN === '', 'Isolation check failed: local auth bypass must be off')
   assert(apiEnv.SECURE_COMMUNICATION === 'false', 'Isolation check failed: unexpected encrypted-body mode')
-  const listener = execFileSync('lsof', ['-tiTCP:2511', '-sTCP:LISTEN'], { encoding: 'utf8' }).trim().split(/\s+/).filter(Boolean)
-  assert(listener.length === 1, 'Isolation check failed: expected one local API listener on port 2511')
-  console.log('PASS isolation: disposable synthetic PostgreSQL, mail/storage/payment integrations inert, API configured for local DB, single local API listener')
+  const dbInfo = psql("SELECT current_database() || '|' || host(inet_server_addr()) || '|' || inet_server_port()::text || '|' || current_setting('data_directory') || '|' || shobj_description(d.oid, 'pg_database') FROM pg_database AS d WHERE d.datname = current_database()")
+  const [database, address, port, dataDirectory, comment] = dbInfo.split('|')
+  assert(database === DB_NAME && address === '127.0.0.1' && port === DB_PORT, 'Isolation check failed: database is not the expected loopback target')
+  assert(path.resolve(dataDirectory) === path.resolve(PGDATA), 'Isolation check failed: database files are outside the task workspace')
+  assert(comment === `${TASK} synthetic only`, 'Isolation check failed: database marker is not task-owned synthetic data')
+  const listenerInfo = execFileSync('lsof', ['-nP', `-iTCP:${DB_PORT}`, '-sTCP:LISTEN'], { encoding: 'utf8' })
+  assert(listenerInfo.includes(`127.0.0.1:${DB_PORT}`) && !listenerInfo.includes(`*:${DB_PORT}`), 'Isolation check failed: database listener is not loopback-only')
+  const apiListener = execFileSync('lsof', ['-nP', '-iTCP:2511', '-sTCP:LISTEN'], { encoding: 'utf8' })
+  const apiLines = apiListener.trim().split(/\r?\n/).slice(1).filter(Boolean)
+  assert(apiLines.length === 1 && apiListener.includes('127.0.0.1:2511') && !apiListener.includes('*:2511'), 'Isolation check failed: API listener is not unique and loopback-only')
+  console.log('PASS isolation: disposable workspace PostgreSQL, both DB and API bound only to loopback, mail/storage/payment integrations inert')
 }
 
 function psql(sql, quiet = false) {
-  const out = execFileSync('docker', [
-    'exec', '-i', DB_CONTAINER, 'psql', '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-U', 'nungu_test', '-d', DB_NAME,
+  const out = execFileSync('psql', [
+    '-X', '-q', '-v', 'ON_ERROR_STOP=1', '-h', '127.0.0.1', '-p', DB_PORT, '-U', 'nungu_test', '-d', DB_NAME,
     '-A', '-t', '-c', sql
   ], { input: undefined, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] })
   return quiet ? out.trim() : out.trim()
@@ -253,8 +234,10 @@ async function assertMembership(actor, productId, collectionId, expected, label)
   assert(ids.includes(productId) === expected, `${label} by-collection membership expected ${expected}`)
 }
 
+const SMOKE_PASSWORD_POLICY = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*#?&])[a-zA-Z0-9@$!%*#?&]+$/
+
 function randomPassword() {
-  return `Test-${randomBytes(9).toString('hex')}9a!`
+  return `Test${randomBytes(9).toString('hex')}9a!`
 }
 
 async function run() {
@@ -263,13 +246,19 @@ async function run() {
 
   assertIsolation()
   psql(schemaSql)
+  psql(fs.readFileSync(API_MIGRATION_UP, 'utf8'))
+  console.log('PASS migration: active-edge uniqueness is installed idempotently')
   const runId = `${Date.now().toString(36)}-${randomBytes(4).toString('hex')}`
   const adminEmail = `nungu-smoke-${runId}-admin@example.invalid`
   const deniedEmail = `nungu-smoke-${runId}-denied@example.invalid`
   const productSku = `SMOKE-${runId}`
   const collectionSlug = `smoke-collection-${runId}`
-  const adminPassword = randomPassword()
+  const adminPassword = process.env.NUNGU_COLLECTIONS_ADMIN_PASSWORD || randomPassword()
   const deniedPassword = randomPassword()
+  assert(SMOKE_PASSWORD_POLICY.test(adminPassword), 'Authorised smoke password does not meet API test requirements')
+  assert(SMOKE_PASSWORD_POLICY.test(deniedPassword), 'Denied smoke password does not meet API test requirements')
+  const browserProofSetup = process.argv.includes('--browser-proof-setup')
+  let preserveFixtures = false
   let adminActor
   let deniedActor
   let productId
@@ -288,36 +277,47 @@ async function run() {
     assert(Number.isInteger(productId) && productId > 0, 'Synthetic product fixture was not seeded')
     assert(psql(`SELECT COUNT(*) FROM products WHERE id = ${productId} AND sku = ${sqlSafe(productSku)} AND is_deleted = '0'`) === '1', 'Seeded product fixture missing')
     assert(psql(`SELECT COUNT(*) FROM collections WHERE id = ${collectionId} AND slug = ${sqlSafe(collectionSlug)} AND is_deleted = '0'`) === '1', 'Seeded collection fixture missing')
-    console.log(`PASS fixtures: synthetic product ${productId}, collection ${collectionId}, authorised and denied local actors verified`)
+    psql(`INSERT INTO product_collections (id_product, id_collection, is_deleted, created_by, created_date) VALUES (${productId}, ${collectionId}, '1', ${adminActor.id}, CURRENT_TIMESTAMP)`)
+    assert(psql(`SELECT COUNT(*) FROM product_collections WHERE id_product = ${productId} AND id_collection = ${collectionId} AND is_deleted = '1'`) === '1', 'Pre-existing soft-deleted relationship fixture missing')
+    console.log(`PASS fixtures: synthetic product ${productId}, collection ${collectionId}, authorised and denied local actors, pre-existing soft-deleted relationship verified`)
 
     const assign = await apiRequest('/product-collection/assign', 'POST', adminActor.token, { collection_id: collectionId, product_ids: [productId] })
     assertApiSuccess(assign, 'first assignment')
-    assert(findValue(assign.payload, 'assignments_created') === 1, 'First assignment did not report exactly one created relationship')
+    assert(findValue(assign.payload, 'assignments_created') === 1, 'First assignment did not report exactly one changed relationship')
     assert(activeCount(productId, collectionId) === 1, 'First assignment did not create exactly one active relationship')
+    assert(psql(`SELECT COUNT(*) FROM product_collections WHERE id_product = ${productId} AND id_collection = ${collectionId} AND is_deleted = '1'`) === '0', 'First assignment did not reactivate the pre-existing tombstone')
     await assertMembership(adminActor, productId, collectionId, true, 'first full readback')
     console.log('PASS cycle 1 assign: by-product and by-collection readbacks contain membership')
+    if (browserProofSetup) {
+      preserveFixtures = true
+      console.log(`PASS browser fixture setup: product=${productId}, collection=${collectionId}, admin=${adminEmail}; local fixture retained for authenticated UI proof`)
+      return
+    }
     const remove = await apiRequest('/product-collection/remove', 'POST', adminActor.token, { collection_id: collectionId, product_ids: [productId] })
     assertApiSuccess(remove, 'first removal')
-    assert(findValue(remove.payload, 'removals_completed') === 1, 'First removal did not report exactly one changed relationship')
+    assert(findValue(remove.payload, 'removals_completed') === 1, `First removal did not report exactly one changed relationship (HTTP ${remove.status}, completed=${findValue(remove.payload, 'removals_completed')}, errors=${Array.isArray(findValue(remove.payload, 'errors')) ? findValue(remove.payload, 'errors').length : 0})`)
     assert(activeCount(productId, collectionId) === 0, 'First removal left an active relationship')
+    assert(psql(`SELECT COUNT(*) FROM product_collections WHERE id_product = ${productId} AND id_collection = ${collectionId} AND is_deleted = '1'`) === '1', 'First removal should retain one soft-deleted relationship')
     await assertMembership(adminActor, productId, collectionId, false, 'first removal readback')
     assert(psql(`SELECT COUNT(*) FROM products WHERE id = ${productId} AND is_deleted = '0'`) === '1', 'Product was deleted by relationship removal')
     console.log('PASS cycle 1 remove: membership absent; product remains')
 
     const denied = await apiRequest('/product-collection/assign', 'POST', deniedActor.token, { collection_id: collectionId, product_ids: [productId] })
-    assert(denied.status < 200 || denied.status >= 300, `Denied actor unexpectedly received HTTP ${denied.status}`)
+    assert(denied.status === 403, `Denied actor expected HTTP 403, got ${denied.status}`)
     assert(activeCount(productId, collectionId) === 0, 'Denied actor mutated membership')
     console.log(`PASS denied actor: HTTP ${denied.status}; membership unchanged`)
 
     const reassign = await apiRequest('/product-collection/assign', 'POST', adminActor.token, { collection_id: collectionId, product_ids: [productId] })
     assertApiSuccess(reassign, 'second assignment')
-    assert(findValue(reassign.payload, 'assignments_created') === 1, 'Second assignment did not report exactly one created relationship')
+    assert(findValue(reassign.payload, 'assignments_created') === 1, 'Second assignment did not report exactly one changed relationship')
     assert(activeCount(productId, collectionId) === 1, 'Second assignment created duplicate active rows')
+    assert(psql(`SELECT COUNT(*) FROM product_collections WHERE id_product = ${productId} AND id_collection = ${collectionId} AND is_deleted = '1'`) === '0', 'Second assignment did not reuse the existing tombstone')
     await assertMembership(adminActor, productId, collectionId, true, 'second full readback')
     const removeAgain = await apiRequest('/product-collection/remove', 'POST', adminActor.token, { collection_id: collectionId, product_ids: [productId] })
     assertApiSuccess(removeAgain, 'second removal')
     assert(findValue(removeAgain.payload, 'removals_completed') === 1, `Second removal did not report exactly one changed relationship (HTTP ${removeAgain.status}, completed=${findValue(removeAgain.payload, 'removals_completed')})`)
     assert(activeCount(productId, collectionId) === 0, `Second removal left ${activeCount(productId, collectionId)} active relationship(s)`)
+    assert(psql(`SELECT COUNT(*) FROM product_collections WHERE id_product = ${productId} AND id_collection = ${collectionId} AND is_deleted = '1'`) === '1', 'Second removal created duplicate tombstones')
     await assertMembership(adminActor, productId, collectionId, false, 'second removal readback')
     assert(psql(`SELECT COUNT(*) FROM products WHERE id = ${productId} AND is_deleted = '0'`) === '1', 'Product missing after second removal')
     console.log('PASS cycle 2 reassign/remove: no duplicate active row; product retained')
@@ -325,6 +325,7 @@ async function run() {
   } catch (error) {
     primaryError = error
   } finally {
+    if (preserveFixtures && !primaryError) return
     const cleanupErrors = []
     if (adminActor && productId && collectionId) {
       try {
