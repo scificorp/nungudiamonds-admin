@@ -18,6 +18,7 @@
     "smoke:routes": "node scripts/check-admin-routes.js",
     "smoke:auth": "node scripts/smoke-auth-flow.js",
     "smoke:catalog": "node scripts/smoke-catalog-flow.js",
+    "smoke:collections-local": "node scripts/smoke-collections-local.js",
     "smoke:cms": "node scripts/smoke-cms-flow.js",
     "verify:production-config": "node scripts/verify-production-config.js",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
